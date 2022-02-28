@@ -2,16 +2,16 @@
 
 @foreach (var taskRun in Model)
 {
-    <div class="card mb-3">
+    <div class="card border-secondary mb-4">
         <div class="card-header text-muted">
             <span>#@taskRun.Id @taskRun.Status</span>
             <div class="float-end">
-                <a href="/run/@taskRun.Id" class="btn btn-sm btn-outline-info" onclick="runTask('@taskRun.Id')">Got to Output</a>
+                <a href="/run/@taskRun.Id" class="btn btn-sm btn-outline-info" onclick="runTask('@taskRun.Id')"><i class="fa-solid fa-eye"></i> Details</a>
             </div>
         </div>
         <div class="card-body">
-            <div>
-                <pre>@taskRun.Script</pre>
+            <div class="height-max-1 overflow-auto">
+                <pre><code>@taskRun.Script</code></pre>
             </div>
         </div>
         <div class="card-footer text-muted text-end">
@@ -21,8 +21,8 @@
 }
 
 @section Actions {
-    <div class="row small text-muted">
-        <div class="col-sm-4 mb-1">
+    <div class="row small text-muted mt-4">
+        <div class="col-sm-6 mb-2">
             <div class="form-check form-check-inline me-1">
                 <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage10" value="10"/>
                 <label class="form-check-label" for="itemPerPage10">10</label>
@@ -37,7 +37,7 @@
             </div>
             <label>items per page</label>
         </div>
-        <div class="col-sm-4 mb-1">
+        <div class="col-sm-3 mb-2">
             <select class="form-select form-select-sm" id="filterSel">
                 <option selected value="">No Custom Filter</option>
                 <option value="@Constants.FilterByRunning">Running only</option>
@@ -46,7 +46,7 @@
                 <option value="@Constants.FilterByDead">Dead only</option>
             </select>
         </div>
-        <div class="col-sm-4 mb-1">
+        <div class="col-sm-3 mb-2">
             <select class="form-select form-select-sm" id="sortSel">
                 <option selected value="">No Custom Sort</option>
                 <option value="@Constants.SortByCompletedAtDesc">Completed time DESC</option>

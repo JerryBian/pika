@@ -1,0 +1,15 @@
+@import "../../../../node_modules/bootswatch/dist/pulse/variables";
+@import "../../../../node_modules/bootstrap/scss/bootstrap";
+@import "../../../../node_modules/bootswatch/dist/pulse/bootswatch";
+
+.height-max-1 {
+    max-height: 200px;
+}
+
+.height-max-2 {
+    max-height: 450px;
+}
+
+pre.d-inline code.hljs{
+    display: inherit;
+}
