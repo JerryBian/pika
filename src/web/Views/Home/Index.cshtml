@@ -1,0 +1,31 @@
+﻿@model PikaSystemStatus
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row text-center">
+    <div class="col-sm-4 mb-3">
+        <div class="card text-dark bg-white">
+            <div class="card-body">
+                <p>Total Tasks</p>
+                <a href="/task" class="fs-1 text-decoration-none">@Model.TaskCount</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4 mb-3">
+        <div class="card text-dark bg-white">
+            <div class="card-body">
+                <p>Total Runs</p>
+                <a href="/run" class="fs-1 text-decoration-none">@Model.RunCount</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4 mb-3">
+        <div class="card text-dark bg-info">
+            <div class="card-body">
+                <p>Total Tasks</p>
+                <a href="/task" class="fs-1 text-decoration-none">@Model.TaskInRunningCount</a>
+            </div>
+        </div>
+    </div>
+</div>

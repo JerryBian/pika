@@ -1,0 +1,92 @@
+﻿@model List<PikaTaskRun>
+
+@foreach (var taskRun in Model)
+{
+    <div class="card mb-3">
+        <div class="card-header text-muted">
+            <span>#@taskRun.Id @taskRun.Status</span>
+            <div class="float-end">
+                <a href="/run/@taskRun.Id" class="btn btn-sm btn-outline-info" onclick="runTask('@taskRun.Id')">Got to Output</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div>
+                <pre>@taskRun.Script</pre>
+            </div>
+        </div>
+        <div class="card-footer text-muted text-end">
+            Created at @taskRun.CreatedAt &middot; Elapsed: @taskRun.GetElapsed()
+        </div>
+    </div>
+}
+
+@section Actions {
+    <div class="row small text-muted">
+        <div class="col-sm-4 mb-1">
+            <div class="form-check form-check-inline me-1">
+                <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage10" value="10"/>
+                <label class="form-check-label" for="itemPerPage10">10</label>
+            </div>
+            <div class="form-check form-check-inline me-1">
+                <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage15" value="15"/>
+                <label class="form-check-label" for="itemPerPage15">15</label>
+            </div>
+            <div class="form-check form-check-inline me-1">
+                <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage20" value="20"/>
+                <label class="form-check-label" for="itemPerPage20">20</label>
+            </div>
+            <label>items per page</label>
+        </div>
+        <div class="col-sm-4 mb-1">
+            <select class="form-select form-select-sm" id="filterSel">
+                <option selected value="">No Custom Filter</option>
+                <option value="@Constants.FilterByRunning">Running only</option>
+                <option value="@Constants.FilterByPending">Pending only</option>
+                <option value="@Constants.FilterByCompleted">Completed only</option>
+                <option value="@Constants.FilterByDead">Dead only</option>
+            </select>
+        </div>
+        <div class="col-sm-4 mb-1">
+            <select class="form-select form-select-sm" id="sortSel">
+                <option selected value="">No Custom Sort</option>
+                <option value="@Constants.SortByCompletedAtDesc">Completed time DESC</option>
+                <option value="@Constants.SortByRunElapsedDesc">Elapsed interval DESC</option>
+            </select>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        let filterSel = document.querySelector("#filterSel");
+        let sortSel = document.querySelector("#sortSel");
+        let itemsPerPage = Cookies.get("@Constants.ItemsPerPage") || "10";
+        let savedFilter = Cookies.get("@Constants.FilterBy") || "";
+        let savedSort = Cookies.get("@Constants.SortBy") || "";
+
+        filterSel.value = savedFilter;
+        sortSel.value = savedSort;
+
+        filterSel.addEventListener("change", function() {
+            Cookies.set("@Constants.FilterBy", this.value);
+            window.location.href = "/run";
+        });
+
+        sortSel.addEventListener("change", function() {
+            Cookies.set("@Constants.SortBy", this.value);
+            window.location.href = "/run";
+        });
+
+        document.querySelector(`#itemPerPage${itemsPerPage}`).checked = true;
+        let radios = document.querySelectorAll("input[name='itemsPerPage']");
+        for (let i = 0; i < radios.length; i++) {
+            radios[i].addEventListener("change",
+                function() {
+                    if (this.checked) {
+                        Cookies.set("@Constants.ItemsPerPage", this.value, { expires: 365 });
+                        window.location.href = "/run";
+                    }
+                });
+        }
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@model TaskRunOutputViewModel
+
+<div class="bg-light p-3">
+    <div class="row">
+        <div class="col-sm-2">Task: </div>
+        <div class="col-sm-4" id="task">@Model.TaskName (#@Model.TaskId)</div>
+        <div class="col-sm-2">Status: </div>
+        <div class="col-sm-4" id="status">@Model.Status</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">Start: </div>
+        <div class="col-sm-4" id="taskRunStart">@Model.RunStartAt</div>
+        <div class="col-sm-2">End: </div>
+        <div class="col-sm-4" id="taskRunEnd">@Model.RunEndAt</div>
+    </div>
+</div>
+
+<div class="my-3">
+    <h4>Script Snapshot</h4>
+    <pre class="border p-2">@Model.Script</pre>
+</div>
+
+<h4>Run Output</h4>
+<div id="runOutput" class="font-monospace fs-6 my-3 border p-2 text-white bg-dark overflow-auto" style="max-height: 600px;">
+    @foreach (var o in Model.Outputs)
+    {
+        <div><span title="@o.CreatedAt" class="small text-muted">&rarr;</span> <pre class="d-inline">@o.Message</pre></div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        let lastTimestamp = @Model.MaxTimestamp;
+        let runEndAt = document.querySelector("#taskRunEnd");
+        let status = document.querySelector("#status");
+        let runOutput = document.querySelector("#runOutput");
+        runOutput.scrollTop = runOutput.scrollHeight;
+
+        let interval = setInterval(function() {
+                loopOutput(lastTimestamp);
+            },
+            1500);
+
+        function loopOutput(t) {
+            fetch(`/api/run/@Model.RunId/output?laterThan=${t}`, { method: "GET" })
+                .then(res => res.json())
+                .then(data => {
+                    lastTimestamp = data.maxTimestamp;
+                    runEndAt.innerHTML = data.runEndAt;
+                    status.innerHTML = data.status;
+
+                    data.outputs.forEach(o => {
+                        let newDiv = document.createElement("div");
+                        newDiv.innerHTML = `<div><span title="${o.createdAt}" class="small text-muted">&rarr;</span> <pre class="d-inline">${o.message}</pre></div>`;
+                        runOutput.appendChild(newDiv);
+                        runOutput.scrollTop = runOutput.scrollHeight;
+                    });
+
+                    if (data.status === "Completed" || data.status === "Dead") {
+                        clearInterval(interval);
+                    }
+                });
+        }
+    </script>
+}

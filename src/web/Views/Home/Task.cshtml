@@ -1,0 +1,183 @@
+﻿@model List<PikaTask>
+
+<div>
+    <button type="button" class="btn btn-primary mb-2" onclick="showAddTaskModal()">New Task</button>
+</div>
+@foreach (var task in Model)
+{
+    <div class="card mb-3">
+        <div class="card-header text-muted">
+            <span>@task.Name</span>
+            <div class="float-end">
+                <a href="javascript:;" class="btn btn-sm btn-outline-dark" onclick="showEditTaskModal('@task.Id')">Edit</a>
+                <a href="javascript:;" class="btn btn-sm btn-outline-success" onclick="runTask('@task.Id')">Run</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="card-text">@task.Description</p>
+            <div>
+                <pre>@task.Script</pre>
+            </div>
+        </div>
+        <div class="card-footer text-muted text-end">
+            Created at @task.CreatedAt
+        </div>
+    </div>
+}
+
+<div class="modal fade" tabindex="-1" id="taskModal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="taskModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskModalTitle">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <fieldset>
+                    <form class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="taskModalName" class="form-label">Task Name</label>
+                            <input type="text" class="form-control" required id="taskModalName" autocomplete="off"/>
+                            <div class="invalid-feedback">
+                                Required.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskModalDesc" class="form-label">Task Description</label>
+                            <input type="text" class="form-control" id="taskModalDesc" autocomplete="off"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskModalScript" class="form-label">Script</label>
+                            <textarea type="text" class="form-control" id="taskModalScript" autocomplete="off" rows="3"></textarea>
+                            <div class="invalid-feedback">
+                                Required.
+                            </div>
+                        </div>
+                        <input type="hidden" id="taskModalId"/>
+                    </form>
+                </fieldset>
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveTask()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Actions {
+    <div class="text-end small text-muted">
+        <div class="form-check form-check-inline me-1">
+            <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage10" value="10"/>
+            <label class="form-check-label" for="itemPerPage10">10</label>
+        </div>
+        <div class="form-check form-check-inline me-1">
+            <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage15" value="15"/>
+            <label class="form-check-label" for="itemPerPage15">15</label>
+        </div>
+        <div class="form-check form-check-inline me-1">
+            <input class="form-check-input" type="radio" name="itemsPerPage" id="itemPerPage20" value="20"/>
+            <label class="form-check-label" for="itemPerPage20">20</label>
+        </div>
+        <label>items per page</label>
+        <div class="vr mx-2"></div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="showFavoriteOnly"/>
+            <label class="form-check-label" for="showFavoriteOnly">Show favorite only</label>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        let isEdit = false;
+        let modalEl = document.querySelector("#taskModal");
+        let modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        let taskModalTitle = document.querySelector("#taskModalTitle");
+        let taskModalName = document.querySelector("#taskModalName");
+        let taskModalDesc = document.querySelector("#taskModalDesc");
+        let taskModalScript = document.querySelector("#taskModalScript");
+        let taskModalId = document.querySelector("#taskModalId");
+        let itemsPerPage = Cookies.get("@Constants.ItemsPerPage") || "10";
+        let showFavoriteOnly = Cookies.get("@Constants.FilterBy");
+
+        document.querySelector(`#itemPerPage${itemsPerPage}`).checked = true;
+        let radios = document.querySelectorAll("input[name='itemsPerPage']");
+        for (let i = 0; i < radios.length; i++) {
+            radios[i].addEventListener("change",
+                function() {
+                    if (this.checked) {
+                        Cookies.set("@Constants.ItemsPerPage", this.value, { expires: 365 });
+                        window.location.href = "/task";
+                    }
+                });
+        }
+
+        let showFavoriteOnlyCb = document.querySelector("#showFavoriteOnly");
+        showFavoriteOnlyCb.checked = showFavoriteOnly === "@Constants.FilterByFavorite";
+        showFavoriteOnlyCb.addEventListener("change",
+            function() {
+                if (this.checked) {
+                    Cookies.set("@Constants.FilterBy", "@Constants.FilterByFavorite", { expires: 365 });
+                } else {
+                    Cookies.remove("@Constants.FilterBy");
+                }
+                
+                window.location.href = "/task";
+            });
+
+        function showAddTaskModal() {
+            isEdit = false;
+            resetModal();
+            taskModalTitle.innerHTML = "New Task";
+            modal.show();
+        }
+
+        function showEditTaskModal(taskId) {
+            isEdit = true;
+            resetModal();
+            fetch(`/api/task/${taskId}`, { method: "GET" })
+                .then(res => res.json())
+                .then(data => {
+                    taskModalTitle.innerHTML = "Edit Task";
+                    taskModalName.value = data.name;
+                    taskModalDesc.value = data.desc;
+                    taskModalScript.value = data.script;
+                    taskModalId.value = data.id;
+                    modal.show();
+                });
+        }
+
+        function runTask(taskId) {
+            fetch(`/api/run/${taskId}`,
+                {
+                    method: "PUT"
+                }).then(res => res.text()).then(data => window.location.href = `/run/${data}`);
+        }
+
+        function saveTask() {
+            fetch("/api/task",
+                {
+                    method: isEdit ? "POST" : "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: taskModalName.value,
+                        desc: taskModalDesc.value,
+                        id: taskModalId.value,
+                        script: taskModalScript.value
+                    })
+                }).then(res => window.location.reload());
+        }
+
+        function resetModal() {
+            taskModalTitle.innerHTML = "";
+            taskModalName.value = "";
+            taskModalDesc.value = "";
+            taskModalScript.value = "";
+            taskModalId.value = "-1";
+        }
+    </script>
+}

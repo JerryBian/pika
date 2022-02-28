@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Pika.Web": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES":  "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" ,
+        "DbLocation": "C:\\temp2" 
+      },
+      "applicationUrl": "http://localhost:5000",
+      "dotnetRunMessages": true
+    }
+  }
+}

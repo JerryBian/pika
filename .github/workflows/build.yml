@@ -1,0 +1,95 @@
+name: master
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  publish_release:
+    name: Publish release
+    runs-on: ubuntu-20.04
+    permissions:
+      packages: write
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libxml2-utils zip unzip tar
+
+      - name: Setup environment variables
+        run: |
+          APP_VERSION=`xmllint --xpath "/Project/PropertyGroup/Version/text()" Directory.Build.props`
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+          echo "APP_VERSION_LINK=${APP_VERSION//.}" >> $GITHUB_ENV
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: false
+
+      - name: Publish Binaries
+        run: |
+          mkdir -p __ga
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-x64 -c Release -o __ga/linux-x64
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-musl-x64 -c Release -o __ga/linux-musl-x64
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-arm -c Release -o __ga/linux-arm
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-arm64 -c Release -o __ga/linux-arm64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-x64 -c Release -o __ga/win-x64
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-x86 -c Release -o __ga/win-x86
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-arm -c Release -o __ga/win-arm
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-arm64 -c Release -o __ga/win-arm64
+          # dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r osx-x64 -c Release -o __ga/osx-x64
+      - name: Package Binaries
+        run: |
+          cd __ga
+          sudo tar -cvzf pika-linux-x64.tar.gz --directory=linux-x64 .
+          # sudo tar -cvzf pika-linux-musl-x64.tar.gz --directory=linux-musl-x64 .
+          # sudo tar -cvzf pika-linux-arm.tar.gz --directory=linux-arm .
+          # sudo tar -cvzf pika-linux-arm64.tar.gz --directory=linux-arm64 .
+          cd win-x64 && sudo zip -r ../pika-win-x64.zip * && cd ..
+          # cd win-x86 && sudo zip -r ../pika-win-x86.zip * && cd ..
+          # cd win-arm && sudo zip -r ../pika-win-arm.zip * && cd ..
+          # cd win-arm64 && sudo zip -r ../pika-win-arm64.zip * && cd ..
+          # cd osx-x64 && sudo zip -r ../pika-osx-x64.zip * && cd ..
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        name: Remove existing release for current version
+        with:
+          delete_release: true
+          tag_name: ${{ env.APP_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ncipollo/release-action@v1
+        name: publish release for current version
+        with:
+          artifacts: "__ga/*.gz,__ga/*zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          removeArtifacts: true
+          tag: ${{ env.APP_VERSION }}
+          allowUpdates: true
+          name: ${{ env.APP_VERSION }}
+          commit: master
+          artifactErrorsFailBuild: true
+          body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        name: Remove existing release for latest version
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ncipollo/release-action@v1
+        name: publish release for latest version
+        with:
+          artifacts: "__ga/*.gz,__ga/*zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          removeArtifacts: true
+          tag: latest
+          allowUpdates: true
+          name: latest
+          commit: master
+          artifactErrorsFailBuild: true
+          body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
