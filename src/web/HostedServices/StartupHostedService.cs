@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Pika.Lib;
+using Pika.Lib.Model;
 using Pika.Lib.Store;
 
 namespace Pika.Web.HostedServices
@@ -27,6 +28,15 @@ namespace Pika.Web.HostedServices
         {
             InitSetting();
             await _repository.StartupAsync();
+            var runningTasks =
+                await _repository.GetTaskRunsAsync(int.MaxValue, 0, $"status={(int) PikaTaskStatus.Running}");
+            foreach (var runningTask in runningTasks)
+            {
+                await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
+                    {IsError = true, Message = "Flag as dead due to startup.", TaskRunId = runningTask.Id});
+                await _repository.UpdateTaskRunStatusAsync(runningTask.Id, PikaTaskStatus.Dead);
+            }
+
             await base.StartAsync(cancellationToken);
         }
 

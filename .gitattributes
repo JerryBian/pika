@@ -1,0 +1,5 @@
+lib/** -linguist-detectable
+**/*.min.js -linguist-detectable
+**/*.min.css -linguist-detectable
+**/style.scss linguist-detectable
+**/script.js linguist-detectable
