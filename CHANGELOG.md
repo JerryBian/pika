@@ -1,3 +1,9 @@
+Listed change logs for history.
+
+### 1.2.0
+
+Enhancement the script/output UI.
+
 ### 1.1.0
 
 Flag all running tasks ad Dead during service startup.

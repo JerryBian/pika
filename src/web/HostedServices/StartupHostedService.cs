@@ -33,7 +33,7 @@ namespace Pika.Web.HostedServices
             foreach (var runningTask in runningTasks)
             {
                 await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
-                    {IsError = true, Message = "Flag as dead due to startup.", TaskRunId = runningTask.Id});
+                    {IsError = true, Message = "Flag as dead during startup.", TaskRunId = runningTask.Id});
                 await _repository.UpdateTaskRunStatusAsync(runningTask.Id, PikaTaskStatus.Dead);
             }
 

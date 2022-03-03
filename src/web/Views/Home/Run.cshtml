@@ -58,6 +58,8 @@
 
 @section Scripts {
     <script>
+        setActive("runNav");
+
         let filterSel = document.querySelector("#filterSel");
         let sortSel = document.querySelector("#sortSel");
         let itemsPerPage = Cookies.get("@Constants.ItemsPerPage") || "10";

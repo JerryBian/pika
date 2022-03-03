@@ -3,8 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Pika.Web</title>
-    
+    @if (ViewData["Title"] == null)
+    {
+        <title>Pika</title>
+    }
+    else
+    {
+        <title>@ViewData["Title"] &middot; Pika</title>
+    }
+
     <link rel="stylesheet" href="~/style.min.css" asp-append-version="true"/>
 </head>
 <body class="w-100">
@@ -18,10 +25,10 @@
                 <div class="collapse navbar-collapse" id="navbarText">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="/task"><i class="fa-solid fa-list"></i> Tasks</a>
+                            <a class="nav-link" href="/task" id="taskNav"><i class="fa-solid fa-list"></i> Tasks</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/run"><i class="fa-solid fa-person-running"></i> Runs</a>
+                            <a class="nav-link" href="/run" id="runNav"><i class="fa-solid fa-person-running"></i> Runs</a>
                         </li>
                     </ul>
                     <span class="navbar-text">

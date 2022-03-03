@@ -24,10 +24,10 @@
 
 <div class="my-2">
     <h4>Run Output</h4>
-    <div id="runOutput" class="font-monospace fs-6 my-3 border p-2 text-white bg-dark overflow-auto height-max-2">
+    <div id="runOutput" class="font-monospace fs-6 my-3 border p-2 overflow-auto bg-dark text-white height-max-2">
         @foreach (var o in Model.Outputs)
         {
-            <div class="mb-1"><i title="@o.CreatedAt" class="fa-solid fa-angle-right small text-muted me-3"></i><pre class="d-inline"><code>@o.Message</code></pre></div>
+            <pre class="m-0 ps-1" title="@o.CreatedAt">@o.Message</pre>
         }
     </div>
 </div>
@@ -55,7 +55,7 @@
 
                     data.outputs.forEach(o => {
                         let newDiv = document.createElement("div");
-                        newDiv.innerHTML = `<div><span title="${o.createdAt}" class="small text-muted">&rarr;</span> <pre class="d-inline">${o.message}</pre></div>`;
+                        newDiv.innerHTML = `<pre class="m-0 ps-1" title="${o.createdAt}">${o.message}</pre>`;
                         runOutput.appendChild(newDiv);
                         runOutput.scrollTop = runOutput.scrollHeight;
                     });
