@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
+using Pika.Lib.Dapper;
 using Pika.Lib.Model;
 
 namespace Pika.Lib.Store;
@@ -15,10 +15,13 @@ public class SqliteDbRepository : IDbRepository
 {
     private readonly PikaOptions _options;
     private string _connectionString;
+    private string _pikaDb;
 
     public SqliteDbRepository(IOptions<PikaOptions> options)
     {
         _options = options.Value;
+        SqlMapper.AddTypeHandler(new DateTimeHandler());
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
     }
 
     public async Task StartupAsync()
@@ -29,16 +32,16 @@ public class SqliteDbRepository : IDbRepository
         }
 
         Directory.CreateDirectory(_options.DbLocation);
-        var dbFile = Path.Combine(_options.DbLocation, "pika.db");
-        if (File.Exists(dbFile) && _options.ForceRecreateDb)
+        _pikaDb = Path.Combine(_options.DbLocation, "pika.db");
+        if (File.Exists(_pikaDb) && _options.ForceRecreateDb)
         {
-            File.Delete(dbFile);
+            File.Delete(_pikaDb);
         }
 
         var connectionStringBuilder = new SqliteConnectionStringBuilder
         {
             Cache = SqliteCacheMode.Shared,
-            DataSource = dbFile,
+            DataSource = _pikaDb,
             Mode = SqliteOpenMode.ReadWriteCreate,
             DefaultTimeout = 30,
             Pooling = true,
@@ -67,13 +70,13 @@ public class SqliteDbRepository : IDbRepository
     public async Task<long> AddTaskAsync(PikaTask task)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO task(name, script, description) VALUES(@name, @script, @desc) RETURNING id";
-        command.Parameters.AddWithValue("@name", task.Name);
-        command.Parameters.AddWithValue("@script", task.Script);
-        command.Parameters.AddWithValue("@desc", task.Description);
-        await connection.OpenAsync();
-        var id = await command.ExecuteScalarAsync();
+        var id = await connection.ExecuteScalarAsync(
+            "INSERT INTO task(name, script, description) VALUES(@name, @script, @desc) RETURNING id", new
+            {
+                name = task.Name,
+                script = task.Script,
+                desc = task.Description
+            });
         if (id == null)
         {
             return -1;
@@ -85,111 +88,42 @@ public class SqliteDbRepository : IDbRepository
     public async Task UpdateTaskAsync(PikaTask task)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "UPDATE task SET name=@name, script=@script, description=@desc WHERE id=@id";
-        command.Parameters.AddWithValue("@name", task.Name);
-        command.Parameters.AddWithValue("@script", task.Script);
-        command.Parameters.AddWithValue("@desc", task.Description);
-        command.Parameters.AddWithValue("@id", task.Id);
-        await connection.OpenAsync();
-        await command.ExecuteNonQueryAsync();
+        await connection.ExecuteAsync("UPDATE task SET name=@name, script=@script, description=@desc WHERE id=@id",
+            new
+            {
+                name = task.Name,
+                script = task.Script,
+                desc = task.Description, 
+                id = task.Id
+            });
     }
 
     public async Task<PikaTask> GetTaskAsync(long taskId)
     {
-        var result = new List<PikaTask>();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM task WHERE id=@id";
-        command.Parameters.AddWithValue("@id", taskId);
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-            var desc = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-            var script = reader.GetString(3);
-            var isFavorite = reader.GetBoolean(4);
-            var createdAt = reader.GetDateTime(5);
-            result.Add(new PikaTask
-            {
-                CreatedAt = createdAt,
-                Description = desc,
-                Id = id,
-                IsFavorite = isFavorite,
-                Name = name,
-                Script = script
-            });
-        }
-
-        return result.FirstOrDefault();
+        var result =
+            await connection.QuerySingleOrDefaultAsync<PikaTask>("SELECT * FROM task WHERE id=@id", new {id = taskId});
+        return result;
     }
 
     public async Task<List<PikaTask>> GetTasksAsync(int limit, int offset, string whereClause = "",
         string orderByClause = "")
     {
-        var result = new List<PikaTask>();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
         whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
         orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        command.CommandText = $"SELECT * FROM task {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-            var desc = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-            var script = reader.GetString(3);
-            var isFavorite = reader.GetBoolean(4);
-            var createdAt = reader.GetDateTime(5);
-            result.Add(new PikaTask
-            {
-                CreatedAt = createdAt,
-                Description = desc,
-                Id = id,
-                IsFavorite = isFavorite,
-                Name = name,
-                Script = script
-            });
-        }
-
-        return result;
+        var sql = $"SELECT * FROM task {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
+        return (await connection.QueryAsync<PikaTask>(sql)).AsList();
     }
 
     public async Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit, int offset, string whereClause = "",
         string orderByClause = "")
     {
-        var result = new List<PikaTaskRun>();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
         whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
         orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        command.CommandText = $"SELECT * FROM task_run {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var taskId = reader.GetInt64(1);
-            var status = reader.GetInt64(2);
-            var script = reader.GetString(3);
-            var createdAt = reader.GetDateTime(4);
-            var completedAt = reader.IsDBNull(5) ? default : reader.GetDateTime(5);
-            result.Add(new PikaTaskRun
-            {
-                CreatedAt = createdAt,
-                TaskId = taskId,
-                Id = id,
-                Status = (PikaTaskStatus) status,
-                CompletedAt = completedAt,
-                Script = script
-            });
-        }
-
-        return result;
+        var sql = $"SELECT * FROM task_run {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
+        return (await connection.QueryAsync<PikaTaskRun>(sql)).AsList();
     }
 
     public async Task<PikaSystemStatus> GetSystemStatusAsync()
@@ -275,6 +209,7 @@ public class SqliteDbRepository : IDbRepository
             });
         }
 
+        status.DbSize = new FileInfo(_pikaDb).Length;
             return status;
     }
 
@@ -282,14 +217,13 @@ public class SqliteDbRepository : IDbRepository
     {
         var task = await GetTaskAsync(taskId);
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText =
-            "INSERT INTO task_run(task_id, status, script) VALUES(@taskId, @status, @script) RETURNING id";
-        command.Parameters.AddWithValue("@taskId", taskId);
-        command.Parameters.AddWithValue("@script", task.Script);
-        command.Parameters.AddWithValue("@status", (int) PikaTaskStatus.Pending);
-        await connection.OpenAsync();
-        var id = await command.ExecuteScalarAsync();
+        var id = await connection.ExecuteScalarAsync(
+            "INSERT INTO task_run(task_id, status, script) VALUES(@taskId, @status, @script) RETURNING id", new
+            {
+                taskId = taskId,
+                script = task.Script,
+                status = (int)PikaTaskStatus.Pending
+            });
         if (id == null)
         {
             return -1;
@@ -301,95 +235,50 @@ public class SqliteDbRepository : IDbRepository
     public async Task AddTaskRunOutputAsync(PikaTaskRunOutput runOutput)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText =
-            "INSERT INTO task_run_output(run_id, message, is_error) VALUES(@runId, @message, @isError)";
-        command.Parameters.AddWithValue("@runId", runOutput.TaskRunId);
-        command.Parameters.AddWithValue("@message", runOutput.Message);
-        command.Parameters.AddWithValue("@isError", Convert.ToInt32(runOutput.IsError));
-        await connection.OpenAsync();
-        await command.ExecuteNonQueryAsync();
+        await connection.ExecuteAsync(
+            "INSERT INTO task_run_output(run_id, message, is_error) VALUES(@runId, @message, @isError)", new
+            {
+                runId = runOutput.TaskRunId,
+                message = runOutput.Message,
+                isError = Convert.ToInt32(runOutput.IsError)
+            });
     }
 
     public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan)
     {
-        var result = new List<PikaTaskRunOutput>();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText =
-            "SELECT * FROM task_run_output WHERE run_id=@runId AND julianday(created_at)>julianday(@laterThan) ORDER BY created_at ASC";
-        command.Parameters.AddWithValue("@runId", taskRunId);
-        command.Parameters.AddWithValue("@laterThan", laterThan);
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var message = reader.GetString(2);
-            var isError = reader.GetBoolean(3);
-            var createdAt = reader.GetDateTime(4);
-            result.Add(new PikaTaskRunOutput
+        var result = await connection.QueryAsync<PikaTaskRunOutput>(
+            "SELECT * FROM task_run_output WHERE run_id=@runId AND julianday(created_at)>julianday(@laterThan) ORDER BY created_at ASC",
+            new
             {
-                CreatedAt = createdAt,
-                Id = id,
-                IsError = isError,
-                Message = message,
-                TaskRunId = taskRunId
+                runId = taskRunId,
+                laterThan = laterThan
             });
-        }
-
-        return result;
+        
+        return result.AsList();
     }
 
     public async Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
+        string sql;
         if (status == PikaTaskStatus.Completed || status == PikaTaskStatus.Dead)
         {
-            command.CommandText =
+            sql =
                 "UPDATE task_run SET status=@status, completed_at=DATETIME('now', 'localtime') WHERE id=@id";
         }
         else
         {
-            command.CommandText = "UPDATE task_run SET status=@status WHERE id=@id";
+            sql = "UPDATE task_run SET status=@status WHERE id=@id";
         }
 
-        command.Parameters.AddWithValue("@status", (int) status);
-        command.Parameters.AddWithValue("@id", runId);
-        await connection.OpenAsync();
-        await command.ExecuteNonQueryAsync();
+        await connection.ExecuteAsync(sql, new {id = runId, status = (int)status});
     }
 
     public async Task<PikaTaskRun> GetTaskRunAsync(long runId)
     {
-        var result = new List<PikaTaskRun>();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM task_run WHERE id=@id";
-        command.Parameters.AddWithValue("@id", runId);
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var taskId = reader.GetInt64(1);
-            var status = reader.GetInt64(2);
-            var script = reader.GetString(3);
-            var createdAt = reader.GetDateTime(4);
-            var completedAt = reader.IsDBNull(5) ? default : reader.GetDateTime(5);
-            result.Add(new PikaTaskRun
-            {
-                CreatedAt = createdAt,
-                TaskId = taskId,
-                Id = id,
-                Status = (PikaTaskStatus) status,
-                CompletedAt = completedAt,
-                Script = script
-            });
-        }
-
-        return result.FirstOrDefault();
+        return await connection.QuerySingleOrDefaultAsync<PikaTaskRun>("SELECT * FROM task_run WHERE id=@id",
+            new {id = runId});
     }
 }

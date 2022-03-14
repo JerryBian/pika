@@ -7,12 +7,11 @@ CREATE TABLE IF NOT EXISTS task
     name TEXT COLLATE BINARY,
     description TEXT COLLATE BINARY,
     script TEXT NOT NULL COLLATE BINARY,
-    is_favorite INTEGER NOT NULL DEFAULT 0,
     created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
     last_modified_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime'))
 );
 
-CREATE INDEX IF NOT EXISTS task_recent ON task(created_at DESC);
+-- CREATE INDEX IF NOT EXISTS task_recent ON task(created_at DESC);
 
 -- task_run
 CREATE TABLE IF NOT EXISTS task_run
@@ -22,6 +21,7 @@ CREATE TABLE IF NOT EXISTS task_run
     status INTEGER NOT NULL,
     script TEXT NOT NULL COLLATE BINARY,
     created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
+    started_at TEXT COLLATE BINARY,
     completed_at TEXT COLLATE BINARY,
     FOREIGN KEY(task_id) REFERENCES task(id)
 );

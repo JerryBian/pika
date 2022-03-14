@@ -1,4 +1,5 @@
-﻿@model PikaSystemStatus
+﻿@using ByteSizeLib
+@model PikaSystemStatus
 
 <div class="mt-5">
     <div class="row">
@@ -36,6 +37,7 @@
                     Stats
                 </div>
                 <div class="list-group">
+                    <div class="list-group-item text-dark bg-white border-bottom border-1">DB Size: @ByteSize.FromBytes(Model.DbSize).ToString("#.#")</div>
                     <a href="/task" class="list-group-item text-dark bg-white border-bottom border-1">Tasks: @Model.TaskCount</a>
                     <a href="/run" class="list-group-item text-dark bg-white border-bottom border-1">Runs: @Model.RunCount</a>
                     <a href="/run?s=@PikaTaskStatus.Pending" class="list-group-item text-dark bg-white border-bottom border-1">Pending tasks: @Model.TaskInPendingCount</a>

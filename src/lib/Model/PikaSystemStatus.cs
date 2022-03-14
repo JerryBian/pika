@@ -18,4 +18,6 @@ public class PikaSystemStatus
     public List<PikaTask> MostRunTasks { get; set; } = new();
 
     public List<PikaTaskRun> LongestRuns { get; set; } = new();
+
+    public long DbSize { get; set; }
 }

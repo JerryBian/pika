@@ -3,13 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AB458530-4CCB-49C4-AB77-A0A124AF734C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{78A1F31F-A4B0-4D14-823E-473F8330BC42}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pika.Web", "src\web\Pika.Web.csproj", "{69F68163-AF60-4C6B-A90C-FF6582C79EB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pika.Lib", "src\lib\Pika.Lib.csproj", "{25972543-2907-495C-BFCF-57560338ADB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pika.Lib", "src\lib\Pika.Lib.csproj", "{25972543-2907-495C-BFCF-57560338ADB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +24,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{69F68163-AF60-4C6B-A90C-FF6582C79EB4} = {AB458530-4CCB-49C4-AB77-A0A124AF734C}
-		{25972543-2907-495C-BFCF-57560338ADB3} = {AB458530-4CCB-49C4-AB77-A0A124AF734C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33959F88-1D7D-4D89-A471-469EC921BD46}

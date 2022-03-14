@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.1.0
+
+Introduce Dapper for SQLite access
+
 ### 2.0.0
 
 Redesign Home page.
