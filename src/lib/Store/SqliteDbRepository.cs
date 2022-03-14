@@ -199,7 +199,11 @@ public class SqliteDbRepository : IDbRepository
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM task;" +
                               "SELECT COUNT(*) FROM task_run;" +
-                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}'";
+                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
+                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
+                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}';" +
+                              "SELECT a.* FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC LIMIT 8 OFFSET 0;" +
+                              $"SELECT * FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
         await connection.OpenAsync();
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -216,10 +220,62 @@ public class SqliteDbRepository : IDbRepository
         await reader.NextResultAsync();
         while (await reader.ReadAsync())
         {
+            status.TaskInPendingCount = reader.GetInt32(0);
+        }
+
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
             status.TaskInRunningCount = reader.GetInt32(0);
         }
 
-        return status;
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
+            status.TaskInCompletedCount = reader.GetInt32(0);
+        }
+
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetInt64(0);
+            var name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+            var desc = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+            var script = reader.GetString(3);
+            var isFavorite = reader.GetBoolean(4);
+            var createdAt = reader.GetDateTime(5);
+            status.MostRunTasks.Add(new PikaTask
+            {
+                CreatedAt = createdAt,
+                Description = desc,
+                Id = id,
+                IsFavorite = isFavorite,
+                Name = name,
+                Script = script
+            });
+        }
+
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetInt64(0);
+            var taskId = reader.GetInt64(1);
+            var s = reader.GetInt64(2);
+            var script = reader.GetString(3);
+            var createdAt = reader.GetDateTime(4);
+            var completedAt = reader.IsDBNull(5) ? default : reader.GetDateTime(5);
+            status.LongestRuns.Add(new PikaTaskRun
+            {
+                CreatedAt = createdAt,
+                TaskId = taskId,
+                Id = id,
+                Status = (PikaTaskStatus)s,
+                CompletedAt = completedAt,
+                Script = script
+            });
+        }
+
+            return status;
     }
 
     public async Task<long> AddTaskRunAsync(long taskId)

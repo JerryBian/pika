@@ -1,28 +1,46 @@
 ﻿@model PikaSystemStatus
 
 <div class="mt-5">
-    <div class="row text-center">
+    <div class="row">
         <div class="col-sm-4 mb-3">
             <div class="card text-dark bg-white">
-                <div class="card-body">
-                    <p>Total Tasks</p>
-                    <a href="/task" class="fs-1 text-decoration-none">@Model.TaskCount</a>
+                <div class="card-header">
+                    Tasks run most often
+                </div>
+                <div class="list-group">
+                    @foreach (var task in Model.MostRunTasks)
+                    {
+                        <a href="/task?t=@task.Id" class="list-group-item text-dark bg-white border-bottom border-1">@task.Name</a>
+                    }
+                    
                 </div>
             </div>
         </div>
         <div class="col-sm-4 mb-3">
             <div class="card text-dark bg-white">
-                <div class="card-body">
-                    <p>Total Runs</p>
-                    <a href="/run" class="fs-1 text-decoration-none">@Model.RunCount</a>
+                <div class="card-header">
+                    Runs take longest
+                </div>
+                <div class="list-group">
+                    @foreach (var run in Model.LongestRuns)
+                    {
+                        <a href="/run/@run.Id" class="list-group-item text-dark bg-white border-bottom border-1">#@run.Id (@run.GetElapsed())</a>
+                    }
+                    
                 </div>
             </div>
         </div>
         <div class="col-sm-4 mb-3">
-            <div class="card text-dark bg-info">
-                <div class="card-body">
-                    <p>Total Tasks</p>
-                    <a href="/task" class="fs-1 text-decoration-none">@Model.TaskInRunningCount</a>
+            <div class="card text-dark bg-white">
+                <div class="card-header">
+                    Stats
+                </div>
+                <div class="list-group">
+                    <a href="/task" class="list-group-item text-dark bg-white border-bottom border-1">Tasks: @Model.TaskCount</a>
+                    <a href="/run" class="list-group-item text-dark bg-white border-bottom border-1">Runs: @Model.RunCount</a>
+                    <a href="/run?s=@PikaTaskStatus.Pending" class="list-group-item text-dark bg-white border-bottom border-1">Pending tasks: @Model.TaskInPendingCount</a>
+                    <a href="/run?s=@PikaTaskStatus.Running" class="list-group-item text-dark bg-white border-bottom border-1">Running tasks: @Model.TaskInRunningCount</a>
+                    <a href="/run?s=@PikaTaskStatus.Completed" class="list-group-item text-dark bg-white border-bottom border-1">Completed tasks: @Model.TaskInCompletedCount</a>
                 </div>
             </div>
         </div>

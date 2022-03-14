@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.0.0
+
+Redesign Home page.
+
 ### 1.2.0
 
 Enhancement the script/output UI.

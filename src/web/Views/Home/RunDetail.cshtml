@@ -55,7 +55,8 @@
 
                     data.outputs.forEach(o => {
                         let newDiv = document.createElement("div");
-                        newDiv.innerHTML = `<pre class="m-0 ps-1" title="${o.createdAt}">${o.message}</pre>`;
+                        let msg = o.message == '' ? "<br/>" : o.message;
+                        newDiv.innerHTML = `<pre class="m-0 ps-1" title="${o.createdAt}">${msg}</pre>`;
                         runOutput.appendChild(newDiv);
                         runOutput.scrollTop = runOutput.scrollHeight;
                     });
