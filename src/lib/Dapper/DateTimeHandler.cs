@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Pika.Lib.Dapper
+namespace Pika.Lib.Dapper;
+
+public class DateTimeHandler : SqliteTypeHandler<DateTime>
 {
-    public class DateTimeHandler : SqliteTypeHandler<DateTime>
+    public override DateTime Parse(object value)
     {
-        public override DateTime Parse(object value)
-        {
-            return DateTime.Parse((string) value);
-        }
+        return DateTime.Parse((string) value);
     }
 }

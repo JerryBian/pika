@@ -4,16 +4,18 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Pika.Lib.Model;
+using Pika.Lib.Store;
 
 namespace Pika.Lib.Command;
 
 public class ProcessCommandClient : ICommandClient
 {
-    private readonly Setting _setting;
+    private readonly IDbRepository _repository;
 
-    public ProcessCommandClient(Setting setting)
+    public ProcessCommandClient(IDbRepository repository)
     {
-        _setting = setting;
+        _repository = repository;
     }
 
     public async Task<int> RunAsync(string script, Func<string, Task> outputHandler = null,
@@ -24,7 +26,9 @@ public class ProcessCommandClient : ICommandClient
         using var process = new Process();
         using var resetEvent1 = new ManualResetEventSlim(false);
         using var resetEvent2 = new ManualResetEventSlim(false);
-        process.StartInfo = new ProcessStartInfo(_setting.Shell, $"{_setting.ShellOptions} \"{scriptFile}\"")
+        var shellName = await _repository.GetSetting(SettingKey.ShellName);
+        var shellOptions = await _repository.GetSetting(SettingKey.ShellOptions);
+        process.StartInfo = new ProcessStartInfo(shellName, $"{shellOptions} \"{scriptFile}\"")
         {
             CreateNoWindow = true,
             RedirectStandardError = true,
@@ -78,7 +82,8 @@ public class ProcessCommandClient : ICommandClient
     private async Task<string> GetScriptFileAsync(string script)
     {
         var tempFile = Path.GetTempFileName();
-        var scriptFile = $"{tempFile}.{_setting.ShellScriptExt}";
+        var shellExt = await _repository.GetSetting(SettingKey.ShellExt);
+        var scriptFile = $"{tempFile}{shellExt}";
         await File.WriteAllTextAsync(scriptFile, script, new UTF8Encoding(false));
         return scriptFile;
     }

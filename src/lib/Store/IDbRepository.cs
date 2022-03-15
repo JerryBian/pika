@@ -31,4 +31,8 @@ public interface IDbRepository
     Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status);
 
     Task<PikaTaskRun> GetTaskRunAsync(long runId);
+
+    Task<string> GetSetting(string key);
+
+    Task InsertOrUpdateSetting(string key, string value);
 }

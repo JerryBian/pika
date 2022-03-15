@@ -36,3 +36,12 @@ CREATE TABLE IF NOT EXISTS task_run_output
     created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
     FOREIGN KEY(run_id) REFERENCES task_run(id)
 );
+
+-- setting
+CREATE TABLE IF NOT EXISTS setting
+(
+    key TEXT NOT NULL PRIMARY KEY COLLATE BINARY,
+    value TEXT COLLATE BINARY,
+    created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
+    last_modified_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime'))
+);

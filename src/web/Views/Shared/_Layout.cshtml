@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
 <html lang="en" class="w-100 min-vh-100">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     @if (ViewData["Title"] == null)
     {
         <title>Pika</title>
@@ -15,44 +15,49 @@
     <link rel="stylesheet" href="~/style.min.css" asp-append-version="true"/>
 </head>
 <body class="w-100">
-    <div class="container-fluid min-vh-100 d-flex flex-column p-0">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="/">Pika</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarText">
-                    <span class="navbar-text">
-                        Run script in background
-                    </span>
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/task" id="taskNav"><i class="fa-solid fa-list"></i> Tasks</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/run" id="runNav"><i class="fa-solid fa-person-running"></i> Runs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/run" id="runNav"><i class="fa-solid fa-gear"></i> Setting</a>
-                        </li>
-                    </ul>
-
-                </div>
-            </div>
-        </nav>
-
+<div class="container-fluid min-vh-100 d-flex flex-column p-0">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            @await RenderSectionAsync("Actions", false)
-        </div>
+            <a class="navbar-brand" href="/">Pika</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <span class="navbar-text">
+                    Run script in background
+                </span>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/task" id="taskNav"><i class="fa-solid fa-list"></i> Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/run" id="runNav"><i class="fa-solid fa-person-running"></i> Runs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/run" id="runNav"><i class="fa-solid fa-gear"></i> Setting</a>
+                    </li>
+                </ul>
 
-        <main class="my-2 container">
-            @RenderBody()
-        </main>
-        <footer class="mt-auto fs-6 text-muted container text-center p-3">Pika &middot; <a href="https://github.com/JerryBian/pika"><i class="fa-brands fa-github"></i></a></footer>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        @await RenderSectionAsync("Actions", false)
     </div>
 
-    <script src="~/script.min.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", false)
+    <main class="my-2 container">
+        @RenderBody()
+    </main>
+    <footer class="mt-auto fs-6 text-muted container text-center p-3">
+        Pika &middot;
+        <a href="https://github.com/JerryBian/pika">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </footer>
+</div>
+
+<script src="~/script.min.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", false)
 </body>
 </html>

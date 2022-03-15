@@ -32,7 +32,7 @@ public class HomeController : Controller
     [HttpGet("/task")]
     public async Task<IActionResult> Task([FromQuery] int p = 1)
     {
-        var c = 10;
+        var c = int.Parse(await _repository.GetSetting(SettingKey.ItemsPerPage));
         if (Request.Cookies.ContainsKey(Constants.ItemsPerPage) &&
             int.TryParse(Request.Cookies[Constants.ItemsPerPage], out var r) && r > 0)
         {
@@ -53,7 +53,7 @@ public class HomeController : Controller
     [HttpGet("/run")]
     public async Task<IActionResult> Run([FromQuery] int p = 1)
     {
-        var c = 10;
+        var c = int.Parse(await _repository.GetSetting(SettingKey.ItemsPerPage));
         if (Request.Cookies.ContainsKey(Constants.ItemsPerPage) &&
             int.TryParse(Request.Cookies[Constants.ItemsPerPage], out var r) && r > 0)
         {
@@ -68,17 +68,17 @@ public class HomeController : Controller
             {
                 whereClause = $"status={(int) PikaTaskStatus.Running}";
             }
-            else if(StringUtil.EqualsIgnoreCase(filterBy, Constants.FilterByPending))
+            else if (StringUtil.EqualsIgnoreCase(filterBy, Constants.FilterByPending))
             {
-                whereClause = $"status={(int)PikaTaskStatus.Pending}";
+                whereClause = $"status={(int) PikaTaskStatus.Pending}";
             }
             else if (StringUtil.EqualsIgnoreCase(filterBy, Constants.FilterByCompleted))
             {
-                whereClause = $"status={(int)PikaTaskStatus.Completed}";
+                whereClause = $"status={(int) PikaTaskStatus.Completed}";
             }
             else if (StringUtil.EqualsIgnoreCase(filterBy, Constants.FilterByDead))
             {
-                whereClause = $"status={(int)PikaTaskStatus.Dead}";
+                whereClause = $"status={(int) PikaTaskStatus.Dead}";
             }
         }
 
@@ -92,7 +92,8 @@ public class HomeController : Controller
             }
             else if (StringUtil.EqualsIgnoreCase(orderBy, Constants.SortByRunElapsedDesc))
             {
-                orderByClause = "(julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC";
+                orderByClause =
+                    "(julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC";
             }
         }
 

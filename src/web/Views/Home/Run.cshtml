@@ -69,15 +69,17 @@
         filterSel.value = savedFilter;
         sortSel.value = savedSort;
 
-        filterSel.addEventListener("change", function() {
-            Cookies.set("@Constants.FilterBy", this.value);
-            window.location.href = "/run";
-        });
+        filterSel.addEventListener("change",
+            function() {
+                Cookies.set("@Constants.FilterBy", this.value);
+                window.location.href = "/run";
+            });
 
-        sortSel.addEventListener("change", function() {
-            Cookies.set("@Constants.SortBy", this.value);
-            window.location.href = "/run";
-        });
+        sortSel.addEventListener("change",
+            function() {
+                Cookies.set("@Constants.SortBy", this.value);
+                window.location.href = "/run";
+            });
 
         document.querySelector(`#itemPerPage${itemsPerPage}`).checked = true;
         let radios = document.querySelectorAll("input[name='itemsPerPage']");

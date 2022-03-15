@@ -93,7 +93,7 @@ public class SqliteDbRepository : IDbRepository
             {
                 name = task.Name,
                 script = task.Script,
-                desc = task.Description, 
+                desc = task.Description,
                 id = task.Id
             });
     }
@@ -135,9 +135,9 @@ public class SqliteDbRepository : IDbRepository
                               "SELECT COUNT(*) FROM task_run;" +
                               $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
                               $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
-                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}';" +
+                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}';" +
                               "SELECT a.* FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC LIMIT 8 OFFSET 0;" +
-                              $"SELECT * FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
+                              $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
         await connection.OpenAsync();
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -203,14 +203,14 @@ public class SqliteDbRepository : IDbRepository
                 CreatedAt = createdAt,
                 TaskId = taskId,
                 Id = id,
-                Status = (PikaTaskStatus)s,
+                Status = (PikaTaskStatus) s,
                 CompletedAt = completedAt,
                 Script = script
             });
         }
 
         status.DbSize = new FileInfo(_pikaDb).Length;
-            return status;
+        return status;
     }
 
     public async Task<long> AddTaskRunAsync(long taskId)
@@ -220,9 +220,9 @@ public class SqliteDbRepository : IDbRepository
         var id = await connection.ExecuteScalarAsync(
             "INSERT INTO task_run(task_id, status, script) VALUES(@taskId, @status, @script) RETURNING id", new
             {
-                taskId = taskId,
+                taskId,
                 script = task.Script,
-                status = (int)PikaTaskStatus.Pending
+                status = (int) PikaTaskStatus.Pending
             });
         if (id == null)
         {
@@ -251,10 +251,9 @@ public class SqliteDbRepository : IDbRepository
             "SELECT * FROM task_run_output WHERE run_id=@runId AND julianday(created_at)>julianday(@laterThan) ORDER BY created_at ASC",
             new
             {
-                runId = taskRunId,
-                laterThan = laterThan
+                runId = taskRunId, laterThan
             });
-        
+
         return result.AsList();
     }
 
@@ -272,7 +271,7 @@ public class SqliteDbRepository : IDbRepository
             sql = "UPDATE task_run SET status=@status WHERE id=@id";
         }
 
-        await connection.ExecuteAsync(sql, new {id = runId, status = (int)status});
+        await connection.ExecuteAsync(sql, new {id = runId, status = (int) status});
     }
 
     public async Task<PikaTaskRun> GetTaskRunAsync(long runId)
@@ -280,5 +279,20 @@ public class SqliteDbRepository : IDbRepository
         await using var connection = new SqliteConnection(_connectionString);
         return await connection.QuerySingleOrDefaultAsync<PikaTaskRun>("SELECT * FROM task_run WHERE id=@id",
             new {id = runId});
+    }
+
+    public async Task<string> GetSetting(string key)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        return await connection.QuerySingleOrDefaultAsync<string>("SELECT value FROM setting WHERE key=@key",
+            new {key});
+    }
+
+    public async Task InsertOrUpdateSetting(string key, string value)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.ExecuteAsync(
+            "INSERT OR REPLACE INTO setting(key, value, last_modified_at) VALUES (@key, @value, DATETIME('now', 'localtime'))",
+            new {key, value});
     }
 }
