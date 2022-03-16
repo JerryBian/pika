@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.3.0
+
+Initial support for Import/Export
+
 ### 2.2.0
 
 Introduce `setting` table

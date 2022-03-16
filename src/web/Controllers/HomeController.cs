@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pika.Lib;
@@ -134,5 +139,28 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+    }
+
+    [HttpPost("/export")]
+    public async Task<IActionResult> ExportAsync()
+    {
+        var tasks = await _repository.GetTasksAsync(int.MaxValue, 0, orderByClause: "created_at ASC");
+        var content = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(tasks, new JsonSerializerOptions{WriteIndented = true}));
+        return File(content, "application/json", "pika_export.json");
+    }
+
+    [HttpPost("/import")]
+    public async Task<IActionResult> ImportAsync(IFormFile file)
+    {
+        using (var reader = new StreamReader(file.OpenReadStream()))
+        {
+            var content = await reader.ReadToEndAsync();
+            foreach (var pikaTask in JsonSerializer.Deserialize<List<PikaTask>>(content))
+            {
+                await _repository.AddTaskAsync(pikaTask);
+            }
+        }
+
+        return Redirect("~/task");
     }
 }

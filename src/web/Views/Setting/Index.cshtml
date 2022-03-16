@@ -1,0 +1,17 @@
+﻿<form action="/export" method="POST">
+    <button type="submit">Export</button>
+</form>
+
+<form action="/import" method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="formFile" class="form-label">Default file input example</label>
+        <input class="form-control" type="file" id="formFile" name="file">
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+@section Scripts{
+    <script>
+        setActive("settingNav");
+    </script>
+}
