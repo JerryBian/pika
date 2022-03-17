@@ -1,14 +1,48 @@
-﻿<form action="/export" method="POST">
-    <button type="submit">Export</button>
-</form>
+﻿@using Pika.Lib.Store
+@inject IDbRepository Repo
 
-<form action="/import" method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="formFile" class="form-label">Default file input example</label>
-        <input class="form-control" type="file" id="formFile" name="file">
+<div class="row">
+    <div class="col-md-6">
+        <h3 class="border-bottom pb-1 my-3" id="import">
+            Import
+        </h3>
+
+        <form action="/import" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="formFile" class="form-label">Choose JSON file</label>
+                <input class="form-control" type="file" id="formFile" name="file">
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-info">Import</button>
+            </div>
+        </form>
+        
+        <h3 class="border-bottom pb-1 my-3" id="export">
+            Export
+        </h3>
+        <form action="/export" method="POST">
+            <div class="d-grid">
+                <button type="submit" class="btn btn-info">Export</button>
+            </div>
+        </form>
     </div>
-    <button type="submit">Submit</button>
-</form>
+    <div class="col-md-6">
+        <h3 class="border-bottom pb-1 my-3" id="misc">
+            Misc
+        </h3>
+        
+        <form>
+            <div class="mb-3">
+                <label for="itemsPerPage" class="col-form-label">Items per page</label>
+                <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@await Repo.GetSetting(SettingKey.ItemsPerPage)">
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts{
     <script>
