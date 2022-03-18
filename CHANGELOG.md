@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.4.0
+
+Use VERSION file
+
 ### 2.3.0
 
 Initial support for Import/Export

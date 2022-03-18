@@ -18,11 +18,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -y libxml2-utils zip unzip tar
+          sudo apt-get install -y zip unzip tar
 
       - name: Setup environment variables
         run: |
-          APP_VERSION=`xmllint --xpath "/Project/PropertyGroup/Version/text()" Directory.Build.props`
+          APP_VERSION=`cat VERSION`
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
           echo "APP_VERSION_LINK=${APP_VERSION//.}" >> $GITHUB_ENV
 
