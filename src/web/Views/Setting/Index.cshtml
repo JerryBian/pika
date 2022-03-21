@@ -1,46 +1,43 @@
 ﻿@using Pika.Lib.Store
 @inject IDbRepository Repo
 
-<div class="row">
-    <div class="col-md-6">
-        <h3 class="border-bottom pb-1 my-3" id="import">
-            Import
-        </h3>
-
-        <form action="/import" method="POST" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="formFile" class="form-label">Choose JSON file</label>
-                <input class="form-control" type="file" id="formFile" name="file">
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-info">Import</button>
-            </div>
-        </form>
-        
-        <h3 class="border-bottom pb-1 my-3" id="export">
-            Export
-        </h3>
-        <form action="/export" method="POST">
-            <div class="d-grid">
-                <button type="submit" class="btn btn-info">Export</button>
-            </div>
-        </form>
+<div class="d-flex align-items-start">
+    <div class="nav flex-column nav-pills me-3 mt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <button class="nav-link active" id="miscTab" data-bs-toggle="pill" data-bs-target="#miscSetting" type="button" role="tab" aria-controls="miscSetting" aria-selected="true">Misc</button>
+        <button class="nav-link" id="importTab" data-bs-toggle="pill" data-bs-target="#importSetting" type="button" role="tab" aria-controls="importSetting" aria-selected="false">Import</button>
+        <button class="nav-link" id="exportTab" data-bs-toggle="pill" data-bs-target="#exportSetting" type="button" role="tab" aria-controls="exportSetting" aria-selected="false">Export</button>
     </div>
-    <div class="col-md-6">
-        <h3 class="border-bottom pb-1 my-3" id="misc">
-            Misc
-        </h3>
-        
-        <form>
-            <div class="mb-3">
-                <label for="itemsPerPage" class="col-form-label">Items per page</label>
-                <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@await Repo.GetSetting(SettingKey.ItemsPerPage)">
-            </div>
-            
-            <div class="d-grid">
-                <button type="submit" class="btn btn-success">Submit</button>
-            </div>
-        </form>
+    <div class="tab-content w-100 p-4" id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="miscSetting" role="tabpanel" aria-labelledby="miscTab">
+            <form>
+                <div class="mb-3">
+                    <label for="itemsPerPage" class="col-form-label">Items per page</label>
+                    <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@await Repo.GetSetting(SettingKey.ItemsPerPage)">
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="importSetting" role="tabpanel" aria-labelledby="importTab">
+            <form action="/import" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="formFile" class="form-label">Choose JSON file</label>
+                    <input class="form-control" type="file" id="formFile" name="file">
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="exportSetting" role="tabpanel" aria-labelledby="exportTab">
+            <form action="/export" method="POST">
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Export</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

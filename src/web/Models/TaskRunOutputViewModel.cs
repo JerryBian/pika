@@ -24,6 +24,5 @@ public class TaskRunOutputViewModel
 
     [JsonPropertyName("script")] public string Script { get; set; }
 
-    [JsonPropertyName("foo")]
-    public string Foo { get; set; }
+    [JsonPropertyName("foo")] public string Foo { get; set; }
 }

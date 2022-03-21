@@ -14,7 +14,11 @@ public class PikaSystemStatus
 
     public int TaskInCompletedCount { get; set; }
 
-    public List<PikaTask> MostRunTasks { get; set; } = new();
+    public int TaskInStoppedCount { get; set; }
+
+    public int TaskInDeadCount { get; set; }
+
+    public List<KeyValuePair<PikaTask, int>> MostRunTasks { get; set; } = new();
 
     public List<PikaTaskRun> LongestRuns { get; set; } = new();
 

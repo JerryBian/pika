@@ -2,7 +2,7 @@
 
 namespace Pika.Web.Controllers;
 
-public class SettingController : Controller
+public class RunController : Controller
 {
     public IActionResult Index()
     {

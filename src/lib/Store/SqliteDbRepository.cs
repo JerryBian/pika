@@ -88,7 +88,8 @@ public class SqliteDbRepository : IDbRepository
     public async Task UpdateTaskAsync(PikaTask task)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        await connection.ExecuteAsync("UPDATE task SET name=@name, script=@script, description=@desc WHERE id=@id",
+        await connection.ExecuteAsync(
+            "UPDATE task SET name=@name, script=@script, description=@desc, last_modified_at=DATETIME('now', 'localtime') WHERE id=@id",
             new
             {
                 name = task.Name,
@@ -106,23 +107,35 @@ public class SqliteDbRepository : IDbRepository
         return result;
     }
 
-    public async Task<List<PikaTask>> GetTasksAsync(int limit, int offset, string whereClause = "",
+    public async Task<List<PikaTask>> GetTasksAsync(int limit = 0, int offset = -1, string whereClause = "",
         string orderByClause = "")
     {
         await using var connection = new SqliteConnection(_connectionString);
         whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
         orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        var sql = $"SELECT * FROM task {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
+        var limitClause = string.Empty;
+        if (limit > 0 && offset >= 0)
+        {
+            limitClause = $"LIMIT {limit} OFFSET {offset}";
+        }
+
+        var sql = $"SELECT * FROM task {whereClause} {orderByClause} {limitClause}";
         return (await connection.QueryAsync<PikaTask>(sql)).AsList();
     }
 
-    public async Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit, int offset, string whereClause = "",
+    public async Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit = 0, int offset = -1, string whereClause = "",
         string orderByClause = "")
     {
         await using var connection = new SqliteConnection(_connectionString);
         whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
         orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        var sql = $"SELECT * FROM task_run {whereClause} {orderByClause} LIMIT {limit} OFFSET {offset}";
+        var limitClause = string.Empty;
+        if (limit > 0 && offset >= 0)
+        {
+            limitClause = $"LIMIT {limit} OFFSET {offset}";
+        }
+
+        var sql = $"SELECT * FROM task_run {whereClause} {orderByClause} {limitClause}";
         return (await connection.QueryAsync<PikaTaskRun>(sql)).AsList();
     }
 
@@ -130,85 +143,38 @@ public class SqliteDbRepository : IDbRepository
     {
         var status = new PikaSystemStatus();
         await using var connection = new SqliteConnection(_connectionString);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(*) FROM task;" +
-                              "SELECT COUNT(*) FROM task_run;" +
-                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
-                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
-                              $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}';" +
-                              "SELECT a.* FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC LIMIT 8 OFFSET 0;" +
-                              $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        var sql = "SELECT COUNT(*) FROM task;" +
+                  "SELECT COUNT(*) FROM task_run;" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Stopped}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Dead}';" +
+                  "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
+                  $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
+        using (var multi = await connection.QueryMultipleAsync(sql))
         {
-            status.TaskCount = reader.GetInt32(0);
-        }
-
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            status.RunCount = reader.GetInt32(0);
-        }
-
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            status.TaskInPendingCount = reader.GetInt32(0);
-        }
-
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            status.TaskInRunningCount = reader.GetInt32(0);
-        }
-
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            status.TaskInCompletedCount = reader.GetInt32(0);
-        }
-
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-            var desc = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-            var script = reader.GetString(3);
-            var isFavorite = reader.GetBoolean(4);
-            var createdAt = reader.GetDateTime(5);
-            status.MostRunTasks.Add(new PikaTask
+            status.TaskCount = await multi.ReadSingleAsync<int>();
+            status.RunCount = await multi.ReadSingleAsync<int>();
+            status.TaskInPendingCount = await multi.ReadSingleAsync<int>();
+            status.TaskInRunningCount = await multi.ReadSingleAsync<int>();
+            status.TaskInCompletedCount = await multi.ReadSingleAsync<int>();
+            status.TaskInStoppedCount = await multi.ReadSingleAsync<int>();
+            status.TaskInDeadCount = await multi.ReadSingleAsync<int>();
+            var mostRunTasks = await multi.ReadAsync<dynamic>();
+            foreach (var mostRunTask in mostRunTasks)
             {
-                CreatedAt = createdAt,
-                Description = desc,
-                Id = id,
-                IsFavorite = isFavorite,
-                Name = name,
-                Script = script
-            });
-        }
+                var task = new PikaTask
+                {
+                    Id = Convert.ToInt64(mostRunTask.id),
+                    Name = Convert.ToString(mostRunTask.name)
+                };
+                status.MostRunTasks.Add(new KeyValuePair<PikaTask, int>(task, Convert.ToInt32(mostRunTask.run_count)));
+            }
 
-        await reader.NextResultAsync();
-        while (await reader.ReadAsync())
-        {
-            var id = reader.GetInt64(0);
-            var taskId = reader.GetInt64(1);
-            var s = reader.GetInt64(2);
-            var script = reader.GetString(3);
-            var createdAt = reader.GetDateTime(4);
-            var completedAt = reader.IsDBNull(5) ? default : reader.GetDateTime(5);
-            status.LongestRuns.Add(new PikaTaskRun
-            {
-                CreatedAt = createdAt,
-                TaskId = taskId,
-                Id = id,
-                Status = (PikaTaskStatus) s,
-                CompletedAt = completedAt,
-                Script = script
-            });
+            status.LongestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
         }
-
+        
         status.DbSize = new FileInfo(_pikaDb).Length;
         return status;
     }

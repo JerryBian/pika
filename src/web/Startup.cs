@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Pika.Lib;
 using Pika.Lib.Command;
+using Pika.Lib.Model;
 using Pika.Lib.Store;
 using Pika.Web.HostedServices;
 
@@ -30,6 +31,7 @@ public class Startup
         });
 
         services.Configure<PikaOptions>(Configuration);
+        services.AddSingleton<PikaSetting>();
         services.AddSingleton<ICommandClient, ProcessCommandClient>();
         services.AddSingleton<IDbRepository, SqliteDbRepository>();
 

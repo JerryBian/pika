@@ -10,9 +10,11 @@ namespace Pika.Web.HostedServices;
 public class StartupHostedService : BackgroundService
 {
     private readonly IDbRepository _repository;
+    private readonly PikaSetting _setting;
 
-    public StartupHostedService(IDbRepository dbRepository)
+    public StartupHostedService(IDbRepository dbRepository, PikaSetting setting)
     {
+        _setting = setting;
         _repository = dbRepository;
     }
 
@@ -65,5 +67,10 @@ public class StartupHostedService : BackgroundService
         {
             await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, "8");
         }
+
+        _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(SettingKey.ItemsPerPage));
+        _setting.DefaultShellName = await _repository.GetSetting(SettingKey.ShellName);
+        _setting.DefaultShellOptions = await _repository.GetSetting(SettingKey.ShellOptions);
+        _setting.DefaultShellExt = await _repository.GetSetting(SettingKey.ShellExt);
     }
 }

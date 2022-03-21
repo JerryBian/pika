@@ -147,7 +147,8 @@ public class HomeController : Controller
     public async Task<IActionResult> ExportAsync()
     {
         var tasks = await _repository.GetTasksAsync(int.MaxValue, 0, orderByClause: "created_at ASC");
-        var content = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(tasks, new JsonSerializerOptions{WriteIndented = true}));
+        var content =
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(tasks, new JsonSerializerOptions {WriteIndented = true}));
         return File(content, "application/json", "pika_export.json");
     }
 

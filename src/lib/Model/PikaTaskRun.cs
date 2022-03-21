@@ -1,4 +1,6 @@
 ﻿using System;
+using Humanizer;
+using Humanizer.Localisation;
 
 namespace Pika.Lib.Model;
 
@@ -16,9 +18,9 @@ public class PikaTaskRun
 
     public PikaTaskStatus Status { get; set; }
 
-    public TimeSpan GetElapsed()
+    public string GetElapsed()
     {
         var end = CompletedAt == default ? DateTime.Now : CompletedAt;
-        return end - CreatedAt;
+        return (end - CreatedAt).Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Hour);
     }
 }

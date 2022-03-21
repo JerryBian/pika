@@ -73,5 +73,4 @@ public class ApiController : ControllerBase
             Foo = string.Join(Environment.NewLine, outputs.Select(x => x.Message))
         };
     }
-
 }

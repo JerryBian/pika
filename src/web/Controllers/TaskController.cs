@@ -2,7 +2,7 @@
 
 namespace Pika.Web.Controllers;
 
-public class SettingController : Controller
+public class TaskController : Controller
 {
     public IActionResult Index()
     {
