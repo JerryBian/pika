@@ -23,4 +23,7 @@ public class TaskRunOutputViewModel
     [JsonPropertyName("maxTimestamp")] public long MaxTimestamp { get; set; }
 
     [JsonPropertyName("script")] public string Script { get; set; }
+
+    [JsonPropertyName("foo")]
+    public string Foo { get; set; }
 }

@@ -59,7 +59,7 @@ public class ApiController : ControllerBase
         }
 
         maxTimestamp = Math.Max(laterThan, maxTimestamp);
-
+        outputs.Reverse();
         return new TaskRunOutputViewModel
         {
             MaxTimestamp = maxTimestamp,
@@ -69,7 +69,8 @@ public class ApiController : ControllerBase
             RunEndAt = taskRun.CompletedAt == default ? string.Empty : taskRun.CompletedAt.ToString(),
             RunStartAt = taskRun.CreatedAt.ToString(),
             Status = taskRun.Status.ToString(),
-            TaskName = task.Name
+            TaskName = task.Name,
+            Foo = string.Join(Environment.NewLine, outputs.Select(x => x.Message))
         };
     }
 

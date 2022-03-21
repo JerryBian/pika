@@ -248,10 +248,10 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var result = await connection.QueryAsync<PikaTaskRunOutput>(
-            "SELECT * FROM task_run_output WHERE run_id=@runId AND julianday(created_at)>julianday(@laterThan) ORDER BY created_at ASC",
+            "SELECT * FROM task_run_output WHERE run_id=@runId ORDER BY id DESC LIMIT 100 OFFSET 0",
             new
             {
-                runId = taskRunId, laterThan
+                runId = taskRunId
             });
 
         return result.AsList();

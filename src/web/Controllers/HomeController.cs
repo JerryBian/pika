@@ -119,6 +119,7 @@ public class HomeController : Controller
             maxTimestamp = lastEl.CreatedAt.Ticks;
         }
 
+        outputs.Reverse();
         var viewModel = new TaskRunOutputViewModel
         {
             MaxTimestamp = maxTimestamp,
@@ -129,7 +130,8 @@ public class HomeController : Controller
             RunStartAt = taskRun.CreatedAt.ToString(),
             Status = taskRun.Status.ToString(),
             TaskName = task.Name,
-            Script = taskRun.Script
+            Script = taskRun.Script,
+            Foo = string.Join(Environment.NewLine, outputs.Select(x => x.Message))
         };
 
         return View("RunDetail", viewModel);

@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.5.0
+
+Limit Run output records
+
 ### 2.4.0
 
 Use VERSION file
