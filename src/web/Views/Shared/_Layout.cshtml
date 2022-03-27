@@ -16,7 +16,7 @@
 </head>
 <body class="w-100">
 <div class="container-fluid min-vh-100 d-flex flex-column p-0">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">Pika</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,22 @@
         </a> &middot;
         @AppUtil.AppVersion
     </footer>
+</div>
+<div class="modal fade" tabindex="-1" id="messageModal" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalTitle">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer" id="messageModalFooter">
+                <button type="button" class="btn btn-info" data-bs-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="~/script.min.js" asp-append-version="true"></script>

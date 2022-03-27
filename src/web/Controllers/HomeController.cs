@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -106,36 +104,6 @@ public class HomeController : Controller
         return View(runs);
     }
 
-    [HttpGet("/run/{runId}")]
-    public async Task<IActionResult> PeekRunOutput([FromRoute] long runId)
-    {
-        var taskRun = await _repository.GetTaskRunAsync(runId);
-        var task = await _repository.GetTaskAsync(taskRun.TaskId);
-        var outputs = await _repository.GetTaskRunOutputs(runId, default);
-        var maxTimestamp = default(DateTime).Ticks;
-        var lastEl = outputs.LastOrDefault();
-        if (lastEl != null)
-        {
-            maxTimestamp = lastEl.CreatedAt.Ticks;
-        }
-
-        outputs.Reverse();
-        var viewModel = new TaskRunOutputViewModel
-        {
-            MaxTimestamp = maxTimestamp,
-            Outputs = outputs,
-            RunId = runId,
-            TaskId = task.Id,
-            RunEndAt = taskRun.CompletedAt == default ? string.Empty : taskRun.CompletedAt.ToString(),
-            RunStartAt = taskRun.CreatedAt.ToString(),
-            Status = taskRun.Status.ToString(),
-            TaskName = task.Name,
-            Script = taskRun.Script,
-            Foo = string.Join(Environment.NewLine, outputs.Select(x => x.Message))
-        };
-
-        return View("RunDetail", viewModel);
-    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

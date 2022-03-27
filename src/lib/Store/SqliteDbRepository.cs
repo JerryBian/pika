@@ -148,8 +148,8 @@ public class SqliteDbRepository : IDbRepository
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Stopped}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Dead}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Stopped}';" +
+                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Dead}';" +
                   "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
                   $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
         using (var multi = await connection.QueryMultipleAsync(sql))
@@ -174,21 +174,24 @@ public class SqliteDbRepository : IDbRepository
 
             status.LongestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
         }
-        
+
         status.DbSize = new FileInfo(_pikaDb).Length;
         return status;
     }
 
-    public async Task<long> AddTaskRunAsync(long taskId)
+    public async Task<long> AddTaskRunAsync(PikaTaskRun run)
     {
-        var task = await GetTaskAsync(taskId);
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task_run(task_id, status, script) VALUES(@taskId, @status, @script) RETURNING id", new
+            "INSERT INTO task_run(task_id, status, script, shell_name, shell_option, shell_ext) VALUES(@taskId, @status, @script, @shellName, @shellOption, @shellExt) RETURNING id", 
+            new
             {
-                taskId,
-                script = task.Script,
-                status = (int) PikaTaskStatus.Pending
+                taskId = run.TaskId,
+                status = (int)run.Status,
+                script = run.Script,
+                shellName = run.ShellName,
+                shellOption = run.ShellOption,
+                shellExt = run.ShellExt
             });
         if (id == null)
         {
@@ -210,14 +213,17 @@ public class SqliteDbRepository : IDbRepository
             });
     }
 
-    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan)
+    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default, int limit = -1)
     {
         await using var connection = new SqliteConnection(_connectionString);
+        var createdAtClause = laterThan == default ? "" : "AND julianday(created_at)>julianday(@laterThan)";
+        var limitClause = limit > 0 ? $"LIMIT {limit} OFFSET 0" : "";
         var result = await connection.QueryAsync<PikaTaskRunOutput>(
-            "SELECT * FROM task_run_output WHERE run_id=@runId ORDER BY id DESC LIMIT 100 OFFSET 0",
+            $"SELECT * FROM task_run_output WHERE run_id=@runId {createdAtClause} ORDER BY id DESC {limitClause}",
             new
             {
-                runId = taskRunId
+                runId = taskRunId,
+                laterThan
             });
 
         return result.AsList();
@@ -231,6 +237,10 @@ public class SqliteDbRepository : IDbRepository
         {
             sql =
                 "UPDATE task_run SET status=@status, completed_at=DATETIME('now', 'localtime') WHERE id=@id";
+        }
+        else if(status == PikaTaskStatus.Running)
+        {
+            sql = "UPDATE task_run SET status=@status, started_at=DATETIME('now', 'localtime') WHERE id=@id";
         }
         else
         {

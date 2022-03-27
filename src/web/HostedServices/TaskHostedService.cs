@@ -32,23 +32,30 @@ public class TaskHostedService : BackgroundService
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var run = await GetPendingTaskAsync(stoppingToken);
-                    if (run != null)
+                    try
                     {
-                        await _commandClient.RunAsync(run.Script, async m =>
+                        var run = await GetPendingTaskAsync(stoppingToken);
+                        if (run != null)
                         {
-                            var output = new PikaTaskRunOutput {TaskRunId = run.Id, IsError = false, Message = m};
-                            await _dbRepository.AddTaskRunOutputAsync(output);
-                        }, async m =>
+                            await _commandClient.RunAsync(run.Script, async m =>
+                            {
+                                var output = new PikaTaskRunOutput { TaskRunId = run.Id, IsError = false, Message = m };
+                                await _dbRepository.AddTaskRunOutputAsync(output);
+                            }, async m =>
+                            {
+                                var output = new PikaTaskRunOutput { TaskRunId = run.Id, IsError = true, Message = m };
+                                await _dbRepository.AddTaskRunOutputAsync(output);
+                            }, stoppingToken);
+                            await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Completed);
+                        }
+                        else
                         {
-                            var output = new PikaTaskRunOutput {TaskRunId = run.Id, IsError = true, Message = m};
-                            await _dbRepository.AddTaskRunOutputAsync(output);
-                        }, stoppingToken);
-                        await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Completed);
+                            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+
                     }
                 }
             }, stoppingToken));

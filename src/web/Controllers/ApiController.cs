@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -12,10 +14,12 @@ namespace Pika.Web.Controllers;
 [ApiController]
 public class ApiController : ControllerBase
 {
+    private readonly PikaSetting _setting;
     private readonly IDbRepository _repository;
 
-    public ApiController(IDbRepository repository)
+    public ApiController(IDbRepository repository, PikaSetting setting)
     {
+        _setting = setting;
         _repository = repository;
     }
 
@@ -38,39 +42,63 @@ public class ApiController : ControllerBase
         await _repository.UpdateTaskAsync(task);
     }
 
-    [HttpPut("run/{taskId}")]
-    public async Task<long> RunAsync([FromRoute] long taskId)
+    [HttpPut("run")]
+    public async Task<long> RunAsync(PikaTaskRun run)
     {
-        var runId = await _repository.AddTaskRunAsync(taskId);
+        var task = await _repository.GetTaskAsync(run.TaskId);
+        run.Script = task.Script;
+        run.ShellName = _setting.DefaultShellName;
+        run.ShellOption = _setting.DefaultShellOptions;
+        run.ShellExt = _setting.DefaultShellExt;
+        run.Status = PikaTaskStatus.Pending;
+        var runId = await _repository.AddTaskRunAsync(run);
         return runId;
     }
 
-    [HttpGet("run/{runId}/output")]
-    public async Task<TaskRunOutputViewModel> GetRunOutputs([FromRoute] long runId, [FromQuery] long laterThan)
+    [HttpPost("run/{runId}/output")]
+    public async Task<ApiResponse<TaskRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
+        [FromQuery] long lastPoint)
     {
-        var taskRun = await _repository.GetTaskRunAsync(runId);
-        var task = await _repository.GetTaskAsync(taskRun.TaskId);
-        var outputs = await _repository.GetTaskRunOutputs(runId, new DateTime(laterThan));
-        var maxTimestamp = default(DateTime).Ticks;
-        var lastEl = outputs.LastOrDefault();
-        if (lastEl != null)
+        var response = new ApiResponse<TaskRunOutputViewModel>();
+        try
         {
-            maxTimestamp = lastEl.CreatedAt.Ticks;
+            var taskRun = await _repository.GetTaskRunAsync(runId);
+            if (taskRun == null)
+            {
+                response.IsOk = false;
+                response.Message = $"Run with id = {runId} not exist.";
+            }
+            else
+            {
+                var outputs = await _repository.GetTaskRunOutputs(runId, new DateTime(lastPoint), 100);
+                outputs.Reverse();
+                var maxTimestamp = default(DateTime).Ticks;
+                var lastEl = outputs.LastOrDefault();
+                if (lastEl != null)
+                {
+                    maxTimestamp = lastEl.CreatedAt.Ticks;
+                }
+
+                maxTimestamp = Math.Max(lastPoint, maxTimestamp);
+                response.Content = new TaskRunOutputViewModel
+                {
+                    LastPoint = maxTimestamp,
+                    Outputs = outputs,
+                    CompletedAt = taskRun.CompletedAt == default ? "-" : taskRun.CompletedAt.Humanize(false),
+                    CompletedAtTooltip = taskRun.CompletedAt == default ? "Not completed yet" : taskRun.CompletedAt.ToString(CultureInfo.InvariantCulture),
+                    StartedAt = taskRun.StartedAt == default ? "-" : taskRun.StartedAt.Humanize(false),
+                    StartedAtTooltip = taskRun.StartedAt == default ? "Not started yet" : taskRun.StartedAt.ToString(CultureInfo.InvariantCulture),
+                    Status = taskRun.Status.ToString(),
+                    Elapsed = taskRun.GetElapsedHtml()
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
         }
 
-        maxTimestamp = Math.Max(laterThan, maxTimestamp);
-        outputs.Reverse();
-        return new TaskRunOutputViewModel
-        {
-            MaxTimestamp = maxTimestamp,
-            Outputs = outputs,
-            RunId = runId,
-            TaskId = task.Id,
-            RunEndAt = taskRun.CompletedAt == default ? string.Empty : taskRun.CompletedAt.ToString(),
-            RunStartAt = taskRun.CreatedAt.ToString(),
-            Status = taskRun.Status.ToString(),
-            TaskName = task.Name,
-            Foo = string.Join(Environment.NewLine, outputs.Select(x => x.Message))
-        };
+        return response;
     }
 }

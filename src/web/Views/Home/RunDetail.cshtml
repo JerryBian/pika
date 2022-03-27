@@ -1,4 +1,4 @@
-﻿@model TaskRunOutputViewModel
+﻿@*@model TaskRunOutputViewModel
 
 <div class="bg-light p-3 my-2">
     <div class="row my-2">
@@ -9,9 +9,9 @@
     </div>
     <div class="row">
         <div class="col-sm-2 fw-bold">Start: </div>
-        <div class="col-sm-4" id="taskRunStart">@Model.RunStartAt</div>
+        <div class="col-sm-4" id="taskRunStart">@Model.RunStartedAt</div>
         <div class="col-sm-2 fw-bold">End: </div>
-        <div class="col-sm-4" id="taskRunEnd">@Model.RunEndAt</div>
+        <div class="col-sm-4" id="taskRunEnd">@Model.RunCompletedAt</div>
     </div>
 </div>
 
@@ -42,7 +42,7 @@
             1500);
 
         function loopOutput(t) {
-            fetch(`/api/run/@Model.RunId/output?laterThan=${t}`, { method: "GET" })
+            fetch(`/api/run/@Model.RunId/output?lastPoint=${t}`, { method: "GET" })
                 .then(res => res.json())
                 .then(data => {
                     lastTimestamp = data.maxTimestamp;
@@ -65,4 +65,4 @@
                 });
         }
     </script>
-}
+}*@

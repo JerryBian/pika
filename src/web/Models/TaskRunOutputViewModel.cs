@@ -6,23 +6,19 @@ namespace Pika.Web.Models;
 
 public class TaskRunOutputViewModel
 {
-    [JsonPropertyName("taskId")] public long TaskId { get; set; }
+    [JsonPropertyName("startedAt")] public string StartedAt { get; set; }
 
-    [JsonPropertyName("taskName")] public string TaskName { get; set; }
+    [JsonPropertyName("completedAt")] public string CompletedAt { get; set; }
 
-    [JsonPropertyName("runId")] public long RunId { get; set; }
+    [JsonPropertyName("elapsed")] public string Elapsed { get; set; }
 
-    [JsonPropertyName("runStartAt")] public string RunStartAt { get; set; }
+    [JsonPropertyName("startedAtTooltip")] public string StartedAtTooltip { get; set; }
 
-    [JsonPropertyName("runEndAt")] public string RunEndAt { get; set; }
+    [JsonPropertyName("completedAtTooltip")] public string CompletedAtTooltip { get; set; }
 
     [JsonPropertyName("status")] public string Status { get; set; }
 
-    [JsonPropertyName("outputs")] public List<PikaTaskRunOutput> Outputs { get; set; }
+    [JsonPropertyName("outputs")] public List<PikaTaskRunOutput> Outputs { get; set; } = new();
 
-    [JsonPropertyName("maxTimestamp")] public long MaxTimestamp { get; set; }
-
-    [JsonPropertyName("script")] public string Script { get; set; }
-
-    [JsonPropertyName("foo")] public string Foo { get; set; }
+    [JsonPropertyName("lastPoint")] public long LastPoint { get; set; }
 }

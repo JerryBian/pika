@@ -151,9 +151,15 @@
         }
 
         function runTask(taskId) {
-            fetch(`/api/run/${taskId}`,
+            fetch("/api/run",
                 {
-                    method: "PUT"
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        taskId: taskId
+                    })
                 }).then(res => res.text()).then(data => window.location.href = `/run/${data}`);
         }
 

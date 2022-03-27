@@ -22,11 +22,11 @@ public interface IDbRepository
 
     Task<PikaSystemStatus> GetSystemStatusAsync();
 
-    Task<long> AddTaskRunAsync(long taskId);
+    Task<long> AddTaskRunAsync(PikaTaskRun run);
 
     Task AddTaskRunOutputAsync(PikaTaskRunOutput runOutput);
 
-    Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan);
+    Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default, int limit = -1);
 
     Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status);
 

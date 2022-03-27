@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Pika.Lib.Model;
@@ -13,9 +14,9 @@ public class PikaTask
 
     [JsonPropertyName("script")] public string Script { get; set; }
 
-    [JsonPropertyName("isFavorite")] public bool IsFavorite { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime LastModifiedAt { get; set; }
+
+    public List<PikaTaskRun> Runs { get; set; } = new();
 }
