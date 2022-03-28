@@ -70,8 +70,13 @@
         let outputLengthEl = document.querySelector("#outputLength");
         let lastPoint = 0;
         let outputElChildrenLength = 0;
+        let processing = false;
 
         let interval = setInterval(function() {
+                if (processing) {
+                    return;
+                }
+
                 submitRequest(`/api/run/@Model.RunId/output?lastPoint=${lastPoint}`,
                     {
                         okAction: function(res) {
@@ -87,13 +92,19 @@
                             if (res.status === "Completed" || res.status === "Stopped" || res.status === "Dead") {
                                 clearInterval(interval);
                             }
+                        },
+                        postAction: function() {
+                            processing = false;
+                        },
+                        preAction: function() {
+                            processing = true;
                         }
                     });
             },
             2000);
 
         function addToOutput(outputs) {
-            let childrenLengthToRemove = outputElChildrenLength + outputs.length - 100;
+            let childrenLengthToRemove = Math.max(0, outputElChildrenLength + outputs.length - 100);
             let childrenToRemove = [];
             outputEl.querySelectorAll("pre").forEach(el => {
                 if (childrenToRemove.length === childrenLengthToRemove) {
@@ -112,17 +123,10 @@
                 outputEl.appendChild(el);
             });
 
-            if (childrenToRemove > 0) {
-                outputElChildrenLength = 100;
-            } else {
-                outputElChildrenLength = outputs.length;
-            }
-
+            outputElChildrenLength = outputElChildrenLength + outputs.length - childrenLengthToRemove;
             outputLengthEl.innerText = outputElChildrenLength;
         }
 
         hljs.highlightElement(document.querySelector("#snapshotScript"));
-
-
     </script>
 }
