@@ -1,6 +1,6 @@
 ﻿@model TaskRunDetailViewModel
 
-<div class="border rounded p-2 my-2">
+<div class="bg-dark rounded p-2 my-4 small">
     <div class="row mb-2">
         <div class="col-md-2 fw-bold">Id</div>
         <div class="col-md-4">
@@ -39,14 +39,16 @@
     </div>
 </div>
 
-<h4>Output</h4>
-<p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/run/@Model.RunId/output/raw" target="_blank">here</a>.</p>
-<div id="output" class="overflow-auto p-2 height-max-2 border rounded mb-2">
+<div class="my-4">
+    <h4>Output</h4>
+    <p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/run/@Model.RunId/output/raw" target="_blank">here</a>.</p>
+    <pre id="output" class="overflow-auto p-2 height-max-2 bg-dark rounded mb-2">
+    </pre>
 </div>
 
-<h4>Snapshot</h4>
-<div class="my-2">
-    <div class="row">
+<div class="my-4">
+    <h4>Snapshot</h4>
+    <div class="row small">
         <div class="col-md-2 fw-bold">Shell Name: </div>
         <div class="col-md-2">@Model.ShellName</div>
         <div class="col-md-2 fw-bold">Shell Options: </div>
@@ -55,7 +57,7 @@
         <div class="col-md-2">@Model.ShellExt</div>
     </div>
     
-    <div class="overflow-auto height-max-1 border rounded my-3">
+    <div class="overflow-auto height-max-1 rounded my-3">
         <pre id="snapshotScript" class="m-0 p-2">@Model.Script</pre>
     </div>
 </div>
@@ -69,7 +71,7 @@
         let outputEl = document.querySelector("#output");
         let outputLengthEl = document.querySelector("#outputLength");
         let lastPoint = 0;
-        let outputElChildrenLength = 0;
+        let outputElChildren = [];
         let processing = false;
 
         let interval = setInterval(function() {
@@ -104,27 +106,16 @@
             2000);
 
         function addToOutput(outputs) {
-            let childrenLengthToRemove = Math.max(0, outputElChildrenLength + outputs.length - 100);
-            let childrenToRemove = [];
-            outputEl.querySelectorAll("pre").forEach(el => {
-                if (childrenToRemove.length === childrenLengthToRemove) {
-                    return;
-                }
-
-                childrenToRemove.push(el);
-            });
-
-            childrenToRemove.forEach(el => el.remove());
+            let childrenLengthToRemove = Math.max(0, outputElChildren.length + outputs.length - 100);
+            outputElChildren = outputElChildren.slice(childrenLengthToRemove);
 
             outputs.forEach(o => {
-                let el = document.createElement("pre");
-                el.innerText = o.message;
-                el.classList.add("m-0");
-                outputEl.appendChild(el);
+                outputElChildren.push(o.message);
             });
 
-            outputElChildrenLength = outputElChildrenLength + outputs.length - childrenLengthToRemove;
-            outputLengthEl.innerText = outputElChildrenLength;
+            outputEl.innerHTML = outputElChildren.join("<br/>");
+            outputLengthEl.innerText = outputElChildren.length;
+            outputEl.scrollTop = outputEl.scrollHeight;
         }
 
         hljs.highlightElement(document.querySelector("#snapshotScript"));
