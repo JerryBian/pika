@@ -19,10 +19,12 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly IDbRepository _repository;
+    private readonly PikaSetting _setting;
 
-    public HomeController(ILogger<HomeController> logger, IDbRepository repository)
+    public HomeController(ILogger<HomeController> logger, IDbRepository repository, PikaSetting setting)
     {
         _logger = logger;
+        _setting = setting;
         _repository = repository;
     }
 
@@ -55,6 +57,9 @@ public class HomeController : Controller
             var content = await reader.ReadToEndAsync();
             foreach (var pikaTask in JsonSerializer.Deserialize<List<PikaTask>>(content))
             {
+                pikaTask.ShellName = _setting.DefaultShellName;
+                pikaTask.ShellOption = _setting.DefaultShellOptions;
+                pikaTask.ShellExt = _setting.DefaultShellExt;
                 await _repository.AddTaskAsync(pikaTask);
             }
         }
