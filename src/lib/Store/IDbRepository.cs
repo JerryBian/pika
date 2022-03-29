@@ -42,4 +42,6 @@ public interface IDbRepository
     Task DeleteTaskAsync(long taskId);
 
     Task<int> GetRunsCountAsync();
+
+    Task<int> GetRunsCountAsync(long taskId);
 }

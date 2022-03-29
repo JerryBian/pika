@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -27,11 +28,11 @@ public class TaskController : Controller
         foreach (var pikaTask in tasks)
         {
             var taskDetailViewModel = new TaskDetailViewModel {Task = pikaTask};
-            var runs = await _repository.GetTaskRunsAsync(whereClause: $"task_id={pikaTask.Id}");
-            taskDetailViewModel.RunCount = runs.Count;
+            taskDetailViewModel.RunCount = await _repository.GetRunsCountAsync(pikaTask.Id);
             pagedViewModel.Items.Add(taskDetailViewModel);
         }
 
+        pagedViewModel.Url = Request.GetDisplayUrl();
         return View(pagedViewModel);
     }
 
@@ -47,6 +48,7 @@ public class TaskController : Controller
         var taskDetailViewModel = new TaskDetailViewModel {Task = task};
         var runs = await _repository.GetTaskRunsAsync(100, 0, $"task_id={id}", "created_at DESC");
         taskDetailViewModel.Runs = runs;
+        taskDetailViewModel.RunCount = await _repository.GetRunsCountAsync(task.Id);
         return View(taskDetailViewModel);
     }
 
@@ -54,5 +56,17 @@ public class TaskController : Controller
     public IActionResult Add()
     {
         return View(_setting);
+    }
+
+    [HttpGet("/task/{id}/update")]
+    public async Task<IActionResult> Update([FromRoute] long id)
+    {
+        var task = await _repository.GetTaskAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        return View(task);
     }
 }

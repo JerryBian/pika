@@ -1,20 +1,23 @@
 ﻿@model TaskRunDetailViewModel
+@{
+    ViewData["Title"] = $"Run #{Model.Run.Id}";
+}
 
 <div class="bg-dark rounded p-2 my-4 small">
     <div class="row mb-2">
         <div class="col-md-2 fw-bold">Id</div>
         <div class="col-md-4">
-            #@Model.RunId
+            #@Model.Run.Id
         </div>
         <div class="col-md-2 fw-bold">Task</div>
         <div class="col-md-4">
-            @Model.TaskName (<a href="/task?id=@Model.TaskId">#@Model.TaskId</a>)
+            @Model.Task.Name (<a href="/task/@Model.Task.Id">#@Model.Task.Id</a>)
         </div>
     </div>
     <div class="row mb-2">
         <div class="col-md-2 fw-bold">Created At</div>
         <div class="col-md-4">
-            <span title="@Model.CreatedAt">@Model.CreatedAtDisplay</span>
+            @Html.Raw(Model.Run.GetCreatedAtHtml())
         </div>
         <div class="col-md-2 fw-bold">Status</div>
         <div class="col-md-4" id="status">
@@ -41,7 +44,7 @@
 
 <div class="my-4">
     <h4>Output</h4>
-    <p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/run/@Model.RunId/output/raw" target="_blank">here</a>.</p>
+    <p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/run/@Model.Run.Id/output/raw" target="_blank">here</a>.</p>
     <pre id="output" class="overflow-auto p-2 height-max-2 bg-dark rounded mb-2">
     </pre>
 </div>
@@ -50,15 +53,15 @@
     <h4>Snapshot</h4>
     <div class="row small">
         <div class="col-md-2 fw-bold">Shell Name: </div>
-        <div class="col-md-2">@Model.ShellName</div>
+        <div class="col-md-2">@Model.Run.ShellName</div>
         <div class="col-md-2 fw-bold">Shell Options: </div>
-        <div class="col-md-2">@Model.ShellOption</div>
+        <div class="col-md-2">@Model.Run.ShellOption</div>
         <div class="col-md-2 fw-bold">Shell Extension: </div>
-        <div class="col-md-2">@Model.ShellExt</div>
+        <div class="col-md-2">@Model.Run.ShellExt</div>
     </div>
 
     <div class="overflow-auto height-max-1 rounded my-3">
-        <pre id="snapshotScript" class="m-0 p-2">@Model.Script</pre>
+        <pre id="snapshotScript" class="m-0 p-2">@Model.Run.Script</pre>
     </div>
 </div>
 
@@ -79,7 +82,7 @@
                     return;
                 }
 
-                submitRequest(`/api/run/@Model.RunId/output?lastPoint=${lastPoint}`,
+                submitRequest(`/api/run/@Model.Run.Id/output?lastPoint=${lastPoint}`,
                     {
                         okAction: function(res) {
                             lastPoint = res.lastPoint;
@@ -119,5 +122,6 @@
         }
 
         hljs.highlightElement(document.querySelector("#snapshotScript"));
+        setActive("runNav");
     </script>
 }

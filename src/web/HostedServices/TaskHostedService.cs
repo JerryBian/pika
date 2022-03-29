@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Pika.Lib.Command;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -14,10 +15,13 @@ public class TaskHostedService : BackgroundService
 {
     private readonly ICommandClient _commandClient;
     private readonly IDbRepository _dbRepository;
+    private readonly ILogger<TaskHostedService> _logger;
     private readonly SemaphoreSlim _semaphoreSlim;
 
-    public TaskHostedService(IDbRepository dbRepository, ICommandClient commandClient)
+    public TaskHostedService(IDbRepository dbRepository, ICommandClient commandClient,
+        ILogger<TaskHostedService> logger)
     {
+        _logger = logger;
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _dbRepository = dbRepository;
         _commandClient = commandClient;
@@ -55,6 +59,7 @@ public class TaskHostedService : BackgroundService
                     }
                     catch (Exception ex)
                     {
+                        _logger.LogError(ex, "Task run failed.");
                     }
                 }
             }, stoppingToken));

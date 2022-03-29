@@ -1,6 +1,5 @@
 ﻿using System;
-using Humanizer;
-using Humanizer.Localisation;
+using Pika.Lib.Extension;
 
 namespace Pika.Lib.Model;
 
@@ -49,14 +48,44 @@ public class PikaTaskRun
         return end - StartedAt;
     }
 
-    public string GetElapsedHtml()
+    public string GetStartAtHtml()
+    {
+        if (StartedAt == default)
+        {
+            return "<span title=\"Not started yet\">-</span>";
+        }
+
+        return $"<span title=\"{StartedAt}\">{StartedAt.ToHuman()}</span>";
+    }
+
+    public string GetCompletedAtHtml()
+    {
+        if (CompletedAt == default)
+        {
+            return "<span title=\"Not completed yet\">-</span>";
+        }
+
+        return $"<span title=\"{CompletedAt}\">{CompletedAt.ToHuman()}</span>";
+    }
+
+    public string GetCreatedAtHtml()
+    {
+        return $"<span title=\"{CreatedAt}\">{CreatedAt.ToHuman()}</span>";
+    }
+
+    public string GetElapsedHtml(bool slim = false)
     {
         var totalElapsed = GetTotalElapsed();
+        if (slim)
+        {
+            return $"<span title=\"{totalElapsed}\">{totalElapsed.ToHuman()}</span> ";
+        }
+
         var startElapsed = GetStartElapsed();
         var runElapsed = GetRunElapsed();
         return
-            $"<span title=\"{totalElapsed}\">{totalElapsed.Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Hour)}</span> " +
-            $"(<span class=\"fst-italic\" title=\"{startElapsed}\">pending to start</span>: {startElapsed.Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Hour)}, " +
-            $"<span class=\"fst-italic\" title=\"{runElapsed}\">run to completed</span>: {runElapsed.Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Hour)})";
+            $"<span title=\"{totalElapsed}\">{totalElapsed.ToHuman()}</span> " +
+            $"(<span class=\"fst-italic\" title=\"{startElapsed}\">pending to start</span>: {startElapsed.ToHuman()}, " +
+            $"<span class=\"fst-italic\" title=\"{runElapsed}\">run to completed</span>: {runElapsed.ToHuman()})";
     }
 }

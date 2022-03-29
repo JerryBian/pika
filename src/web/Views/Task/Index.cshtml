@@ -1,4 +1,21 @@
 ﻿@model PagedViewModel<TaskDetailViewModel>
+@{
+    ViewData["Title"] = "All Tasks";
+}
+
+<div class="text-end mb-3">
+    <a href="/task/add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Create new task</a>
+</div>
+
+<div class="d-none d-lg-block">
+    <div class="row mb-3 py-2">
+        <div class="col-md-2 my-1">Id</div>
+        <div class="col-md-4 my-1">Task Name</div>
+        <div class="col-md-2 my-1">Run Times</div>
+        <div class="col-md-4 my-1">Action</div>
+    </div>
+</div>
+
 
 @foreach (var item in Model.Items)
 {
@@ -7,10 +24,10 @@
         <div class="col-md-4 my-1">@item.Task.Name</div>
         <div class="col-md-2 my-1">@item.RunCount</div>
         <div class="col-md-4 my-1">
-            <a class="btn btn-info btn-sm mx-1" href="/task/@item.Task.Id/edit"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
             <a type="button" class="btn btn-primary btn-sm mx-1" href="/task/@item.Task.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
-            <button type="button" class="btn btn-danger btn-sm mx-1" onclick="deleteTask(@item.Task.Id)"><i class="fa-solid fa-trash-can"></i> Delete</button>
+            <a class="btn btn-info btn-sm mx-1" href="/task/@item.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
             <button type="button" class="btn btn-success btn-sm mx-1" onclick="runTask(@item.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
+            <button type="button" class="btn btn-danger btn-sm mx-1" onclick="deleteTask(@item.Task.Id)"><i class="fa-solid fa-trash-can"></i> Delete</button>
         </div>
     </div>
 }
@@ -31,5 +48,7 @@
                         });
                 });
         }
+
+        setActive("taskNav");
     </script>
 }

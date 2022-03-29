@@ -1,5 +1,9 @@
 ﻿@model TaskDetailViewModel
 
+@{
+    ViewData["Title"] = $"Task #{Model.Task.Id}";
+}
+
 <div class="small row my-3">
     @Model.Task.Description
 </div>
@@ -9,7 +13,7 @@
     <div class="col-md-4 my-1">@Model.Task.Name</div>
     <div class="col-md-2 my-1">@Model.RunCount</div>
     <div class="col-md-4 my-1">
-        <a class="btn btn-info btn-sm mx-1" href="/task/@Model.Task.Id/edit"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+        <a class="btn btn-info btn-sm mx-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
         <button type="button" class="btn btn-success btn-sm mx-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
     </div>
 </div>
@@ -37,9 +41,9 @@
         {
             <tr>
                 <td>#@item.Id</td>
-                <td>@item.StartedAt</td>
-                <td>@item.CompletedAt</td>
-                <td>@item.GetTotalElapsed()</td>
+                <td>@Html.Raw(item.GetStartAtHtml())</td>
+                <td>@Html.Raw(item.GetCompletedAtHtml())</td>
+                <td>@Html.Raw(item.GetElapsedHtml(true))</td>
                 <td>@item.Status</td>
                 <td>
                     <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
@@ -53,5 +57,6 @@
 @section Scripts{
     <script>
         hljs.highlightElement(document.querySelector("#script"));
+        setActive("taskNav");
     </script>
 }

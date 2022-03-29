@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.7.0
+
+Alpha version for Version 3
+
 ### 2.6.0
 
 Initialized working refactor version

@@ -1,11 +1,10 @@
 ﻿using Pika.Lib.Model;
 
-namespace Pika.Web.Models
-{
-    public class RunDetailViewModel
-    {
-        public string TaskName { get; set; }
+namespace Pika.Web.Models;
 
-        public PikaTaskRun Run { get; set; }
-    }
+public class RunDetailViewModel
+{
+    public string TaskName { get; set; }
+
+    public PikaTaskRun Run { get; set; }
 }

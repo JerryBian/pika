@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
 
@@ -11,10 +12,12 @@ namespace Pika.Lib.Command;
 
 public class ProcessCommandClient : ICommandClient
 {
+    private readonly ILogger<ProcessCommandClient> _logger;
     private readonly IDbRepository _repository;
 
-    public ProcessCommandClient(IDbRepository repository)
+    public ProcessCommandClient(IDbRepository repository, ILogger<ProcessCommandClient> logger)
     {
+        _logger = logger;
         _repository = repository;
     }
 
@@ -68,6 +71,8 @@ public class ProcessCommandClient : ICommandClient
         };
 
         process.Start();
+        _logger.LogDebug($"Process: {process.Id} ==> {process.StartInfo.FileName} {process.StartInfo.Arguments}");
+
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
         await process.WaitForExitAsync(cancellationToken);
@@ -76,6 +81,7 @@ public class ProcessCommandClient : ICommandClient
             File.Delete(scriptFile);
         }
 
+        _logger.LogDebug($"Process {process.Id} completed ...");
         return process.Id;
     }
 

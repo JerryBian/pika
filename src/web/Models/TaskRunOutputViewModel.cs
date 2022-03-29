@@ -12,11 +12,6 @@ public class TaskRunOutputViewModel
 
     [JsonPropertyName("elapsed")] public string Elapsed { get; set; }
 
-    [JsonPropertyName("startedAtTooltip")] public string StartedAtTooltip { get; set; }
-
-    [JsonPropertyName("completedAtTooltip")]
-    public string CompletedAtTooltip { get; set; }
-
     [JsonPropertyName("status")] public string Status { get; set; }
 
     [JsonPropertyName("outputs")] public List<PikaTaskRunOutput> Outputs { get; set; } = new();

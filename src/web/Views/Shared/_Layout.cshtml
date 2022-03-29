@@ -2,6 +2,7 @@
 <html lang="en" class="w-100 min-vh-100">
 <head>
     <meta charset="utf-8"/>
+    <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     @if (ViewData["Title"] == null)
     {
@@ -23,7 +24,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
-                <span class="navbar-text">
+                <span class="navbar-text small text-muted font-monospace">
                     Run script in background
                 </span>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -42,13 +43,10 @@
         </div>
     </nav>
 
-    <div class="container">
-        @await RenderSectionAsync("Actions", false)
-    </div>
-
-    <main class="my-2 container">
+    <main class="my-2 py-3 container">
         @RenderBody()
     </main>
+
     <footer class="mt-auto fs-6 text-muted container text-center p-3">
         Pika &middot;
         <a href="https://github.com/JerryBian/pika">
@@ -57,6 +55,7 @@
         @AppUtil.AppVersion
     </footer>
 </div>
+
 <div class="modal fade" tabindex="-1" id="messageModal" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -65,10 +64,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="messageModalBody">
-                <p>Modal body text goes here.</p>
             </div>
             <div class="modal-footer" id="messageModalFooter">
-                <button type="button" class="btn btn-info" data-bs-dismiss="modal">Ok</button>
             </div>
         </div>
     </div>

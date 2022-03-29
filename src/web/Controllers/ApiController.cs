@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
+using Pika.Lib.Util;
 using Pika.Web.Models;
 
 namespace Pika.Web.Controllers;
@@ -15,11 +18,11 @@ namespace Pika.Web.Controllers;
 public class ApiController : ControllerBase
 {
     private readonly IDbRepository _repository;
-    private readonly PikaSetting _setting;
+    private readonly ILogger<ApiController> _logger;
 
-    public ApiController(IDbRepository repository, PikaSetting setting)
+    public ApiController(IDbRepository repository, ILogger<ApiController> logger)
     {
-        _setting = setting;
+        _logger = logger;
         _repository = repository;
     }
 
@@ -40,19 +43,6 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpGet("task/{taskId}")]
-    public async Task<PikaTask> GetTaskAsync([FromRoute] long taskId)
-    {
-        var task = await _repository.GetTaskAsync(taskId);
-        return task;
-    }
-
-    [HttpPost("task")]
-    public async Task UpdateTaskAsync(PikaTask task)
-    {
-        await _repository.UpdateTaskAsync(task);
-    }
-
     [HttpPut("run/{id}")]
     public async Task<ApiResponse<object>> RunAsync([FromRoute] long id)
     {
@@ -60,13 +50,15 @@ public class ApiController : ControllerBase
         try
         {
             var task = await _repository.GetTaskAsync(id);
-            var run = new PikaTaskRun();
-            run.TaskId = id;
-            run.Script = task.Script;
-            run.ShellName = task.ShellName;
-            run.ShellOption = task.ShellOption;
-            run.ShellExt = task.ShellExt;
-            run.Status = PikaTaskStatus.Pending;
+            var run = new PikaTaskRun
+            {
+                TaskId = id,
+                Script = task.Script,
+                ShellName = task.ShellName,
+                ShellOption = task.ShellOption,
+                ShellExt = task.ShellExt,
+                Status = PikaTaskStatus.Pending
+            };
             var runId = await _repository.AddTaskRunAsync(run);
             response.RedirectTo = $"/run/{runId}";
         }
@@ -87,6 +79,24 @@ public class ApiController : ControllerBase
         {
             var id = await _repository.AddTaskAsync(task);
             response.RedirectTo = $"/task/{id}";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPost("task/update")]
+    public async Task<ApiResponse<object>> UpdateTaskAsync([FromForm] PikaTask task)
+    {
+        var response = new ApiResponse<object>();
+        try
+        {
+            await _repository.UpdateTaskAsync(task);
+            response.RedirectTo = $"/task/{task.Id}";
         }
         catch (Exception ex)
         {
@@ -126,14 +136,8 @@ public class ApiController : ControllerBase
                 {
                     LastPoint = maxTimestamp,
                     Outputs = outputs,
-                    CompletedAt = taskRun.CompletedAt == default ? "-" : taskRun.CompletedAt.Humanize(false),
-                    CompletedAtTooltip = taskRun.CompletedAt == default
-                        ? "Not completed yet"
-                        : taskRun.CompletedAt.ToString(CultureInfo.InvariantCulture),
-                    StartedAt = taskRun.StartedAt == default ? "-" : taskRun.StartedAt.Humanize(false),
-                    StartedAtTooltip = taskRun.StartedAt == default
-                        ? "Not started yet"
-                        : taskRun.StartedAt.ToString(CultureInfo.InvariantCulture),
+                    CompletedAt = taskRun.GetCompletedAtHtml(),
+                    StartedAt = taskRun.GetStartAtHtml(),
                     Status = taskRun.Status.ToString(),
                     Elapsed = taskRun.GetElapsedHtml()
                 };
@@ -146,5 +150,35 @@ public class ApiController : ControllerBase
         }
 
         return response;
+    }
+
+    [HttpPost("export")]
+    public async Task<IActionResult> ExportAsync()
+    {
+        var tasks = await _repository.GetTasksAsync(int.MaxValue, 0, orderByClause: "created_at ASC");
+        var content =
+            Encoding.UTF8.GetBytes(JsonUtil.Serialize(tasks, true));
+        return File(content, "application/json", "pika-task.json");
+    }
+
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportAsync(IFormFile file)
+    {
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            foreach (var pikaTask in await JsonUtil.DeserializeAsync<List<PikaTask>>(stream))
+            {
+                await _repository.AddTaskAsync(pikaTask);
+            }
+
+            return Redirect("~/task");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Import failed.");
+        }
+
+        return BadRequest();
     }
 }

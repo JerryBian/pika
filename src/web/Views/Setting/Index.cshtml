@@ -21,22 +21,26 @@
             </form>
         </div>
         <div class="tab-pane fade" id="importSetting" role="tabpanel" aria-labelledby="importTab">
-            <form action="/import" method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="formFile" class="form-label">Choose JSON file</label>
-                    <input class="form-control" type="file" id="formFile" name="file">
-                </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Import</button>
-                </div>
-            </form>
+            <fieldset>
+                <form action="/api/import" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="formFile" class="form-label">Choose JSON file</label>
+                        <input class="form-control" type="file" id="formFile" name="file">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </fieldset>
         </div>
         <div class="tab-pane fade" id="exportSetting" role="tabpanel" aria-labelledby="exportTab">
-            <form action="/export" method="POST">
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Export</button>
-                </div>
-            </form>
+            <fieldset>
+                <form action="/api/export" method="POST">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Export</button>
+                    </div>
+                </form>
+            </fieldset>
         </div>
     </div>
 </div>

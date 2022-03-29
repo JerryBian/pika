@@ -1,5 +1,4 @@
-﻿@using Humanizer.Localisation
-@model PikaSystemStatus
+﻿@model PikaSystemStatus
 
 <div class="mt-5">
     <div class="row">
@@ -32,10 +31,9 @@
                     {
                         <a href="/run/@run.Id" class="list-group-item  d-flex justify-content-between align-items-center">
                             <span><i class="fa-solid fa-person-running text-muted"></i> #@run.Id</span>
-                            <span class="badge bg-primary rounded-pill">@run.GetTotalElapsed().Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Hour)</span>
+                            <span class="badge bg-primary rounded-pill">@run.GetTotalElapsed().ToHuman()</span>
                         </a>
                     }
-
                 </div>
             </div>
         </div>
@@ -47,7 +45,7 @@
                 <div class="list-group">
                     <div class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-database text-muted"></i> SQLite DB Size</span>
-                        <span class="badge bg-primary rounded-pill">@Model.DbSize.Bytes().ToString("#.#")</span>
+                        <span class="badge bg-primary rounded-pill">@Model.DbSize.ToByteSizeHuman()</span>
                     </div>
                     <a href="/task" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-list text-muted"></i> Total Tasks</span>
@@ -58,23 +56,23 @@
                         <span class="badge bg-primary rounded-pill">@Model.RunCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Pending" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Pending runs</span>
+                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Pending</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInPendingCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Running" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Running runs</span>
+                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Running</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInRunningCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Completed runs</span>
+                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Completed</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInCompletedCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Stopped" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Stopped runs</span>
+                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Stopped</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInStoppedCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Dead" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Dead runs</span>
+                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Dead</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInDeadCount</span>
                     </a>
                 </div>

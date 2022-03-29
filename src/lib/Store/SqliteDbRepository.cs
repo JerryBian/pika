@@ -93,13 +93,16 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.ExecuteAsync(
-            "UPDATE task SET name=@name, script=@script, description=@desc, last_modified_at=DATETIME('now', 'localtime') WHERE id=@id",
+            "UPDATE task SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=DATETIME('now', 'localtime') WHERE id=@id",
             new
             {
                 name = task.Name,
                 script = task.Script,
                 desc = task.Description,
-                id = task.Id
+                id = task.Id,
+                shellName = task.ShellName,
+                shellOption = task.ShellOption,
+                shellExt = task.ShellExt
             });
     }
 
@@ -108,6 +111,15 @@ public class SqliteDbRepository : IDbRepository
         await using var connection = new SqliteConnection(_connectionString);
         var result =
             await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task_run");
+        return result;
+    }
+
+    public async Task<int> GetRunsCountAsync(long taskId)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        var result =
+            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task_run WHERE task_id=@taskId",
+                new {taskId});
         return result;
     }
 
