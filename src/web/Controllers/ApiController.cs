@@ -14,13 +14,30 @@ namespace Pika.Web.Controllers;
 [ApiController]
 public class ApiController : ControllerBase
 {
-    private readonly PikaSetting _setting;
     private readonly IDbRepository _repository;
+    private readonly PikaSetting _setting;
 
     public ApiController(IDbRepository repository, PikaSetting setting)
     {
         _setting = setting;
         _repository = repository;
+    }
+
+    [HttpDelete("task/{id}")]
+    public async Task<ApiResponse<object>> DeleteTaskAsync([FromRoute] long id)
+    {
+        var response = new ApiResponse<object>();
+        try
+        {
+            await _repository.DeleteTaskAsync(id);
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
     }
 
     [HttpGet("task/{taskId}")]
@@ -30,29 +47,54 @@ public class ApiController : ControllerBase
         return task;
     }
 
-    [HttpPut("task")]
-    public async Task AddTaskAsync(PikaTask task)
-    {
-        await _repository.AddTaskAsync(task);
-    }
-
     [HttpPost("task")]
     public async Task UpdateTaskAsync(PikaTask task)
     {
         await _repository.UpdateTaskAsync(task);
     }
 
-    [HttpPut("run")]
-    public async Task<long> RunAsync(PikaTaskRun run)
+    [HttpPut("run/{id}")]
+    public async Task<ApiResponse<object>> RunAsync([FromRoute] long id)
     {
-        var task = await _repository.GetTaskAsync(run.TaskId);
-        run.Script = task.Script;
-        run.ShellName = _setting.DefaultShellName;
-        run.ShellOption = _setting.DefaultShellOptions;
-        run.ShellExt = _setting.DefaultShellExt;
-        run.Status = PikaTaskStatus.Pending;
-        var runId = await _repository.AddTaskRunAsync(run);
-        return runId;
+        var response = new ApiResponse<object>();
+        try
+        {
+            var task = await _repository.GetTaskAsync(id);
+            var run = new PikaTaskRun();
+            run.TaskId = id;
+            run.Script = task.Script;
+            run.ShellName = task.ShellName;
+            run.ShellOption = task.ShellOption;
+            run.ShellExt = task.ShellExt;
+            run.Status = PikaTaskStatus.Pending;
+            var runId = await _repository.AddTaskRunAsync(run);
+            response.RedirectTo = $"/run/{runId}";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPut("task/add")]
+    public async Task<ApiResponse<object>> AddTaskAsync([FromForm] PikaTask task)
+    {
+        var response = new ApiResponse<object>();
+        try
+        {
+            var id = await _repository.AddTaskAsync(task);
+            response.RedirectTo = $"/task/{id}";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
     }
 
     [HttpPost("run/{runId}/output")]
@@ -85,9 +127,13 @@ public class ApiController : ControllerBase
                     LastPoint = maxTimestamp,
                     Outputs = outputs,
                     CompletedAt = taskRun.CompletedAt == default ? "-" : taskRun.CompletedAt.Humanize(false),
-                    CompletedAtTooltip = taskRun.CompletedAt == default ? "Not completed yet" : taskRun.CompletedAt.ToString(CultureInfo.InvariantCulture),
+                    CompletedAtTooltip = taskRun.CompletedAt == default
+                        ? "Not completed yet"
+                        : taskRun.CompletedAt.ToString(CultureInfo.InvariantCulture),
                     StartedAt = taskRun.StartedAt == default ? "-" : taskRun.StartedAt.Humanize(false),
-                    StartedAtTooltip = taskRun.StartedAt == default ? "Not started yet" : taskRun.StartedAt.ToString(CultureInfo.InvariantCulture),
+                    StartedAtTooltip = taskRun.StartedAt == default
+                        ? "Not started yet"
+                        : taskRun.StartedAt.ToString(CultureInfo.InvariantCulture),
                     Status = taskRun.Status.ToString(),
                     Elapsed = taskRun.GetElapsedHtml()
                 };

@@ -11,7 +11,7 @@
                 <div class="list-group">
                     @foreach (var task in Model.MostRunTasks)
                     {
-                        <a href="/task?t=@task.Key.Id" class="list-group-item  d-flex justify-content-between align-items-center">
+                        <a href="/task/@task.Key.Id" class="list-group-item  d-flex justify-content-between align-items-center">
                             <span>
                                 <i class="fa-solid fa-list-check text-muted"></i> @task.Key.Name
                             </span>
@@ -57,23 +57,23 @@
                         <span><i class="fa-solid fa-person-running text-muted"></i> Total Runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.RunCount</span>
                     </a>
-                    <a href="/run?s=@PikaTaskStatus.Pending" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/run?status=@PikaTaskStatus.Pending" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Pending runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInPendingCount</span>
                     </a>
-                    <a href="/run?s=@PikaTaskStatus.Running" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/run?status=@PikaTaskStatus.Running" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Running runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInRunningCount</span>
                     </a>
-                    <a href="/run?s=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/run?status=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Completed runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInCompletedCount</span>
                     </a>
-                    <a href="/run?s=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/run?status=@PikaTaskStatus.Stopped" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Stopped runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInStoppedCount</span>
                     </a>
-                    <a href="/run?s=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="/run?status=@PikaTaskStatus.Dead" class="list-group-item d-flex justify-content-between align-items-center">
                         <span><i class="fa-solid fa-angle-right text-muted"></i> Realtime - Dead runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInDeadCount</span>
                     </a>

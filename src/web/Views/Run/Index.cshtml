@@ -1,0 +1,19 @@
+﻿@using Humanizer.Localisation
+@model PagedViewModel<RunDetailViewModel>
+
+@foreach (var item in Model.Items)
+{
+    <div class="row mb-3 bg-dark py-2">
+        <div class="col-md-1 my-1">#@item.Run.Id</div>
+        <div class="col-md-3 my-1">@item.TaskName (<a href="/task/@item.Run.Id">#@item.Run.TaskId</a>)</div>
+        <div class="col-md-2 my-1">@item.Run.StartedAt.Humanize(false)</div>
+        <div class="col-md-2 my-1">@item.Run.CompletedAt.Humanize(false)</div>
+        <div class="col-md-2 my-1">@item.Run.GetTotalElapsed().Humanize(minUnit:TimeUnit.Second, maxUnit:TimeUnit.Hour)</div>
+        <div class="col-md-1 my-1">@item.Run.Status</div>
+        <div class="col-md-1 my-1">
+            <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Run.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
+        </div>
+    </div>
+}
+
+<page total-pages="@Model.TotalPages" current-page="@Model.CurrentPage" url="@Model.Url"></page>

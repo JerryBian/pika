@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS task
     name TEXT COLLATE BINARY,
     description TEXT COLLATE BINARY,
     script TEXT NOT NULL COLLATE BINARY,
+    shell_name TEXT NOT NULL COLLATE BINARY,
+    shell_option TEXT NOT NULL COLLATE BINARY,
+    shell_ext TEXT NOT NULL COLLATE BINARY,
     created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
     last_modified_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime'))
 );

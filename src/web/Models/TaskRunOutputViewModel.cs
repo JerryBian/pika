@@ -14,7 +14,8 @@ public class TaskRunOutputViewModel
 
     [JsonPropertyName("startedAtTooltip")] public string StartedAtTooltip { get; set; }
 
-    [JsonPropertyName("completedAtTooltip")] public string CompletedAtTooltip { get; set; }
+    [JsonPropertyName("completedAtTooltip")]
+    public string CompletedAtTooltip { get; set; }
 
     [JsonPropertyName("status")] public string Status { get; set; }
 

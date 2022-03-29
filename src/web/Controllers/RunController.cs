@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using Microsoft.AspNetCore.Mvc;
+using Pika.Lib.Model;
 using Pika.Lib.Store;
 using Pika.Web.Models;
 
@@ -11,16 +12,45 @@ namespace Pika.Web.Controllers;
 
 public class RunController : Controller
 {
+    private readonly PikaSetting _setting;
     private readonly IDbRepository _repository;
 
-    public RunController(IDbRepository repository)
+    public RunController(PikaSetting setting, IDbRepository repository)
     {
+        _setting = setting;
         _repository = repository;
     }
 
-    public IActionResult Index()
+    [HttpGet("/run")]
+    public async Task<IActionResult> Index([FromQuery] int page = 1, [FromQuery]string status = "")
     {
-        return View();
+        var whereClause = "";
+        if (Enum.TryParse<PikaTaskStatus>(status, out var s))
+        {
+            whereClause = $"status={(int)s}";
+        }
+        var runsCount = await _repository.GetRunsCountAsync();
+        var pagedViewModel = new PagedViewModel<RunDetailViewModel>(page, runsCount, _setting.ItemsPerPage);
+        var runs = await _repository.GetTaskRunsAsync(_setting.ItemsPerPage,
+            (pagedViewModel.CurrentPage - 1) * _setting.ItemsPerPage, whereClause: whereClause, orderByClause: "created_at DESC");
+        foreach (var run in runs)
+        {
+            var runDetailViewModel = new RunDetailViewModel { Run = run };
+            var vm = pagedViewModel.Items.FirstOrDefault(x => x.Run.TaskId == run.TaskId);
+            if (vm == null)
+            {
+                var task = await _repository.GetTaskAsync(run.TaskId);
+                runDetailViewModel.TaskName = task.Name;
+            }
+            else
+            {
+                runDetailViewModel.TaskName = vm.TaskName;
+            }
+
+            pagedViewModel.Items.Add(runDetailViewModel);
+        }
+
+        return View(pagedViewModel);
     }
 
     [HttpGet("/run/{id}")]
@@ -41,7 +71,7 @@ public class RunController : Controller
         var viewModel = new TaskRunDetailViewModel
         {
             CreatedAt = taskRun.CreatedAt,
-            CreatedAtDisplay = taskRun.CreatedAt.Humanize(),
+            CreatedAtDisplay = taskRun.CreatedAt.Humanize(false),
             RunId = id,
             Script = taskRun.Script,
             ShellExt = taskRun.ShellExt,

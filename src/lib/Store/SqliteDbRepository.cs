@@ -71,11 +71,15 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task(name, script, description) VALUES(@name, @script, @desc) RETURNING id", new
+            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext) VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt) RETURNING id",
+            new
             {
                 name = task.Name,
                 script = task.Script,
-                desc = task.Description
+                desc = task.Description,
+                shellName = task.ShellName,
+                shellOption = task.ShellOption,
+                shellExt = task.ShellExt
             });
         if (id == null)
         {
@@ -99,12 +103,40 @@ public class SqliteDbRepository : IDbRepository
             });
     }
 
+    public async Task<int> GetRunsCountAsync()
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        var result =
+            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task_run");
+        return result;
+    }
+
+    public async Task<int> GetTasksCountAsync()
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        var result =
+            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task");
+        return result;
+    }
+
     public async Task<PikaTask> GetTaskAsync(long taskId)
     {
         await using var connection = new SqliteConnection(_connectionString);
         var result =
             await connection.QuerySingleOrDefaultAsync<PikaTask>("SELECT * FROM task WHERE id=@id", new {id = taskId});
         return result;
+    }
+
+    public async Task DeleteTaskAsync(long taskId)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.ExecuteAsync(
+            "DELETE FROM task_run_output WHERE run_id IN(SELECT id FROM task_run WHERE task_id=@taskId);" +
+            "DELETE FROM task_run WHERE task_id=@taskId;" +
+            "DELETE FROM task WHERE id=@taskId", new
+            {
+                taskId
+            });
     }
 
     public async Task<List<PikaTask>> GetTasksAsync(int limit = 0, int offset = -1, string whereClause = "",
@@ -183,11 +215,11 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task_run(task_id, status, script, shell_name, shell_option, shell_ext) VALUES(@taskId, @status, @script, @shellName, @shellOption, @shellExt) RETURNING id", 
+            "INSERT INTO task_run(task_id, status, script, shell_name, shell_option, shell_ext) VALUES(@taskId, @status, @script, @shellName, @shellOption, @shellExt) RETURNING id",
             new
             {
                 taskId = run.TaskId,
-                status = (int)run.Status,
+                status = (int) run.Status,
                 script = run.Script,
                 shellName = run.ShellName,
                 shellOption = run.ShellOption,
@@ -213,7 +245,8 @@ public class SqliteDbRepository : IDbRepository
             });
     }
 
-    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default, int limit = -1)
+    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default,
+        int limit = -1)
     {
         await using var connection = new SqliteConnection(_connectionString);
         var createdAtClause = laterThan == default ? "" : "AND julianday(created_at)>julianday(@laterThan)";
@@ -238,7 +271,7 @@ public class SqliteDbRepository : IDbRepository
             sql =
                 "UPDATE task_run SET status=@status, completed_at=DATETIME('now', 'localtime') WHERE id=@id";
         }
-        else if(status == PikaTaskStatus.Running)
+        else if (status == PikaTaskStatus.Running)
         {
             sql = "UPDATE task_run SET status=@status, started_at=DATETIME('now', 'localtime') WHERE id=@id";
         }

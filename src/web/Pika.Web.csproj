@@ -17,8 +17,4 @@
     <ProjectReference Include="..\lib\Pika.Lib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\Task\" />
-  </ItemGroup>
-
 </Project>

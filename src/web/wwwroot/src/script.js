@@ -14,7 +14,11 @@ function submitRequest(url, option) {
         if (option.form.classList.contains("needs-validation")) {
             if (option.form.checkValidity()) {
                 option.form.classList.add("was-validated");
+            } else {
+                option.form.classList.add("was-validated");
+                return;
             }
+
         }
 
         const fieldset = option.form.closest("fieldset");
@@ -115,15 +119,22 @@ function showConfirmMessageModal(message, yesHandler) {
     }
 
     let yesId = guidGenerator();
-    let yesButton = `<button type="button" class="btn btn-info" data-bs-dismiss="modal" id="${yesId}">Yes</button>`;
-    let noButton = "<button type=\"button\" class=\"btn btn-info\" data-bs-dismiss=\"modal\">Ok</button>";
-    document.querySelector(`#${yesId}`).addEventListener("click", function() { yesHandler(); });
+    let yesButton = `<button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="${yesId}"><span class="px-2">Yes</span></button>`;
+    let noButton = "<button type=\"button\" class=\"btn btn-dark\" data-bs-dismiss=\"modal\"><span class=\"px-2\">No</span></button>";
     showMessageModal("Info", `<p>${message}</p>`, yesButton + noButton);
+    document.querySelector(`#${yesId}`).addEventListener("click", function () { yesHandler(); });
 }
 
 function guidGenerator() {
     let S4 = function () {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     };
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    return "x" + S4() + S4() + S4() + S4();
+}
+
+function runTask(id) {
+    submitRequest(`/api/run/${id}`,
+        {
+            method: "PUT"
+        });
 }

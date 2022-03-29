@@ -39,11 +39,11 @@ public class TaskHostedService : BackgroundService
                         {
                             await _commandClient.RunAsync(run.Script, async m =>
                             {
-                                var output = new PikaTaskRunOutput { TaskRunId = run.Id, IsError = false, Message = m };
+                                var output = new PikaTaskRunOutput {TaskRunId = run.Id, IsError = false, Message = m};
                                 await _dbRepository.AddTaskRunOutputAsync(output);
                             }, async m =>
                             {
-                                var output = new PikaTaskRunOutput { TaskRunId = run.Id, IsError = true, Message = m };
+                                var output = new PikaTaskRunOutput {TaskRunId = run.Id, IsError = true, Message = m};
                                 await _dbRepository.AddTaskRunOutputAsync(output);
                             }, stoppingToken);
                             await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Completed);
@@ -55,7 +55,6 @@ public class TaskHostedService : BackgroundService
                     }
                     catch (Exception ex)
                     {
-
                     }
                 }
             }, stoppingToken));

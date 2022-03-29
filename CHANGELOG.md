@@ -1,5 +1,9 @@
 Listed change logs for history.
 
+### 2.6.0
+
+Initialized working refactor version
+
 ### 2.5.0
 
 Limit Run output records

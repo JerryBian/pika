@@ -1,0 +1,79 @@
+﻿@model PikaSetting
+
+<fieldset>
+    <legend>Create new task</legend>
+    <form class="needs-validation" novalidate>
+        <div class="mb-3 row">
+            <label for="taskName" class="col-sm-2 col-form-label">Task Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="taskName" autocomplete="off" autofocus name="name" required>
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="taskDesc" class="col-sm-2 col-form-label">Task Description</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="taskDesc" autocomplete="off" name="description">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="shellName" class="col-sm-2 col-form-label">Shell Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellName" autocomplete="off" name="shellName" value="@Model.DefaultShellName" required>
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="shellOption" class="col-sm-2 col-form-label">Shell Option</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellOption" autocomplete="off" name="shellOption" value="@Model.DefaultShellOptions">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="shellExt" class="col-sm-2 col-form-label">Shell Extension</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellExt" autocomplete="off" name="shellExt" value="@Model.DefaultShellExt">
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="script" class="col-sm-2 col-form-label">Script</label>
+            <div class="col-sm-10">
+                <textarea class="form-control font-monospace" id="script" autocomplete="off" name="script" rows="5" required></textarea>
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="script" class="col-sm-2"></label>
+            <div class="col-sm-10 d-grid">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+@section Scripts{
+    <script>
+        const form = document.querySelector("form");
+        form.addEventListener('submit',
+            function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                submitRequest("/api/task/add",
+                    {
+                        form: form,
+                        method: "PUT",
+                        body: new URLSearchParams(new FormData(form)),
+                        contentType: "application/x-www-form-urlencoded"
+                    });
+            });
+    </script>
+}

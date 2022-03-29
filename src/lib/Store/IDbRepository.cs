@@ -15,9 +15,10 @@ public interface IDbRepository
 
     Task<PikaTask> GetTaskAsync(long taskId);
 
-    Task<List<PikaTask>> GetTasksAsync(int limit, int offset, string whereClause = "", string orderByClause = "");
+    Task<List<PikaTask>> GetTasksAsync(int limit = 0, int offset = -1, string whereClause = "",
+        string orderByClause = "");
 
-    Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit, int offset, string whereClause = "",
+    Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit = 0, int offset = -1, string whereClause = "",
         string orderByClause = "");
 
     Task<PikaSystemStatus> GetSystemStatusAsync();
@@ -35,4 +36,10 @@ public interface IDbRepository
     Task<string> GetSetting(string key);
 
     Task InsertOrUpdateSetting(string key, string value);
+
+    Task<int> GetTasksCountAsync();
+
+    Task DeleteTaskAsync(long taskId);
+
+    Task<int> GetRunsCountAsync();
 }
