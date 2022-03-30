@@ -70,7 +70,7 @@ public class StartupHostedService : BackgroundService
 
         _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(SettingKey.ItemsPerPage));
         _setting.DefaultShellName = await _repository.GetSetting(SettingKey.ShellName);
-        _setting.DefaultShellOptions = await _repository.GetSetting(SettingKey.ShellOptions);
+        _setting.DefaultShellOption = await _repository.GetSetting(SettingKey.ShellOptions);
         _setting.DefaultShellExt = await _repository.GetSetting(SettingKey.ShellExt);
     }
 }

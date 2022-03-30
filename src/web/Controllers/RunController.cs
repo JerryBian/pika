@@ -51,7 +51,7 @@ public class RunController : Controller
             pagedViewModel.Items.Add(runDetailViewModel);
         }
 
-        pagedViewModel.Url = Request.GetDisplayUrl();
+        pagedViewModel.Url = Request.Path;
         return View(pagedViewModel);
     }
 

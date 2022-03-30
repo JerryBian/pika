@@ -17,12 +17,12 @@ namespace Pika.Web.Controllers;
 [ApiController]
 public class ApiController : ControllerBase
 {
+    private readonly PikaSetting _setting;
     private readonly IDbRepository _repository;
-    private readonly ILogger<ApiController> _logger;
 
-    public ApiController(IDbRepository repository, ILogger<ApiController> logger)
+    public ApiController(PikaSetting setting, IDbRepository repository)
     {
-        _logger = logger;
+        _setting = setting;
         _repository = repository;
     }
 
@@ -152,33 +152,60 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpPost("export")]
-    public async Task<IActionResult> ExportAsync()
+    [HttpPost("setting/update")]
+    public async Task<ApiResponse<object>> UpdateSettingAsync([FromForm]PikaSetting setting)
     {
-        var tasks = await _repository.GetTasksAsync(int.MaxValue, 0, orderByClause: "created_at ASC");
-        var content =
-            Encoding.UTF8.GetBytes(JsonUtil.Serialize(tasks, true));
-        return File(content, "application/json", "pika-task.json");
-    }
-
-    [HttpPost("import")]
-    public async Task<IActionResult> ImportAsync(IFormFile file)
-    {
+        var response = new ApiResponse<object>();
         try
         {
-            await using var stream = file.OpenReadStream();
-            foreach (var pikaTask in await JsonUtil.DeserializeAsync<List<PikaTask>>(stream))
+            if (setting.ItemsPerPage is > 0 and <= 50)
             {
-                await _repository.AddTaskAsync(pikaTask);
+                await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, setting.ItemsPerPage.ToString());
+                _setting.ItemsPerPage = setting.ItemsPerPage;
+            }
+            else
+            {
+                response.IsOk = false;
+                response.Message = "Invalid Items Per Page set: it must be in [1, 50].";
+                return response;
             }
 
-            return Redirect("~/task");
+            if (!string.IsNullOrEmpty(setting.DefaultShellName))
+            {
+                await _repository.InsertOrUpdateSetting(SettingKey.ShellName, setting.DefaultShellName);
+                _setting.DefaultShellName = setting.DefaultShellName;
+            }
+            else
+            {
+                response.IsOk = false;
+                response.Message = "Invalid Default Shell Name set.";
+                return response;
+            }
+
+            if (!string.IsNullOrEmpty(setting.DefaultShellExt))
+            {
+                await _repository.InsertOrUpdateSetting(SettingKey.ShellExt, setting.DefaultShellExt);
+                _setting.DefaultShellExt = setting.DefaultShellExt;
+            }
+            else
+            {
+                response.IsOk = false;
+                response.Message = "Invalid Default Shell Extension set.";
+                return response;
+            }
+
+            if (!string.IsNullOrEmpty(setting.DefaultShellOption))
+            {
+                await _repository.InsertOrUpdateSetting(SettingKey.ShellOptions, setting.DefaultShellOption);
+                _setting.DefaultShellOption = setting.DefaultShellOption;
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Import failed.");
+            response.IsOk = false;
+            response.Message = ex.Message;
         }
 
-        return BadRequest();
+        return response;
     }
 }

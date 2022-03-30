@@ -1,52 +1,104 @@
-﻿@using Pika.Lib.Store
-@inject IDbRepository Repo
+﻿@model PikaSetting
 
-<div class="d-flex align-items-start">
-    <div class="nav flex-column nav-pills me-3 mt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-        <button class="nav-link active" id="miscTab" data-bs-toggle="pill" data-bs-target="#miscSetting" type="button" role="tab" aria-controls="miscSetting" aria-selected="true">Misc</button>
-        <button class="nav-link" id="importTab" data-bs-toggle="pill" data-bs-target="#importSetting" type="button" role="tab" aria-controls="importSetting" aria-selected="false">Import</button>
-        <button class="nav-link" id="exportTab" data-bs-toggle="pill" data-bs-target="#exportSetting" type="button" role="tab" aria-controls="exportSetting" aria-selected="false">Export</button>
-    </div>
-    <div class="tab-content w-100 p-4" id="v-pills-tabContent">
-        <div class="tab-pane fade show active" id="miscSetting" role="tabpanel" aria-labelledby="miscTab">
-            <form>
-                <div class="mb-3">
-                    <label for="itemsPerPage" class="col-form-label">Items per page</label>
-                    <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@await Repo.GetSetting(SettingKey.ItemsPerPage)">
+<div id="misc" class="my-2">
+    <h4>Misc</h4>
+    <fieldset>
+        <form class="needs-validation" novalidate id="miscForm">
+            <div class="mb-3 row">
+                <label for="itemsPerPage" class="col-md-2 col-form-label">Items per page</label>
+                <div class="col-md-10">
+                    <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@Model.ItemsPerPage" name="itemsPerPage" required>
+                    <div class="invalid-feedback">
+                        Required
+                    </div>
                 </div>
+            </div>
+            
+            <div class="mb-3 row">
+                <label for="defaultShellName" class="col-md-2 col-form-label">Default Shell Name</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="defaultShellName" value="@Model.DefaultShellName" name="defaultShellName" required>
+                    <div class="invalid-feedback">
+                        Required
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3 row">
+                <label for="defaultShellOption" class="col-md-2 col-form-label">Default Shell Option</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="defaultShellOption" value="@Model.DefaultShellOption" name="defaultShellOption">
+                </div>
+            </div>
+            
+            <div class="mb-3 row">
+                <label for="defaultShellExt" class="col-md-2 col-form-label">Default Shell Extension</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="defaultShellExt" value="@Model.DefaultShellExt" name="defaultShellExt" required>
+                    <div class="invalid-feedback">
+                        Required
+                    </div>
+                </div>
+            </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="row">
+                <label class="col-md-2 col-form-label"></label>
+                <div class="d-grid col-md-10">
+                    <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
                 </div>
-            </form>
-        </div>
-        <div class="tab-pane fade" id="importSetting" role="tabpanel" aria-labelledby="importTab">
-            <fieldset>
-                <form action="/api/import" method="POST" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="formFile" class="form-label">Choose JSON file</label>
-                        <input class="form-control" type="file" id="formFile" name="file">
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Import</button>
-                    </div>
-                </form>
-            </fieldset>
-        </div>
-        <div class="tab-pane fade" id="exportSetting" role="tabpanel" aria-labelledby="exportTab">
-            <fieldset>
-                <form action="/api/export" method="POST">
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Export</button>
-                    </div>
-                </form>
-            </fieldset>
-        </div>
-    </div>
+            </div>
+        </form>
+    </fieldset>
+</div>
+
+<hr/>
+
+<div id="import" class="my-2">
+    <h4>Import Tasks</h4>
+    <fieldset>
+        <form action="/setting/import" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="formFile" class="form-label">Import tasks from JSON file.</label>
+                <input class="form-control" type="file" id="formFile" name="file">
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-file-import"></i> Import</button>
+            </div>
+        </form>
+    </fieldset>
+</div>
+
+<hr/>
+
+<div id="export" class="my-2">
+    <h4>Export Tasks</h4>
+    <fieldset>
+        <form action="/setting/export" method="POST">
+            <label class="form-label">Export all tasks to JSON file.</label>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-file-export"></i> Export</button>
+            </div>
+        </form>
+    </fieldset>
 </div>
 
 @section Scripts{
     <script>
+        const miscForm = document.querySelector("#miscForm");
+        miscForm.addEventListener('submit',
+            function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                submitRequest("/api/setting/update",
+                    {
+                        form: miscForm,
+                        body: new URLSearchParams(new FormData(miscForm)),
+                        contentType: "application/x-www-form-urlencoded",
+                        okAction: function() {
+                            showInfoMessageModal("Your Misc settings are saved successfully.");
+                        }
+                    });
+            });
         setActive("settingNav");
     </script>
 }

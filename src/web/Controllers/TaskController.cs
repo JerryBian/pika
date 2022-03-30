@@ -32,7 +32,7 @@ public class TaskController : Controller
             pagedViewModel.Items.Add(taskDetailViewModel);
         }
 
-        pagedViewModel.Url = Request.GetDisplayUrl();
+        pagedViewModel.Url = Request.Path;
         return View(pagedViewModel);
     }
 
