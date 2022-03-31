@@ -35,5 +35,15 @@ The only required setting is `DbLocation`, it indicates the location for SQLite 
 
 This project is under active development, you can peek the [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md) for each release.
 
+## Screenshots
+
+![Home](./img/home.png)
+
+![Task List](./img/task-list.png)
+
+
+![Run](./img/run.png)
+
+
 ## License
 [GPLv3](https://github.com/JerryBian/pika/blob/master/LICENSE)
