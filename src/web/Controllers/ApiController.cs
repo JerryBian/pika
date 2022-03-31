@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
-using Pika.Lib.Util;
 using Pika.Web.Models;
 
 namespace Pika.Web.Controllers;
@@ -17,8 +12,8 @@ namespace Pika.Web.Controllers;
 [ApiController]
 public class ApiController : ControllerBase
 {
-    private readonly PikaSetting _setting;
     private readonly IDbRepository _repository;
+    private readonly PikaSetting _setting;
 
     public ApiController(PikaSetting setting, IDbRepository repository)
     {
@@ -153,7 +148,7 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost("setting/update")]
-    public async Task<ApiResponse<object>> UpdateSettingAsync([FromForm]PikaSetting setting)
+    public async Task<ApiResponse<object>> UpdateSettingAsync([FromForm] PikaSetting setting)
     {
         var response = new ApiResponse<object>();
         try

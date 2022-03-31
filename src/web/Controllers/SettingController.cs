@@ -13,9 +13,9 @@ namespace Pika.Web.Controllers;
 
 public class SettingController : Controller
 {
-    private readonly PikaSetting _setting;
-    private readonly IDbRepository _repository;
     private readonly ILogger<SettingController> _logger;
+    private readonly IDbRepository _repository;
+    private readonly PikaSetting _setting;
 
     public SettingController(PikaSetting setting, IDbRepository repository, ILogger<SettingController> logger)
     {
