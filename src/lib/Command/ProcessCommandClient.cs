@@ -5,33 +5,38 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Pika.Lib.Model;
-using Pika.Lib.Store;
+using Pika.Lib.Extension;
 
 namespace Pika.Lib.Command;
 
 public class ProcessCommandClient : ICommandClient
 {
+    private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ILogger<ProcessCommandClient> _logger;
-    private readonly IDbRepository _repository;
+    private readonly Process _process;
+    private readonly ManualResetEventSlim _resetEvent1;
+    private readonly ManualResetEventSlim _resetEvent2;
 
-    public ProcessCommandClient(IDbRepository repository, ILogger<ProcessCommandClient> logger)
+    public ProcessCommandClient(ILogger<ProcessCommandClient> logger)
     {
         _logger = logger;
-        _repository = repository;
+        _process = new Process();
+        _resetEvent1 = new ManualResetEventSlim(false);
+        _resetEvent2 = new ManualResetEventSlim(false);
+        _cancellationTokenSource = new CancellationTokenSource();
     }
 
-    public async Task<int> RunAsync(string script, Func<string, Task> outputHandler = null,
-        Func<string, Task> errorHandler = null,
-        CancellationToken cancellationToken = default)
+    public void Stop()
     {
-        var scriptFile = await GetScriptFileAsync(script);
-        using var process = new Process();
-        using var resetEvent1 = new ManualResetEventSlim(false);
-        using var resetEvent2 = new ManualResetEventSlim(false);
-        var shellName = await _repository.GetSetting(SettingKey.ShellName);
-        var shellOptions = await _repository.GetSetting(SettingKey.ShellOptions);
-        process.StartInfo = new ProcessStartInfo(shellName, $"{shellOptions} \"{scriptFile}\"")
+        _cancellationTokenSource.Cancel();
+    }
+
+    public async Task RunAsync(string shellName, string shellOption, string shellExt, string script,
+        Func<string, Task> outputHandler = null,
+        Func<string, Task> errorHandler = null, Func<Task> stopHandler = null)
+    {
+        var scriptFile = await GetScriptFileAsync(shellExt, script);
+        _process.StartInfo = new ProcessStartInfo(shellName, $"{shellOption} \"{scriptFile}\"")
         {
             CreateNoWindow = true,
             RedirectStandardError = true,
@@ -40,11 +45,11 @@ public class ProcessCommandClient : ICommandClient
             WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
         };
 
-        process.OutputDataReceived += async (sender, args) =>
+        _process.OutputDataReceived += async (_, args) =>
         {
             if (args.Data == null)
             {
-                resetEvent1.Set();
+                _resetEvent1.Set();
             }
             else
             {
@@ -55,11 +60,11 @@ public class ProcessCommandClient : ICommandClient
             }
         };
 
-        process.ErrorDataReceived += async (sender, args) =>
+        _process.ErrorDataReceived += async (_, args) =>
         {
             if (args.Data == null)
             {
-                resetEvent2.Set();
+                _resetEvent2.Set();
             }
             else
             {
@@ -70,25 +75,39 @@ public class ProcessCommandClient : ICommandClient
             }
         };
 
-        process.Start();
-        _logger.LogDebug($"Process: {process.Id} ==> {process.StartInfo.FileName} {process.StartInfo.Arguments}");
+        _process.Start();
+        _logger.LogInformation(
+            $"Process: {_process.Id} ==> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
 
-        process.BeginErrorReadLine();
-        process.BeginOutputReadLine();
-        await process.WaitForExitAsync(cancellationToken);
+        _process.BeginErrorReadLine();
+        _process.BeginOutputReadLine();
+        await _process.WaitForExitAsync(_cancellationTokenSource.Token).OkForCancel();
+
+        if (_cancellationTokenSource.IsCancellationRequested && stopHandler != null)
+        {
+            await stopHandler.Invoke();
+        }
+
         if (File.Exists(scriptFile))
         {
             File.Delete(scriptFile);
         }
 
-        _logger.LogDebug($"Process {process.Id} completed ...");
-        return process.Id;
+        _logger.LogInformation($"Process {_process.Id} completed ...");
     }
 
-    private async Task<string> GetScriptFileAsync(string script)
+    public async ValueTask DisposeAsync()
+    {
+        _process?.Dispose();
+        _resetEvent1?.Dispose();
+        _resetEvent2?.Dispose();
+        _cancellationTokenSource?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    private async Task<string> GetScriptFileAsync(string shellExt, string script)
     {
         var tempFile = Path.GetTempFileName();
-        var shellExt = await _repository.GetSetting(SettingKey.ShellExt);
         var scriptFile = $"{tempFile}{shellExt}";
         await File.WriteAllTextAsync(scriptFile, script, new UTF8Encoding(false));
         return scriptFile;

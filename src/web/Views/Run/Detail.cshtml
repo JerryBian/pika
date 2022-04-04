@@ -97,6 +97,10 @@
                             if (res.status === "Completed" || res.status === "Stopped" || res.status === "Dead") {
                                 clearInterval(interval);
                             }
+
+                            if (res.status === "Running") {
+                                statusEl.innerHTML += ` (<a href="javascript:;" class="text-danger" onclick="stopRun('@Model.Run.Id')"><i class="fa-solid fa-stop"></i> Stop</a>)`;
+                            }
                         },
                         postAction: function() {
                             processing = false;

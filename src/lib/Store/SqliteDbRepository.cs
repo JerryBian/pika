@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
@@ -279,7 +278,7 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         string sql;
-        if (status == PikaTaskStatus.Completed || status == PikaTaskStatus.Dead)
+        if (status == PikaTaskStatus.Completed || status == PikaTaskStatus.Dead || status == PikaTaskStatus.Stopped)
         {
             sql =
                 "UPDATE task_run SET status=@status, completed_at=DATETIME('now', 'localtime') WHERE id=@id";

@@ -134,3 +134,16 @@ function runTask(id) {
             method: "PUT"
         });
 }
+
+function stopRun(runId) {
+    showConfirmMessageModal(`Are your sure to stop run #${runId}?`,
+        function () {
+            submitRequest(`/api/run/${runId}/stop`,
+                {
+                    method: "POST",
+                    okAction: function (res) {
+                        window.location.reload();
+                    }
+                });
+        });
+}

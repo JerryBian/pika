@@ -1,11 +1,18 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pika.Lib.Command;
 
-public interface ICommandClient
+public interface ICommandClient : IAsyncDisposable
 {
-    Task<int> RunAsync(string script, Func<string, Task> outputHandler = null,
-        Func<string, Task> errorHandler = null, CancellationToken cancellationToken = default);
+    void Stop();
+
+    Task RunAsync(
+        string shellName,
+        string shellOption,
+        string shellExt,
+        string script,
+        Func<string, Task> outputHandler = null,
+        Func<string, Task> errorHandler = null,
+        Func<Task> stopHandler = null);
 }

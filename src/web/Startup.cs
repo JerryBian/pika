@@ -32,7 +32,8 @@ public class Startup
 
         services.Configure<PikaOptions>(Configuration);
         services.AddSingleton<PikaSetting>();
-        services.AddSingleton<ICommandClient, ProcessCommandClient>();
+        services.AddTransient<ICommandClient, ProcessCommandClient>();
+        services.AddSingleton<ICommandManager, CommandManager>();
         services.AddSingleton<IDbRepository, SqliteDbRepository>();
 
         services.AddHostedService<StartupHostedService>();

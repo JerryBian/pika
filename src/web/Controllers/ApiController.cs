@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Pika.Lib.Command;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
 using Pika.Web.Models;
@@ -12,13 +13,15 @@ namespace Pika.Web.Controllers;
 [ApiController]
 public class ApiController : ControllerBase
 {
+    private readonly ICommandManager _commandManager;
     private readonly IDbRepository _repository;
     private readonly PikaSetting _setting;
 
-    public ApiController(PikaSetting setting, IDbRepository repository)
+    public ApiController(PikaSetting setting, IDbRepository repository, ICommandManager commandManager)
     {
         _setting = setting;
         _repository = repository;
+        _commandManager = commandManager;
     }
 
     [HttpDelete("task/{id}")]
@@ -28,6 +31,23 @@ public class ApiController : ControllerBase
         try
         {
             await _repository.DeleteTaskAsync(id);
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPost("run/{id}/stop")]
+    public ApiResponse<object> StopRun([FromRoute] long id)
+    {
+        var response = new ApiResponse<object>();
+        try
+        {
+            _commandManager.Stop(id);
         }
         catch (Exception ex)
         {
