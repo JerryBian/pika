@@ -74,7 +74,6 @@
         let outputEl = document.querySelector("#output");
         let outputLengthEl = document.querySelector("#outputLength");
         let lastPoint = 0;
-        let outputElChildren = [];
         let processing = false;
 
         let interval = setInterval(function() {
@@ -113,15 +112,35 @@
             2000);
 
         function addToOutput(outputs) {
-            let childrenLengthToRemove = Math.max(0, outputElChildren.length + outputs.length - 100);
-            outputElChildren = outputElChildren.slice(childrenLengthToRemove);
+            let existingEls = document.querySelectorAll("#output div");
+            let childrenLengthToRemove = Math.max(0, existingEls.length + outputs.length - 100);
+            let k = 0;
+            existingEls.forEach(el => {
+                if (k === childrenLengthToRemove) {
+                    return;
+                }
 
-            outputs.forEach(o => {
-                outputElChildren.push(o.message);
+                el.remove();
+                k++;
             });
 
-            outputEl.innerHTML = outputElChildren.join("<br/>");
-            outputLengthEl.innerText = outputElChildren.length;
+            outputs.forEach(o => {
+                let text = o.message;
+                if (text.length === 0) {
+                    text = " ";
+                }
+
+                text = escapeHTML(text);
+                let div = document.createElement("div");
+                div.setAttribute("title", o.createdAt);
+                if (o.isError) {
+                    div.classList.add("text-danger");
+                }
+                div.innerHTML = text;
+                outputEl.appendChild(div);
+            });
+
+            outputLengthEl.innerText = document.querySelectorAll("#output div").length;
             outputEl.scrollTop = outputEl.scrollHeight;
         }
 

@@ -7,30 +7,35 @@
     <a href="/task/add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Create new task</a>
 </div>
 
-<div class="d-none d-lg-block">
-    <div class="row mb-3 py-2">
-        <div class="col-md-2 my-1">Id</div>
-        <div class="col-md-4 my-1">Task Name</div>
-        <div class="col-md-2 my-1">Run Times</div>
-        <div class="col-md-4 my-1">Action</div>
-    </div>
+<div class="table-responsive">
+    <table class="table text-md-center align-middle ">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Task Name</th>
+            <th>Run Times</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>#@item.Task.Id</td>
+                <td>@item.Task.Name</td>
+                <td>@item.RunCount</td>
+                <td>
+                    <a type="button" class="btn btn-primary btn-sm m-1" href="/task/@item.Task.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
+                    <a class="btn btn-info btn-sm m-1" href="/task/@item.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                    <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@item.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
+                    <button type="button" class="btn btn-danger btn-sm m-1" onclick="deleteTask(@item.Task.Id)"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>
 
-
-@foreach (var item in Model.Items)
-{
-    <div class="row mb-3 bg-light py-2">
-        <div class="col-md-2 my-1">#@item.Task.Id</div>
-        <div class="col-md-4 my-1">@item.Task.Name</div>
-        <div class="col-md-2 my-1">@item.RunCount</div>
-        <div class="col-md-4 my-1">
-            <a type="button" class="btn btn-primary btn-sm mx-1" href="/task/@item.Task.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
-            <a class="btn btn-info btn-sm mx-1" href="/task/@item.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-            <button type="button" class="btn btn-success btn-sm mx-1" onclick="runTask(@item.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
-            <button type="button" class="btn btn-danger btn-sm mx-1" onclick="deleteTask(@item.Task.Id)"><i class="fa-solid fa-trash-can"></i> Delete</button>
-        </div>
-    </div>
-}
 
 <page total-pages="@Model.TotalPages" current-page="@Model.CurrentPage" url="@Model.Url"></page>
 

@@ -3,37 +3,56 @@
 @{
     ViewData["Title"] = $"Task #{Model.Task.Id}";
 }
-
-<div class="small row my-3">
-    @Model.Task.Description
+<div class="table-responsive">
+    <table class="table align-middle table-borderless caption-top">
+        <caption>Task Information</caption>
+        <tbody>
+        <tr>
+            <td>Id</td>
+            <td>#@Model.Task.Id</td>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>@Model.Task.Name</td>
+        </tr>
+        <tr>
+            <td>Description</td>
+            <td>@Model.Task.Description</td>
+        </tr>
+        <tr>
+            <td>Run Times</td>
+            <td>@Model.RunCount</td>
+        </tr>
+        <tr>
+            <td>Script</td>
+            <td>
+                <div class="overflow-auto height-max-1 rounded">
+                    <pre class="m-0 p-2" id="script">@Model.Task.Script</pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>Actions</td>
+            <td>
+                <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
-<div class="row mb-3 bg-light py-2">
-    <div class="col-md-2 my-1">#@Model.Task.Id</div>
-    <div class="col-md-4 my-1">@Model.Task.Name</div>
-    <div class="col-md-2 my-1">@Model.RunCount</div>
-    <div class="col-md-4 my-1">
-        <a class="btn btn-info btn-sm mx-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-        <button type="button" class="btn btn-success btn-sm mx-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
-    </div>
-</div>
-
-<div class="row overflow-auto height-max-1 rounded my-3">
-    <pre class="m-0 p-2" id="script">@Model.Task.Script</pre>
-</div>
-
-<div class="row small my-3">
-    <p class="px-0">Latest runs</p>
-
-    <table class="table">
+<div class="table-responsive">
+    <table class="table align-middle caption-top text-md-center">
+        <caption>Recent Runs</caption>
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Start At</th>
-            <th scope="col">Completed At</th>
-            <th scope="col">Elapsed</th>
-            <th scope="col">Status</th>
-            <th scope="col">Action</th>
+            <th>#</th>
+            <th>Start At</th>
+            <th>Completed At</th>
+            <th>Elapsed</th>
+            <th>Status</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>

@@ -102,11 +102,11 @@ function showMessageModal(title, bodyHtml, footerHtml) {
 }
 
 function showInfoMessageModal(message) {
-    showMessageModal("Info", `<p>${message}</p>`);
+    showMessageModal(`<i class="fa-solid fa-circle-info text-info"></i> Info`, `<p>${message}</p>`);
 }
 
 function showErrorMessageModal(message) {
-    showMessageModal("Error", `<p>${message}</p>`);
+    showMessageModal(`<i class="fa-solid fa-circle-exclamation text-danger"></i> Error`, `<p>${message}</p>`);
 }
 
 function showConfirmMessageModal(message, yesHandler) {
@@ -114,18 +114,22 @@ function showConfirmMessageModal(message, yesHandler) {
         return;
     }
 
-    let yesId = guidGenerator();
+    let yesId = makeId(8);
     let yesButton = `<button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="${yesId}"><span class="px-2">Yes</span></button>`;
     let noButton = "<button type=\"button\" class=\"btn btn-dark\" data-bs-dismiss=\"modal\"><span class=\"px-2\">No</span></button>";
-    showMessageModal("Info", `<p>${message}</p>`, yesButton + noButton);
+    showMessageModal(`<i class="fa-solid fa-circle-question text-warning"></i> Question`, `<p>${message}</p>`, yesButton + noButton);
     document.querySelector(`#${yesId}`).addEventListener("click", function () { yesHandler(); });
 }
 
-function guidGenerator() {
-    let S4 = function () {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return "x" + S4() + S4() + S4() + S4();
+function makeId(length) {
+    var result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
 }
 
 function runTask(id) {
@@ -146,4 +150,8 @@ function stopRun(runId) {
                     }
                 });
         });
+}
+
+function escapeHTML(str) {
+    return new Option(str).innerHTML;
 }
