@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 3.4.0
+
+Fix Stop issue.
+
 ## 3.3.0
 
 UI improvement.
