@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 3.5.1
+
+Fix Shrink DB issues.
+
 ## 3.5.0
 
 - Export support Settings and Tasks now

@@ -142,7 +142,7 @@ public class SqliteDbRepository : IDbRepository
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -159,7 +159,7 @@ public class SqliteDbRepository : IDbRepository
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -176,7 +176,7 @@ public class SqliteDbRepository : IDbRepository
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
