@@ -122,6 +122,24 @@ public class ApiController : ControllerBase
         return response;
     }
 
+    [HttpPost("shrinkDB")]
+    public async Task<ApiResponse<object>> ShrinkDb()
+    {
+        var response = new ApiResponse<object>();
+        try
+        {
+            await _repository.VacuumDbAsync();
+            response.RedirectTo = "/setting";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
     [HttpPost("run/{runId}/output")]
     public async Task<ApiResponse<TaskRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
         [FromQuery] long lastPoint)
@@ -182,6 +200,18 @@ public class ApiController : ControllerBase
             {
                 response.IsOk = false;
                 response.Message = "Invalid Items Per Page set: it must be in [1, 50].";
+                return response;
+            }
+
+            if (setting.RetainSizeInMb > 0)
+            {
+                await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, setting.RetainSizeInMb.ToString());
+                _setting.RetainSizeInMb = setting.RetainSizeInMb;
+            }
+            else
+            {
+                response.IsOk = false;
+                response.Message = "Invalid Retain Size In MB set: it must be greater than 0.";
                 return response;
             }
 

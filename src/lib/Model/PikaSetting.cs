@@ -12,4 +12,6 @@ public class PikaSetting
     [JsonPropertyName("defaultShellExt")] public string DefaultShellExt { get; set; }
 
     [JsonPropertyName("itemsPerPage")] public int ItemsPerPage { get; set; }
+
+    [JsonPropertyName("retainSizeInMb")] public int RetainSizeInMb { get; set; }
 }

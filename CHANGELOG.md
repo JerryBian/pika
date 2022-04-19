@@ -1,5 +1,10 @@
 Listed change logs for release history.
 
+## 3.5.0
+
+- Export support Settings and Tasks now
+- Add Shrink DB function
+
 ## 3.4.0
 
 Fix Stop issue.

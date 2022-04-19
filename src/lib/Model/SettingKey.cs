@@ -9,4 +9,6 @@ public class SettingKey
     public const string ShellExt = "default_shell_ext";
 
     public const string ItemsPerPage = "items_per_page";
+
+    public const string RetainSizeInMb = "retain_size_in_mb";
 }

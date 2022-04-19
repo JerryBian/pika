@@ -123,6 +123,68 @@ public class SqliteDbRepository : IDbRepository
         return result;
     }
 
+    public long GetDbSize()
+    {
+        return new FileInfo(_pikaDb).Length;
+    }
+
+    public async Task VacuumDbAsync()
+    {
+        var retainDbSize = Convert.ToInt32(await GetSetting(SettingKey.RetainSizeInMb)) * 1024 * 1024;
+        await using var connection = new SqliteConnection(_connectionString);
+
+        while (GetDbSize() > retainDbSize)
+        {
+            var runId = await connection.QueryFirstOrDefaultAsync<int>(
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Dead} ORDER BY created_at DESC LIMIT 1");
+            if (runId == default)
+            {
+                break;
+            }
+
+            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+                new
+                {
+                    runId
+                });
+            await connection.ExecuteAsync("VACUUM");
+        }
+
+        while (GetDbSize() > retainDbSize)
+        {
+            var runId = await connection.QueryFirstOrDefaultAsync<int>(
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Stopped} ORDER BY created_at DESC LIMIT 1");
+            if (runId == default)
+            {
+                break;
+            }
+
+            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+                new
+                {
+                    runId
+                });
+            await connection.ExecuteAsync("VACUUM");
+        }
+
+        while (GetDbSize() > retainDbSize)
+        {
+            var runId = await connection.QueryFirstOrDefaultAsync<int>(
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Completed} ORDER BY created_at DESC LIMIT 1");
+            if (runId == default)
+            {
+                break;
+            }
+
+            await connection.ExecuteAsync("DELETE task_run_output WHERE run_id=@runId; DELETE task_run WHERE id=@runId",
+                new
+                {
+                    runId
+                });
+            await connection.ExecuteAsync("VACUUM");
+        }
+    }
+
     public async Task<int> GetTasksCountAsync()
     {
         await using var connection = new SqliteConnection(_connectionString);
@@ -219,7 +281,7 @@ public class SqliteDbRepository : IDbRepository
             status.LongestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
         }
 
-        status.DbSize = new FileInfo(_pikaDb).Length;
+        status.DbSize = GetDbSize();
         return status;
     }
 

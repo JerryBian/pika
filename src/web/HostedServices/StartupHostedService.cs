@@ -68,7 +68,14 @@ public class StartupHostedService : BackgroundService
             await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, "8");
         }
 
+        var retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
+        if (!int.TryParse(retainSizeInMb, out var val2) || val2 < 1)
+        {
+            await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, "200");
+        }
+
         _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(SettingKey.ItemsPerPage));
+        _setting.RetainSizeInMb = Convert.ToInt32(await _repository.GetSetting(SettingKey.RetainSizeInMb));
         _setting.DefaultShellName = await _repository.GetSetting(SettingKey.ShellName);
         _setting.DefaultShellOption = await _repository.GetSetting(SettingKey.ShellOptions);
         _setting.DefaultShellExt = await _repository.GetSetting(SettingKey.ShellExt);

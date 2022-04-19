@@ -15,6 +15,16 @@
             </div>
 
             <div class="mb-3 row">
+                <label for="retainSizeInMb" class="col-md-2 col-form-label">Retain DB Size in MB</label>
+                <div class="col-md-10">
+                    <input type="number" class="form-control" id="retainSizeInMb" min="1" step="1" value="@Model.RetainSizeInMb" name="retainSizeInMb" required>
+                    <div class="invalid-feedback">
+                        Required
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
                 <label for="defaultShellName" class="col-md-2 col-form-label">Default Shell Name</label>
                 <div class="col-md-10">
                     <input type="text" class="form-control" id="defaultShellName" value="@Model.DefaultShellName" name="defaultShellName" required>
@@ -46,6 +56,20 @@
                 <div class="d-grid col-md-10">
                     <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
                 </div>
+            </div>
+        </form>
+    </fieldset>
+</div>
+
+<hr/>
+
+<div id="shrinkDb" class="my-2">
+    <h4>Export Tasks</h4>
+    <fieldset>
+        <form id="shrinkDbForm" class="needs-validation" novalidate>
+            <label class="form-label">Shrink DB to smaller size, current size is <strong>@ViewData["DbSize"]</strong>. The minimal size is decided by "Retain DB Size in MB" setting(<strong>@Model.RetainSizeInMb MB</strong>).</label>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-file-export"></i> Shrink</button>
             </div>
         </form>
     </fieldset>
@@ -99,6 +123,18 @@
                         }
                     });
             });
+
+        const shrinkDbForm = document.querySelector("#shrinkDbForm");
+        shrinkDbForm.addEventListener('submit',
+            function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                submitRequest("/api/shrinkDB",
+                    {
+                        form: shrinkDbForm
+                    });
+            });
+
         setActive("settingNav");
     </script>
 }

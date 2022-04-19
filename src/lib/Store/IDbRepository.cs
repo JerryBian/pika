@@ -44,4 +44,8 @@ public interface IDbRepository
     Task<int> GetRunsCountAsync();
 
     Task<int> GetRunsCountAsync(long taskId);
+
+    long GetDbSize();
+
+    Task VacuumDbAsync();
 }
