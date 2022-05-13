@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <None Update="Store\startup.sql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

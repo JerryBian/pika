@@ -34,9 +34,9 @@ CREATE TABLE IF NOT EXISTS task_run
     FOREIGN KEY(task_id) REFERENCES task(id)
 );
 
-CREATE INDEX IF NOT EXISTS IX_task_run_status ON task(status ASC);
-CREATE INDEX IF NOT EXISTS IX_task_run_created_at ON task(created_at DESC);
-CREATE INDEX IF NOT EXISTS IX_task_run_completed_at ON task(completed_at DESC);
+CREATE INDEX IF NOT EXISTS IX_task_run_status ON task_run(status ASC);
+CREATE INDEX IF NOT EXISTS IX_task_run_created_at ON task_run(created_at DESC);
+CREATE INDEX IF NOT EXISTS IX_task_run_completed_at ON task_run(completed_at DESC);
 
 -- task_run_output
 CREATE TABLE IF NOT EXISTS task_run_output
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS task_run_output
     FOREIGN KEY(run_id) REFERENCES task_run(id)
 );
 
-CREATE INDEX IF NOT EXISTS IX_task_run_output_created_at ON task(created_at ASC);
+CREATE INDEX IF NOT EXISTS IX_task_run_output_created_at ON task_run_output(created_at ASC);
 
 -- setting
 CREATE TABLE IF NOT EXISTS setting

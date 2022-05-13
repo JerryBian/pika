@@ -21,7 +21,7 @@
         {
             <tr>
                 <td>#@item.Run.Id</td>
-                <td>@item.TaskName (<a href="/task/@item.Run.TaskId">#@item.Run.TaskId</a>)</td>
+                <td class="text-start">@item.TaskName (<a href="/task/@item.Run.TaskId">#@item.Run.TaskId</a>)</td>
                 <td>@Html.Raw(item.Run.GetStartAtHtml())</td>
                 <td>@Html.Raw(item.Run.GetCompletedAtHtml())</td>
                 <td>@Html.Raw(item.Run.GetElapsedHtml(true))</td>
