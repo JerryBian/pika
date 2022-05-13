@@ -39,7 +39,7 @@ public class CommandManager : ICommandManager
 
         while (_queue.TryDequeue(out var output))
         {
-            await _dbRepository.AddTaskRunOutputAsync(output);
+            await ProcessRunOutputAsync(output);
         }
     }
 
@@ -92,8 +92,9 @@ public class CommandManager : ICommandManager
                                     await Task.CompletedTask;
                                 });
 
-                            await _dbRepository.UpdateTaskRunStatusAsync(run.Id,
-                                stopped ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed);
+                            var output = new PikaTaskRunOutput
+                                { TaskRunId = run.Id, IsError = !stopped, Message = null };
+                            _queue.Enqueue(output);
                         }
                         else
                         {
@@ -114,14 +115,24 @@ public class CommandManager : ICommandManager
             {
                 if (_queue.TryDequeue(out var output))
                 {
-                    await _dbRepository.AddTaskRunOutputAsync(output);
+                    await ProcessRunOutputAsync(output);
                     continue;
                 }
 
-                await Task.Delay(100);
+                await Task.Delay(100, stoppingToken);
             }
         }, stoppingToken));
         await Task.WhenAll(tasks);
+    }
+
+    private async Task ProcessRunOutputAsync(PikaTaskRunOutput output)
+    {
+        await _dbRepository.AddTaskRunOutputAsync(output);
+        if (string.IsNullOrEmpty(output.Message))
+        {
+            await _dbRepository.UpdateTaskRunStatusAsync(output.TaskRunId,
+                output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed);
+        }
     }
 
     private async Task<PikaTaskRun> GetPendingTaskAsync(CancellationToken cancellationToken)
