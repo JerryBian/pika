@@ -131,7 +131,7 @@ public class CommandManager : ICommandManager
     {
         try
         {
-            if (output.Message == _completedLiteral)
+            if (output.Message != _completedLiteral)
             {
                 await _dbRepository.AddTaskRunOutputAsync(output);
 
