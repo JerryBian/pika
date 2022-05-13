@@ -93,7 +93,7 @@ public class CommandManager : ICommandManager
                                 });
 
                             var output = new PikaTaskRunOutput
-                                { TaskRunId = run.Id, IsError = !stopped, Message = null };
+                                {TaskRunId = run.Id, IsError = !stopped, Message = null};
                             _queue.Enqueue(output);
                         }
                         else
@@ -127,11 +127,32 @@ public class CommandManager : ICommandManager
 
     private async Task ProcessRunOutputAsync(PikaTaskRunOutput output)
     {
-        await _dbRepository.AddTaskRunOutputAsync(output);
-        if (string.IsNullOrEmpty(output.Message))
+        try
         {
-            await _dbRepository.UpdateTaskRunStatusAsync(output.TaskRunId,
-                output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed);
+            if (!string.IsNullOrEmpty(output.Message))
+            {
+                await _dbRepository.AddTaskRunOutputAsync(output);
+
+                if (output.IsError)
+                {
+                    _logger.LogError($"Run: {output.TaskRunId}, Message: {output.Message}");
+                }
+                else
+                {
+                    _logger.LogInformation($"Run: {output.TaskRunId}, Message: {output.Message}");
+                }
+            }
+            else
+            {
+                var status = output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
+                await _dbRepository.UpdateTaskRunStatusAsync(output.TaskRunId, status);
+                _logger.LogInformation($"Run {output.TaskRunId} marked as {status}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Process output failed. Run: {output.Id}, IsError: {output.IsError}, Message: {output.Message}");
         }
     }
 

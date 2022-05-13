@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.1.0
+
+Support clone task
+
 ## 4.0.0
 
 - Improve performance

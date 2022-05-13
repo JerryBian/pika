@@ -98,7 +98,15 @@ public class ProcessCommandClient : ICommandClient
 
     public async ValueTask DisposeAsync()
     {
-        _process.Kill(true);
+        try
+        {
+            _process.Kill(true);
+        }
+        catch
+        {
+            // ignored
+        }
+
         _process?.Dispose();
         _resetEvent1?.Dispose();
         _resetEvent2?.Dispose();

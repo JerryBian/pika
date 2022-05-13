@@ -1,10 +1,10 @@
 ﻿@model PagedViewModel<TaskDetailViewModel>
 @{
-    ViewData["Title"] = "All Tasks";
+    ViewData["Title"] = "Saved Tasks";
 }
 
 <div class="text-end mb-3">
-    <a href="/task/add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Create new task</a>
+    <a href="/task/add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Create new saved task</a>
 </div>
 
 <div class="table-responsive">
@@ -12,7 +12,7 @@
         <thead>
         <tr>
             <th>Id</th>
-            <th>Task Name</th>
+            <th class="text-start">Task Name</th>
             <th>Run Times</th>
             <th>Actions</th>
         </tr>

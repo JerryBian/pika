@@ -52,10 +52,36 @@ public class TaskController : Controller
     }
 
     [HttpGet("/task/add")]
-    public IActionResult Add([FromQuery] bool isTemp)
+    public async Task<IActionResult> Add([FromQuery] bool isTemp, [FromQuery] long sourceTaskId)
     {
-        ViewData["IsTemp"] = isTemp;
-        return View(_setting);
+        var model = new TaskAddViewModel
+        {
+            IsTemp = isTemp
+        };
+
+        PikaTask sourceTask = null;
+        if (sourceTaskId > 0)
+        {
+            sourceTask = await _repository.GetTaskAsync(sourceTaskId);
+        }
+
+        if (sourceTask != null)
+        {
+            model.ShellExt = sourceTask.ShellExt;
+            model.ShellName = sourceTask.ShellName;
+            model.ShellOption = sourceTask.ShellOption;
+            model.Script = sourceTask.Script;
+            model.TaskName = $"(Clone) {sourceTask.Name}";
+            model.TaskDescription = $"(Clone) {sourceTask.Description}";
+        }
+        else
+        {
+            model.ShellExt = _setting.DefaultShellExt;
+            model.ShellName = _setting.DefaultShellName;
+            model.ShellOption = _setting.DefaultShellOption;
+        }
+
+        return View(model);
     }
 
     [HttpGet("/task/{id}/update")]

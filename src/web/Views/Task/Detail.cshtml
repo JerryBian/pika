@@ -4,6 +4,11 @@
     ViewData["Title"] = $"Task #{Model.Task.Id}";
 }
 <div class="table-responsive">
+    <div>
+        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Task.Id" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-copy"></i> Clone to Temp task</a>
+        <span class="vr"></span>
+        <a href="/task/add?sourceTaskId=@Model.Task.Id" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-clone"></i> Clone to Saved task</a>
+    </div>
     <table class="table align-middle table-borderless caption-top">
         <caption>Task Information</caption>
         <tbody>
@@ -22,6 +27,10 @@
         <tr>
             <td>Run Times</td>
             <td>@Model.RunCount</td>
+        </tr>
+        <tr>
+            <td>Shell</td>
+            <td>@Html.Raw(string.Join(" &middot; ", Model.Task.ShellName, Model.Task.ShellOption, Model.Task.ShellExt))</td>
         </tr>
         <tr>
             <td>Script</td>
