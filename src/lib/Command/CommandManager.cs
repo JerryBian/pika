@@ -19,12 +19,14 @@ public class CommandManager : ICommandManager
     private readonly ConcurrentQueue<PikaTaskRunOutput> _queue;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IServiceProvider _serviceProvider;
+    private readonly string _completedLiteral;
 
     public CommandManager(IDbRepository repository, ILogger<CommandManager> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _dbRepository = repository;
         _serviceProvider = serviceProvider;
+        _completedLiteral = Guid.NewGuid().ToString();
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _queue = new ConcurrentQueue<PikaTaskRunOutput>();
         _commandClients = new ConcurrentDictionary<long, ICommandClient>();
@@ -93,7 +95,7 @@ public class CommandManager : ICommandManager
                                 });
 
                             var output = new PikaTaskRunOutput
-                                {TaskRunId = run.Id, IsError = stopped, Message = null};
+                                {TaskRunId = run.Id, IsError = stopped, Message = _completedLiteral};
                             _queue.Enqueue(output);
                         }
                         else
@@ -129,7 +131,7 @@ public class CommandManager : ICommandManager
     {
         try
         {
-            if (!string.IsNullOrEmpty(output.Message))
+            if (output.Message == _completedLiteral)
             {
                 await _dbRepository.AddTaskRunOutputAsync(output);
 
