@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Pika.Lib.Model;
 
@@ -27,7 +26,8 @@ public interface IDbRepository
 
     Task AddTaskRunOutputAsync(PikaTaskRunOutput runOutput);
 
-    Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default, int limit = -1);
+    Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = default, int limit = -1,
+        bool desc = true);
 
     Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status);
 

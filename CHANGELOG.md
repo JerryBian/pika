@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.2.0
+
+Support lots of output in one second processing
+
 ## 4.1.0
 
 Support clone task

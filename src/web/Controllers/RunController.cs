@@ -80,9 +80,7 @@ public class RunController : Controller
     [HttpGet("/run/{id}/output/raw")]
     public async Task<IActionResult> RawOutput([FromRoute] long id)
     {
-        var outputs = await _repository.GetTaskRunOutputs(id);
-        outputs.Reverse();
-
+        var outputs = await _repository.GetTaskRunOutputs(id, desc: false);
         return Content(string.Join(Environment.NewLine, outputs.Select(x => x.Message)), "text/plain", Encoding.UTF8);
     }
 }

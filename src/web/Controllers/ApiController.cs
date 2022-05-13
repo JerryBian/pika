@@ -86,7 +86,8 @@ public class ApiController : ControllerBase
             ShellName = task.ShellName,
             ShellOption = task.ShellOption,
             ShellExt = task.ShellExt,
-            Status = PikaTaskStatus.Pending
+            Status = PikaTaskStatus.Pending,
+            CreatedAt = DateTime.Now.Ticks
         };
 
         var runId = await _repository.AddTaskRunAsync(run);
@@ -99,16 +100,17 @@ public class ApiController : ControllerBase
         var response = new ApiResponse<object>();
         try
         {
-            var istemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
-            if (istemp)
+            task.CreatedAt = task.LastModifiedAt = DateTime.Now.Ticks;
+            var isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
+            if (isTemp)
             {
                 task.IsTemp = true;
-                task.Name = $"temp_{Guid.NewGuid().ToString("N")}";
+                task.Name = $"temp_{Guid.NewGuid():N}";
                 task.Description = "Temp one time task";
             }
 
             var id = await _repository.AddTaskAsync(task);
-            if (istemp)
+            if (isTemp)
             {
                 var runId = await StartRunAsync(id);
                 response.RedirectTo = $"/run/{runId}";
@@ -133,6 +135,7 @@ public class ApiController : ControllerBase
         var response = new ApiResponse<object>();
         try
         {
+            task.LastModifiedAt = DateTime.Now.Ticks;
             await _repository.UpdateTaskAsync(task);
             response.RedirectTo = $"/task/{task.Id}";
         }
@@ -178,13 +181,13 @@ public class ApiController : ControllerBase
             }
             else
             {
-                var outputs = await _repository.GetTaskRunOutputs(runId, new DateTime(lastPoint), 100);
+                var outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
                 outputs.Reverse();
                 var maxTimestamp = default(DateTime).Ticks;
                 var lastEl = outputs.LastOrDefault();
                 if (lastEl != null)
                 {
-                    maxTimestamp = lastEl.CreatedAt.Ticks;
+                    maxTimestamp = lastEl.CreatedAt;
                 }
 
                 maxTimestamp = Math.Max(lastPoint, maxTimestamp);

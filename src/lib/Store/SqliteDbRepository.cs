@@ -71,7 +71,8 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext, is_temp) VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt, @isTemp) RETURNING id",
+            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext, is_temp, created_at, last_modified_at) " +
+            "VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt, @isTemp, @createdAt, @lastModifiedAt) RETURNING id",
             new
             {
                 name = task.Name,
@@ -80,7 +81,9 @@ public class SqliteDbRepository : IDbRepository
                 shellName = task.ShellName,
                 shellOption = task.ShellOption,
                 shellExt = task.ShellExt,
-                isTemp = task.IsTemp
+                isTemp = task.IsTemp,
+                createdAt = task.CreatedAt,
+                lastModifiedAt = task.LastModifiedAt
             });
         if (id == null)
         {
@@ -94,7 +97,7 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.ExecuteAsync(
-            "UPDATE task SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=DATETIME('now', 'localtime') WHERE id=@id",
+            "UPDATE task SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=@lastModifiedAt WHERE id=@id",
             new
             {
                 name = task.Name,
@@ -103,7 +106,8 @@ public class SqliteDbRepository : IDbRepository
                 id = task.Id,
                 shellName = task.ShellName,
                 shellOption = task.ShellOption,
-                shellExt = task.ShellExt
+                shellExt = task.ShellExt,
+                lastModifiedAt = task.LastModifiedAt
             });
     }
 
@@ -262,7 +266,7 @@ public class SqliteDbRepository : IDbRepository
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Stopped}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Dead}';" +
                   "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id WHERE a.is_temp = 0 GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
-                  $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
+                  $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (completed_at - created_at) DESC LIMIT 8 OFFSET 0";
         using (var multi = await connection.QueryMultipleAsync(sql))
         {
             status.TaskCount = await multi.ReadSingleAsync<int>();
@@ -294,7 +298,8 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task_run(task_id, status, script, shell_name, shell_option, shell_ext) VALUES(@taskId, @status, @script, @shellName, @shellOption, @shellExt) RETURNING id",
+            "INSERT INTO task_run(task_id, status, script, shell_name, shell_option, shell_ext, created_at, started_at, completed_at) " +
+            "VALUES(@taskId, @status, @script, @shellName, @shellOption, @shellExt, @createdAt, 0, 0) RETURNING id",
             new
             {
                 taskId = run.TaskId,
@@ -302,7 +307,8 @@ public class SqliteDbRepository : IDbRepository
                 script = run.Script,
                 shellName = run.ShellName,
                 shellOption = run.ShellOption,
-                shellExt = run.ShellExt
+                shellExt = run.ShellExt,
+                createdAt = run.CreatedAt
             });
         if (id == null)
         {
@@ -316,22 +322,25 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.ExecuteAsync(
-            "INSERT INTO task_run_output(run_id, message, is_error) VALUES(@runId, @message, @isError)", new
+            "INSERT INTO task_run_output(run_id, message, is_error, created_at) VALUES(@runId, @message, @isError, @createdAt)",
+            new
             {
                 runId = runOutput.TaskRunId,
                 message = runOutput.Message,
-                isError = Convert.ToInt32(runOutput.IsError)
+                isError = Convert.ToInt32(runOutput.IsError),
+                createdAt = runOutput.CreatedAt
             });
     }
 
-    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, DateTime laterThan = default,
-        int limit = -1)
+    public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = default,
+        int limit = -1, bool desc = true)
     {
         await using var connection = new SqliteConnection(_connectionString);
-        var createdAtClause = laterThan == default ? "" : "AND julianday(created_at)>julianday(@laterThan)";
+        var createdAtClause = laterThan == default ? "" : "AND created_at>@laterThan";
         var limitClause = limit > 0 ? $"LIMIT {limit} OFFSET 0" : "";
+        var orderClause = desc ? "DESC" : "ASC";
         var result = await connection.QueryAsync<PikaTaskRunOutput>(
-            $"SELECT * FROM task_run_output WHERE run_id=@runId {createdAtClause} ORDER BY id DESC {limitClause}",
+            $"SELECT * FROM task_run_output WHERE run_id=@runId {createdAtClause} ORDER BY id {orderClause} {limitClause}",
             new
             {
                 runId = taskRunId,
@@ -348,18 +357,18 @@ public class SqliteDbRepository : IDbRepository
         if (status == PikaTaskStatus.Completed || status == PikaTaskStatus.Dead || status == PikaTaskStatus.Stopped)
         {
             sql =
-                "UPDATE task_run SET status=@status, completed_at=DATETIME('now', 'localtime') WHERE id=@id";
+                "UPDATE task_run SET status=@status, completed_at=@time WHERE id=@id";
         }
         else if (status == PikaTaskStatus.Running)
         {
-            sql = "UPDATE task_run SET status=@status, started_at=DATETIME('now', 'localtime') WHERE id=@id";
+            sql = "UPDATE task_run SET status=@status, started_at=@time WHERE id=@id";
         }
         else
         {
             sql = "UPDATE task_run SET status=@status WHERE id=@id";
         }
 
-        await connection.ExecuteAsync(sql, new {id = runId, status = (int) status});
+        await connection.ExecuteAsync(sql, new {id = runId, status = (int) status, time = DateTime.Now.Ticks});
     }
 
     public async Task<PikaTaskRun> GetTaskRunAsync(long runId)
@@ -380,7 +389,7 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.ExecuteAsync(
-            "INSERT OR REPLACE INTO setting(key, value, last_modified_at) VALUES (@key, @value, DATETIME('now', 'localtime'))",
-            new {key, value});
+            "INSERT OR REPLACE INTO setting(key, value, last_modified_at) VALUES (@key, @value, @time)",
+            new {key, value, time = DateTime.Now.Ticks});
     }
 }

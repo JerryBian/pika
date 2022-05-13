@@ -14,12 +14,12 @@ namespace Pika.Lib.Command;
 public class CommandManager : ICommandManager
 {
     private readonly ConcurrentDictionary<long, ICommandClient> _commandClients;
+    private readonly string _completedLiteral;
     private readonly IDbRepository _dbRepository;
     private readonly ILogger<CommandManager> _logger;
     private readonly ConcurrentQueue<PikaTaskRunOutput> _queue;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IServiceProvider _serviceProvider;
-    private readonly string _completedLiteral;
 
     public CommandManager(IDbRepository repository, ILogger<CommandManager> logger, IServiceProvider serviceProvider)
     {
@@ -79,13 +79,17 @@ public class CommandManager : ICommandManager
                                 async m =>
                                 {
                                     var output = new PikaTaskRunOutput
-                                        {TaskRunId = run.Id, IsError = false, Message = m};
+                                    {
+                                        TaskRunId = run.Id, IsError = false, Message = m, CreatedAt = DateTime.Now.Ticks
+                                    };
                                     _queue.Enqueue(output);
                                     await Task.CompletedTask;
                                 }, async m =>
                                 {
                                     var output = new PikaTaskRunOutput
-                                        {TaskRunId = run.Id, IsError = true, Message = m};
+                                    {
+                                        TaskRunId = run.Id, IsError = true, Message = m, CreatedAt = DateTime.Now.Ticks
+                                    };
                                     _queue.Enqueue(output);
                                     await Task.CompletedTask;
                                 }, async () =>
@@ -95,7 +99,10 @@ public class CommandManager : ICommandManager
                                 });
 
                             var output = new PikaTaskRunOutput
-                                {TaskRunId = run.Id, IsError = stopped, Message = _completedLiteral};
+                            {
+                                TaskRunId = run.Id, IsError = stopped, Message = _completedLiteral,
+                                CreatedAt = DateTime.Now.Ticks
+                            };
                             _queue.Enqueue(output);
                         }
                         else

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Pika.Lib.Model;
 
@@ -19,9 +18,9 @@ public class PikaTask
 
     [JsonPropertyName("shellExt")] public string ShellExt { get; set; }
 
-    [JsonPropertyName("createdAt")] public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("createdAt")] public long CreatedAt { get; set; }
 
-    [JsonPropertyName("lastModifiedAt")] public DateTime LastModifiedAt { get; set; }
+    [JsonPropertyName("lastModifiedAt")] public long LastModifiedAt { get; set; }
 
     [JsonPropertyName("isTemp")] public bool IsTemp { get; set; }
 }

@@ -33,7 +33,7 @@ public class SettingController : Controller
     [HttpPost("/setting/export")]
     public async Task<IActionResult> ExportAsync()
     {
-        var tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC");
+        var tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
         var export = new PikaExport
         {
             Setting = _setting,
@@ -70,6 +70,8 @@ public class SettingController : Controller
             {
                 foreach (var pikaTask in export.Tasks)
                 {
+                    pikaTask.CreatedAt = DateTime.Now.Ticks;
+                    pikaTask.LastModifiedAt = DateTime.Now.Ticks;
                     await _repository.AddTaskAsync(pikaTask);
                 }
             }

@@ -32,7 +32,10 @@ public class StartupHostedService : BackgroundService
         foreach (var runningTask in runningTasks)
         {
             await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
-                {IsError = true, Message = "Flag as dead during startup.", TaskRunId = runningTask.Id});
+            {
+                IsError = true, Message = "Flag as dead during startup.", TaskRunId = runningTask.Id,
+                CreatedAt = DateTime.Now.Ticks
+            });
             await _repository.UpdateTaskRunStatusAsync(runningTask.Id, PikaTaskStatus.Dead);
         }
 

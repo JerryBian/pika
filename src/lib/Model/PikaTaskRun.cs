@@ -11,11 +11,11 @@ public class PikaTaskRun
 
     public string Script { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public long CreatedAt { get; set; }
 
-    public DateTime StartedAt { get; set; }
+    public long StartedAt { get; set; }
 
-    public DateTime CompletedAt { get; set; }
+    public long CompletedAt { get; set; }
 
     public PikaTaskStatus Status { get; set; }
 
@@ -25,16 +25,33 @@ public class PikaTaskRun
 
     public string ShellExt { get; set; }
 
+    public DateTime GetCreatedAtTime()
+    {
+        return new DateTime(CreatedAt);
+    }
+
+    public DateTime GetStartedAtTime()
+    {
+        return new DateTime(StartedAt);
+    }
+
+    public DateTime GetCompletedAtTime()
+    {
+        return new DateTime(CompletedAt);
+    }
+
     public TimeSpan GetTotalElapsed()
     {
-        var end = CompletedAt == default ? DateTime.Now : CompletedAt;
-        return end - CreatedAt;
+        var completedAt = GetCompletedAtTime();
+        var end = completedAt == default ? DateTime.Now : completedAt;
+        return end - GetCreatedAtTime();
     }
 
     public TimeSpan GetStartElapsed()
     {
-        var end = StartedAt == default ? DateTime.Now : StartedAt;
-        return end - CreatedAt;
+        var startedAt = GetStartedAtTime();
+        var end = startedAt == default ? DateTime.Now : startedAt;
+        return end - GetCreatedAtTime();
     }
 
     public TimeSpan GetRunElapsed()
@@ -44,8 +61,8 @@ public class PikaTaskRun
             return TimeSpan.Zero;
         }
 
-        var end = CompletedAt == default ? DateTime.Now : CompletedAt;
-        return end - StartedAt;
+        var end = CompletedAt == default ? DateTime.Now : GetCompletedAtTime();
+        return end - GetStartedAtTime();
     }
 
     public string GetStartAtHtml()
@@ -55,7 +72,8 @@ public class PikaTaskRun
             return "<span title=\"Not started yet\">-</span>";
         }
 
-        return $"<span title=\"{StartedAt}\">{StartedAt.ToHuman()}</span>";
+        var startedAt = GetStartedAtTime();
+        return $"<span title=\"{startedAt}\">{startedAt.ToHuman()}</span>";
     }
 
     public string GetCompletedAtHtml()
@@ -65,12 +83,14 @@ public class PikaTaskRun
             return "<span title=\"Not completed yet\">-</span>";
         }
 
-        return $"<span title=\"{CompletedAt}\">{CompletedAt.ToHuman()}</span>";
+        var completedAt = GetCompletedAtTime();
+        return $"<span title=\"{completedAt}\">{completedAt.ToHuman()}</span>";
     }
 
     public string GetCreatedAtHtml()
     {
-        return $"<span title=\"{CreatedAt}\">{CreatedAt.ToHuman()}</span>";
+        var createdAt = GetCreatedAtTime();
+        return $"<span title=\"{createdAt}\">{createdAt.ToHuman()}</span>";
     }
 
     public string GetElapsedHtml(bool slim = false)

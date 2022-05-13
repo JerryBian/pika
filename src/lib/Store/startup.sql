@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS task
     shell_option TEXT COLLATE BINARY,
     shell_ext TEXT NOT NULL COLLATE BINARY,
     is_temp INTEGER DEFAULT 0,
-    created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
-    last_modified_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime'))
+    created_at INTEGER NOT NULL,
+    last_modified_at INTEGER NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS IX_task_is_temp ON task(is_temp ASC);
@@ -28,9 +28,9 @@ CREATE TABLE IF NOT EXISTS task_run
     shell_name TEXT NOT NULL COLLATE BINARY,
     shell_option TEXT COLLATE BINARY,
     shell_ext TEXT NOT NULL COLLATE BINARY,
-    created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
-    started_at TEXT COLLATE BINARY,
-    completed_at TEXT COLLATE BINARY,
+    created_at INTEGER NOT NULL,
+    started_at INTEGER NOT NULL,
+    completed_at INTEGER NOT NULL,
     FOREIGN KEY(task_id) REFERENCES task(id)
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS task_run_output
     run_id INTEGER NOT NULL,
     message TEXT NOT NULL COLLATE BINARY,
     is_error INTEGER DEFAULT 0,
-    created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
+    created_at INTEGER NOT NULL,
     FOREIGN KEY(run_id) REFERENCES task_run(id)
 );
 
@@ -56,6 +56,5 @@ CREATE TABLE IF NOT EXISTS setting
 (
     key TEXT NOT NULL PRIMARY KEY COLLATE BINARY,
     value TEXT COLLATE BINARY,
-    created_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime')),
-    last_modified_at TEXT COLLATE BINARY DEFAULT (DATETIME('now', 'localtime'))
+    last_modified_at INTEGER NOT NULL
 );
