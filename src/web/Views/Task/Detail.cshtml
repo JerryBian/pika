@@ -31,13 +31,17 @@
                 </div>
             </td>
         </tr>
-        <tr>
-            <td>Actions</td>
-            <td>
-                <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
-            </td>
-        </tr>
+        @if (!Model.Task.IsTemp)
+        {
+            <tr>
+                <td>Actions</td>
+                <td>
+                    <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                    <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
+                </td>
+            </tr>
+        }
+
         </tbody>
     </table>
 </div>

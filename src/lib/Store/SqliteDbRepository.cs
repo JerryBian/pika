@@ -71,7 +71,7 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext) VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt) RETURNING id",
+            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext, is_temp) VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt, @isTemp) RETURNING id",
             new
             {
                 name = task.Name,
@@ -79,7 +79,8 @@ public class SqliteDbRepository : IDbRepository
                 desc = task.Description,
                 shellName = task.ShellName,
                 shellOption = task.ShellOption,
-                shellExt = task.ShellExt
+                shellExt = task.ShellExt,
+                isTemp = task.IsTemp
             });
         if (id == null)
         {
@@ -106,11 +107,12 @@ public class SqliteDbRepository : IDbRepository
             });
     }
 
-    public async Task<int> GetRunsCountAsync()
+    public async Task<int> GetRunsCountAsync(string whereClause = "")
     {
         await using var connection = new SqliteConnection(_connectionString);
+        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
         var result =
-            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task_run");
+            await connection.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM task_run {whereClause}");
         return result;
     }
 
@@ -136,13 +138,14 @@ public class SqliteDbRepository : IDbRepository
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Dead} ORDER BY created_at DESC LIMIT 1");
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Dead} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+            await connection.ExecuteAsync(
+                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -153,13 +156,14 @@ public class SqliteDbRepository : IDbRepository
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Stopped} ORDER BY created_at DESC LIMIT 1");
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Stopped} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+            await connection.ExecuteAsync(
+                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -170,13 +174,14 @@ public class SqliteDbRepository : IDbRepository
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Completed} ORDER BY created_at DESC LIMIT 1");
+                $"SELECT id FROM task_run WHERE status = {(int) PikaTaskStatus.Completed} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
-            await connection.ExecuteAsync("DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+            await connection.ExecuteAsync(
+                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -189,7 +194,7 @@ public class SqliteDbRepository : IDbRepository
     {
         await using var connection = new SqliteConnection(_connectionString);
         var result =
-            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task");
+            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task WHERE is_temp = 0");
         return result;
     }
 
@@ -217,7 +222,7 @@ public class SqliteDbRepository : IDbRepository
         string orderByClause = "")
     {
         await using var connection = new SqliteConnection(_connectionString);
-        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
+        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"AND {whereClause}";
         orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
         var limitClause = string.Empty;
         if (limit > 0 && offset >= 0)
@@ -225,7 +230,7 @@ public class SqliteDbRepository : IDbRepository
             limitClause = $"LIMIT {limit} OFFSET {offset}";
         }
 
-        var sql = $"SELECT * FROM task {whereClause} {orderByClause} {limitClause}";
+        var sql = $"SELECT * FROM task WHERE is_temp = 0 {whereClause} {orderByClause} {limitClause}";
         return (await connection.QueryAsync<PikaTask>(sql)).AsList();
     }
 
@@ -249,14 +254,14 @@ public class SqliteDbRepository : IDbRepository
     {
         var status = new PikaSystemStatus();
         await using var connection = new SqliteConnection(_connectionString);
-        var sql = "SELECT COUNT(*) FROM task;" +
+        var sql = "SELECT COUNT(*) FROM task WHERE is_temp = 0;" +
                   "SELECT COUNT(*) FROM task_run;" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Pending}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Running}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Stopped}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int) PikaTaskStatus.Dead}';" +
-                  "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
+                  "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id WHERE a.is_temp = 0 GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
                   $"SELECT * FROM task_run WHERE status='{(int) PikaTaskStatus.Completed}' ORDER BY (julianday(IFNULL(completed_at, DATETIME('now', 'localtime'))) - julianday(created_at)) DESC LIMIT 8 OFFSET 0";
         using (var multi = await connection.QueryMultipleAsync(sql))
         {

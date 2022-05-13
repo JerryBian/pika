@@ -7,7 +7,7 @@ public interface ICommandManager
 {
     void Stop(long runId);
 
-    void StopAll();
+    Task StopAllAsync();
 
     Task ExecuteAsync(CancellationToken stoppingToken);
 }

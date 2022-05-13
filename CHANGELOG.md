@@ -1,5 +1,10 @@
 Listed change logs for release history.
 
+## 4.0.0
+
+- Improve performance
+- Support one time task run
+
 ## 3.5.1
 
 Fix Shrink DB issues.

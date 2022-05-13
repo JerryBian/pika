@@ -16,6 +16,7 @@ public class CommandManager : ICommandManager
     private readonly ConcurrentDictionary<long, ICommandClient> _commandClients;
     private readonly IDbRepository _dbRepository;
     private readonly ILogger<CommandManager> _logger;
+    private readonly ConcurrentQueue<PikaTaskRunOutput> _queue;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IServiceProvider _serviceProvider;
 
@@ -25,14 +26,20 @@ public class CommandManager : ICommandManager
         _dbRepository = repository;
         _serviceProvider = serviceProvider;
         _semaphoreSlim = new SemaphoreSlim(1, 1);
+        _queue = new ConcurrentQueue<PikaTaskRunOutput>();
         _commandClients = new ConcurrentDictionary<long, ICommandClient>();
     }
 
-    public void StopAll()
+    public async Task StopAllAsync()
     {
         foreach (var item in _commandClients)
         {
             item.Value.Stop();
+        }
+
+        while (_queue.TryDequeue(out var output))
+        {
+            await _dbRepository.AddTaskRunOutputAsync(output);
         }
     }
 
@@ -71,12 +78,14 @@ public class CommandManager : ICommandManager
                                 {
                                     var output = new PikaTaskRunOutput
                                         {TaskRunId = run.Id, IsError = false, Message = m};
-                                    await _dbRepository.AddTaskRunOutputAsync(output);
+                                    _queue.Enqueue(output);
+                                    await Task.CompletedTask;
                                 }, async m =>
                                 {
                                     var output = new PikaTaskRunOutput
                                         {TaskRunId = run.Id, IsError = true, Message = m};
-                                    await _dbRepository.AddTaskRunOutputAsync(output);
+                                    _queue.Enqueue(output);
+                                    await Task.CompletedTask;
                                 }, async () =>
                                 {
                                     stopped = true;
@@ -99,6 +108,19 @@ public class CommandManager : ICommandManager
             }, stoppingToken));
         }
 
+        tasks.Add(Task.Run(async () =>
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                if (_queue.TryDequeue(out var output))
+                {
+                    await _dbRepository.AddTaskRunOutputAsync(output);
+                    continue;
+                }
+
+                await Task.Delay(100);
+            }
+        }, stoppingToken));
         await Task.WhenAll(tasks);
     }
 
@@ -107,8 +129,9 @@ public class CommandManager : ICommandManager
         await _semaphoreSlim.WaitAsync(cancellationToken);
         try
         {
-            var pendingRuns = await _dbRepository.GetTaskRunsAsync(1, 0,
-                $"status={(int) PikaTaskStatus.Pending}", "created_at ASC");
+            var pendingRuns =
+                await _dbRepository.GetTaskRunsAsync(whereClause: $"status={(int) PikaTaskStatus.Pending}",
+                    orderByClause: "created_at ASC");
             var run = pendingRuns.FirstOrDefault();
             if (run != null)
             {

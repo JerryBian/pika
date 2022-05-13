@@ -21,7 +21,7 @@ public class TaskHostedService : BackgroundService
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        _commandManager.StopAll();
+        await _commandManager.StopAllAsync();
         await Task.CompletedTask;
     }
 }

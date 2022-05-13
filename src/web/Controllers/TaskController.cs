@@ -52,8 +52,9 @@ public class TaskController : Controller
     }
 
     [HttpGet("/task/add")]
-    public IActionResult Add()
+    public IActionResult Add([FromQuery] bool isTemp)
     {
+        ViewData["IsTemp"] = isTemp;
         return View(_setting);
     }
 

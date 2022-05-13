@@ -64,17 +64,7 @@ public class ApiController : ControllerBase
         var response = new ApiResponse<object>();
         try
         {
-            var task = await _repository.GetTaskAsync(id);
-            var run = new PikaTaskRun
-            {
-                TaskId = id,
-                Script = task.Script,
-                ShellName = task.ShellName,
-                ShellOption = task.ShellOption,
-                ShellExt = task.ShellExt,
-                Status = PikaTaskStatus.Pending
-            };
-            var runId = await _repository.AddTaskRunAsync(run);
+            var runId = await StartRunAsync(id);
             response.RedirectTo = $"/run/{runId}";
         }
         catch (Exception ex)
@@ -86,14 +76,47 @@ public class ApiController : ControllerBase
         return response;
     }
 
+    private async Task<long> StartRunAsync(long taskId)
+    {
+        var task = await _repository.GetTaskAsync(taskId);
+        var run = new PikaTaskRun
+        {
+            TaskId = taskId,
+            Script = task.Script,
+            ShellName = task.ShellName,
+            ShellOption = task.ShellOption,
+            ShellExt = task.ShellExt,
+            Status = PikaTaskStatus.Pending
+        };
+
+        var runId = await _repository.AddTaskRunAsync(run);
+        return runId;
+    }
+
     [HttpPut("task/add")]
     public async Task<ApiResponse<object>> AddTaskAsync([FromForm] PikaTask task)
     {
         var response = new ApiResponse<object>();
         try
         {
+            var istemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
+            if (istemp)
+            {
+                task.IsTemp = true;
+                task.Name = $"temp_{Guid.NewGuid().ToString("N")}";
+                task.Description = "Temp one time task";
+            }
+
             var id = await _repository.AddTaskAsync(task);
-            response.RedirectTo = $"/task/{id}";
+            if (istemp)
+            {
+                var runId = await StartRunAsync(id);
+                response.RedirectTo = $"/run/{runId}";
+            }
+            else
+            {
+                response.RedirectTo = $"/task/{id}";
+            }
         }
         catch (Exception ex)
         {

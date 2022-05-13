@@ -29,7 +29,7 @@ public class RunController : Controller
             whereClause = $"status={(int) s}";
         }
 
-        var runsCount = await _repository.GetRunsCountAsync();
+        var runsCount = await _repository.GetRunsCountAsync(whereClause);
         var pagedViewModel = new PagedViewModel<RunDetailViewModel>(page, runsCount, _setting.ItemsPerPage);
         var runs = await _repository.GetTaskRunsAsync(_setting.ItemsPerPage,
             (pagedViewModel.CurrentPage - 1) * _setting.ItemsPerPage, whereClause, "created_at DESC");
