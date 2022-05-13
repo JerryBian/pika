@@ -93,7 +93,7 @@ public class CommandManager : ICommandManager
                                 });
 
                             var output = new PikaTaskRunOutput
-                                {TaskRunId = run.Id, IsError = !stopped, Message = null};
+                                {TaskRunId = run.Id, IsError = stopped, Message = null};
                             _queue.Enqueue(output);
                         }
                         else

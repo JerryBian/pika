@@ -82,6 +82,8 @@ public class ProcessCommandClient : ICommandClient
         _process.BeginErrorReadLine();
         _process.BeginOutputReadLine();
         await _process.WaitForExitAsync(_cancellationTokenSource.Token).OkForCancel();
+        _resetEvent1.Wait(_cancellationTokenSource.Token);
+        _resetEvent2.Wait(_cancellationTokenSource.Token);
 
         if (_cancellationTokenSource.IsCancellationRequested && stopHandler != null)
         {
