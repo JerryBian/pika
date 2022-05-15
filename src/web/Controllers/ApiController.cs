@@ -193,7 +193,7 @@ public class ApiController : ControllerBase
                 maxTimestamp = Math.Max(lastPoint, maxTimestamp);
                 response.Content = new TaskRunOutputViewModel
                 {
-                    LastPoint = maxTimestamp,
+                    LastPoint = maxTimestamp.ToString(),
                     Outputs = outputs,
                     CompletedAt = taskRun.GetCompletedAtHtml(),
                     StartedAt = taskRun.GetStartAtHtml(),

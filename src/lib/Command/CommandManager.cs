@@ -50,6 +50,7 @@ public class CommandManager : ICommandManager
         if (_commandClients.TryGetValue(runId, out var commandClient))
         {
             commandClient.Stop();
+            _commandClients.TryRemove(runId, out _);
         }
     }
 

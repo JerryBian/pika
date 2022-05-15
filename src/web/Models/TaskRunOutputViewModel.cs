@@ -16,5 +16,5 @@ public class TaskRunOutputViewModel
 
     [JsonPropertyName("outputs")] public List<PikaTaskRunOutput> Outputs { get; set; } = new();
 
-    [JsonPropertyName("lastPoint")] public long LastPoint { get; set; }
+    [JsonPropertyName("lastPoint")] public string LastPoint { get; set; }
 }

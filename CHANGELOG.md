@@ -1,5 +1,12 @@
 Listed change logs for release history.
 
+## 4.3.0
+
+Bug fix: 
+
+- stop function not working
+- lose digits while passing from server to client
+
 ## 4.2.0
 
 Support lots of output in one second processing
