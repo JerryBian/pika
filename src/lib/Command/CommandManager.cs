@@ -105,6 +105,7 @@ public class CommandManager : ICommandManager
                                 CreatedAt = DateTime.Now.Ticks
                             };
                             _queue.Enqueue(output);
+                            _commandClients.TryRemove(run.Id, out _);
                         }
                         else
                         {
