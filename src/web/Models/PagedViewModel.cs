@@ -12,7 +12,7 @@ public class PagedViewModel<T>
             totalCount = 0;
         }
 
-        TotalPages = Convert.ToInt32(Math.Ceiling(totalCount / (double) postsPerPage));
+        TotalPages = Convert.ToInt32(Math.Ceiling(totalCount / (double)postsPerPage));
 
         if (currentPage <= 0)
         {

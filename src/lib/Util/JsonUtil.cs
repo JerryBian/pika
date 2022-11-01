@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using Pika.Lib.Converter;
+using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Pika.Lib.Converter;
 
 namespace Pika.Lib.Util;
 
@@ -10,7 +10,7 @@ public static class JsonUtil
 {
     public static string Serialize<T>(T obj, bool writeIndented = false)
     {
-        var option = new JsonSerializerOptions
+        JsonSerializerOptions option = new()
         {
             WriteIndented = writeIndented,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping

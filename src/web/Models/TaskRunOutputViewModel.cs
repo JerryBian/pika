@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Pika.Lib.Model;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Pika.Lib.Model;
 
 namespace Pika.Web.Models;
 

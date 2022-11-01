@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Pika.Lib.Model;
+using Pika.Lib.Store;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Pika.Lib.Model;
-using Pika.Lib.Store;
 
 namespace Pika.Lib.Command;
 
@@ -34,12 +34,12 @@ public class CommandManager : ICommandManager
 
     public async Task StopAllAsync()
     {
-        foreach (var item in _commandClients)
+        foreach (KeyValuePair<long, ICommandClient> item in _commandClients)
         {
             item.Value.Stop();
         }
 
-        while (_queue.TryDequeue(out var output))
+        while (_queue.TryDequeue(out PikaTaskRunOutput output))
         {
             await ProcessRunOutputAsync(output);
         }
@@ -47,17 +47,17 @@ public class CommandManager : ICommandManager
 
     public void Stop(long runId)
     {
-        if (_commandClients.TryGetValue(runId, out var commandClient))
+        if (_commandClients.TryGetValue(runId, out ICommandClient commandClient))
         {
             commandClient.Stop();
-            _commandClients.TryRemove(runId, out _);
+            _ = _commandClients.TryRemove(runId, out _);
         }
     }
 
     public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tasks = new List<Task>();
-        for (var i = 0; i < 5; i++)
+        List<Task> tasks = new();
+        for (int i = 0; i < 5; i++)
         {
             tasks.Add(Task.Run(async () =>
             {
@@ -65,31 +65,37 @@ public class CommandManager : ICommandManager
                 {
                     try
                     {
-                        var run = await GetPendingTaskAsync(stoppingToken);
+                        PikaTaskRun run = await GetPendingTaskAsync(stoppingToken);
                         if (run != null)
                         {
-                            await using var commandClient = _serviceProvider.GetService<ICommandClient>();
+                            await using ICommandClient commandClient = _serviceProvider.GetService<ICommandClient>();
                             if (commandClient == null)
                             {
                                 continue;
                             }
 
-                            var stopped = false;
-                            _commandClients.TryAdd(run.Id, commandClient);
+                            bool stopped = false;
+                            _ = _commandClients.TryAdd(run.Id, commandClient);
                             await commandClient.RunAsync(run.ShellName, run.ShellOption, run.ShellExt, run.Script,
                                 async m =>
                                 {
-                                    var output = new PikaTaskRunOutput
+                                    PikaTaskRunOutput output = new()
                                     {
-                                        TaskRunId = run.Id, IsError = false, Message = m, CreatedAt = DateTime.Now.Ticks
+                                        TaskRunId = run.Id,
+                                        IsError = false,
+                                        Message = m,
+                                        CreatedAt = DateTime.Now.Ticks
                                     };
                                     _queue.Enqueue(output);
                                     await Task.CompletedTask;
                                 }, async m =>
                                 {
-                                    var output = new PikaTaskRunOutput
+                                    PikaTaskRunOutput output = new()
                                     {
-                                        TaskRunId = run.Id, IsError = true, Message = m, CreatedAt = DateTime.Now.Ticks
+                                        TaskRunId = run.Id,
+                                        IsError = true,
+                                        Message = m,
+                                        CreatedAt = DateTime.Now.Ticks
                                     };
                                     _queue.Enqueue(output);
                                     await Task.CompletedTask;
@@ -99,13 +105,15 @@ public class CommandManager : ICommandManager
                                     await Task.CompletedTask;
                                 });
 
-                            var output = new PikaTaskRunOutput
+                            PikaTaskRunOutput output = new()
                             {
-                                TaskRunId = run.Id, IsError = stopped, Message = _completedLiteral,
+                                TaskRunId = run.Id,
+                                IsError = stopped,
+                                Message = _completedLiteral,
                                 CreatedAt = DateTime.Now.Ticks
                             };
                             _queue.Enqueue(output);
-                            _commandClients.TryRemove(run.Id, out _);
+                            _ = _commandClients.TryRemove(run.Id, out _);
                         }
                         else
                         {
@@ -124,7 +132,7 @@ public class CommandManager : ICommandManager
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_queue.TryDequeue(out var output))
+                if (_queue.TryDequeue(out PikaTaskRunOutput output))
                 {
                     await ProcessRunOutputAsync(output);
                     continue;
@@ -155,7 +163,7 @@ public class CommandManager : ICommandManager
             }
             else
             {
-                var status = output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
+                PikaTaskStatus status = output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
                 await _dbRepository.UpdateTaskRunStatusAsync(output.TaskRunId, status);
                 _logger.LogInformation($"Run {output.TaskRunId} marked as {status}.");
             }
@@ -172,10 +180,10 @@ public class CommandManager : ICommandManager
         await _semaphoreSlim.WaitAsync(cancellationToken);
         try
         {
-            var pendingRuns =
-                await _dbRepository.GetTaskRunsAsync(whereClause: $"status={(int) PikaTaskStatus.Pending}",
+            List<PikaTaskRun> pendingRuns =
+                await _dbRepository.GetTaskRunsAsync(whereClause: $"status={(int)PikaTaskStatus.Pending}",
                     orderByClause: "created_at ASC");
-            var run = pendingRuns.FirstOrDefault();
+            PikaTaskRun run = pendingRuns.FirstOrDefault();
             if (run != null)
             {
                 await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Running);
@@ -185,7 +193,7 @@ public class CommandManager : ICommandManager
         }
         finally
         {
-            _semaphoreSlim.Release();
+            _ = _semaphoreSlim.Release();
         }
     }
 }

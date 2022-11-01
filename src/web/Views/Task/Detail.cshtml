@@ -5,9 +5,9 @@
 }
 <div class="table-responsive">
     <div>
-        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Task.Id" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-copy"></i> Clone to Temp task</a>
+        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Task.Id" class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard"></i> Clone to Temp task</a>
         <span class="vr"></span>
-        <a href="/task/add?sourceTaskId=@Model.Task.Id" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-clone"></i> Clone to Saved task</a>
+        <a href="/task/add?sourceTaskId=@Model.Task.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-clipboard-plus"></i> Clone to Saved task</a>
     </div>
     <table class="table align-middle table-borderless caption-top">
         <caption>Task Information</caption>
@@ -45,8 +45,8 @@
             <tr>
                 <td>Actions</td>
                 <td>
-                    <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                    <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
+                        <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                        <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
                 </td>
             </tr>
         }
@@ -78,7 +78,7 @@
                 <td>@Html.Raw(item.GetElapsedHtml(true))</td>
                 <td>@item.Status</td>
                 <td>
-                    <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
+                        <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Id"><i class="bi bi-info"></i> Detail</a>
                 </td>
             </tr>
         }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pika.Web.HostedServices;
 
@@ -27,13 +27,15 @@ public class StartupHostedService : BackgroundService
     {
         await _repository.StartupAsync();
         await InitSettingAsync();
-        var runningTasks =
-            await _repository.GetTaskRunsAsync(int.MaxValue, 0, $"status={(int) PikaTaskStatus.Running}");
-        foreach (var runningTask in runningTasks)
+        System.Collections.Generic.List<PikaTaskRun> runningTasks =
+            await _repository.GetTaskRunsAsync(int.MaxValue, 0, $"status={(int)PikaTaskStatus.Running}");
+        foreach (PikaTaskRun runningTask in runningTasks)
         {
             await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
             {
-                IsError = true, Message = "Flag as dead during startup.", TaskRunId = runningTask.Id,
+                IsError = true,
+                Message = "Flag as dead during startup.",
+                TaskRunId = runningTask.Id,
                 CreatedAt = DateTime.Now.Ticks
             });
             await _repository.UpdateTaskRunStatusAsync(runningTask.Id, PikaTaskStatus.Dead);
@@ -44,7 +46,7 @@ public class StartupHostedService : BackgroundService
 
     private async Task InitSettingAsync()
     {
-        var shellName = await _repository.GetSetting(SettingKey.ShellName);
+        string shellName = await _repository.GetSetting(SettingKey.ShellName);
         if (string.IsNullOrEmpty(shellName))
         {
             if (OperatingSystem.IsWindows())
@@ -65,14 +67,14 @@ public class StartupHostedService : BackgroundService
             }
         }
 
-        var itemsPerPage = await _repository.GetSetting(SettingKey.ItemsPerPage);
-        if (!int.TryParse(itemsPerPage, out var val) || val < 1)
+        string itemsPerPage = await _repository.GetSetting(SettingKey.ItemsPerPage);
+        if (!int.TryParse(itemsPerPage, out int val) || val < 1)
         {
             await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, "8");
         }
 
-        var retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
-        if (!int.TryParse(retainSizeInMb, out var val2) || val2 < 1)
+        string retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
+        if (!int.TryParse(retainSizeInMb, out int val2) || val2 < 1)
         {
             await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, "200");
         }

@@ -6,6 +6,6 @@ public class DateTimeHandler : SqliteTypeHandler<DateTime>
 {
     public override DateTime Parse(object value)
     {
-        return DateTime.Parse((string) value);
+        return DateTime.Parse((string)value);
     }
 }

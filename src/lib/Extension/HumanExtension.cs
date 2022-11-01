@@ -1,6 +1,6 @@
-﻿using System;
-using Humanizer;
+﻿using Humanizer;
 using Humanizer.Localisation;
+using System;
 
 namespace Pika.Lib.Extension;
 

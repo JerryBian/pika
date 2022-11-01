@@ -1,13 +1,13 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pika.Lib.Extension;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
 using Pika.Lib.Util;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Pika.Web.Controllers;
 
@@ -33,13 +33,13 @@ public class SettingController : Controller
     [HttpPost("/setting/export")]
     public async Task<IActionResult> ExportAsync()
     {
-        var tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
-        var export = new PikaExport
+        System.Collections.Generic.List<PikaTask> tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
+        PikaExport export = new()
         {
             Setting = _setting,
             Tasks = tasks
         };
-        var content =
+        byte[] content =
             Encoding.UTF8.GetBytes(JsonUtil.Serialize(export, true));
         return File(content, "application/json", "pika-export.json");
     }
@@ -49,8 +49,8 @@ public class SettingController : Controller
     {
         try
         {
-            await using var stream = file.OpenReadStream();
-            var export = await JsonUtil.DeserializeAsync<PikaExport>(stream);
+            await using System.IO.Stream stream = file.OpenReadStream();
+            PikaExport export = await JsonUtil.DeserializeAsync<PikaExport>(stream);
             if (export.Setting != null)
             {
                 if (export.Setting.RetainSizeInMb < 1)
@@ -58,7 +58,7 @@ public class SettingController : Controller
                     export.Setting.RetainSizeInMb = _setting.RetainSizeInMb;
                 }
 
-                if (export.Setting.ItemsPerPage < 1 || export.Setting.ItemsPerPage > 50)
+                if (export.Setting.ItemsPerPage is < 1 or > 50)
                 {
                     export.Setting.ItemsPerPage = _setting.ItemsPerPage;
                 }
@@ -68,11 +68,11 @@ public class SettingController : Controller
 
             if (export.Tasks != null)
             {
-                foreach (var pikaTask in export.Tasks)
+                foreach (PikaTask pikaTask in export.Tasks)
                 {
                     pikaTask.CreatedAt = DateTime.Now.Ticks;
                     pikaTask.LastModifiedAt = DateTime.Now.Ticks;
-                    await _repository.AddTaskAsync(pikaTask);
+                    _ = await _repository.AddTaskAsync(pikaTask);
                 }
             }
 

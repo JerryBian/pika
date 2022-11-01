@@ -98,7 +98,7 @@
                             }
 
                             if (res.status === "Running") {
-                                statusEl.innerHTML += ` (<a href="javascript:;" class="text-danger" onclick="stopRun('@Model.Run.Id')"><i class="fa-solid fa-stop"></i> Stop</a>)`;
+                            statusEl.innerHTML += ` (<a href="javascript:;" class="text-danger" onclick="stopRun('@Model.Run.Id')"><i class="bi bi-stop-circle"></i> Stop</a>)`;
                             }
                         },
                         postAction: function() {

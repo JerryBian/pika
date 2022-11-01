@@ -8,13 +8,8 @@ public class IsoDateTimeConverter : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var str = reader.GetString();
-        if (string.IsNullOrEmpty(str))
-        {
-            return DateTime.MinValue;
-        }
-
-        return DateTime.Parse(str);
+        string str = reader.GetString();
+        return string.IsNullOrEmpty(str) ? DateTime.MinValue : DateTime.Parse(str);
     }
 
     public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)

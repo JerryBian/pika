@@ -12,7 +12,7 @@
                     {
                         <a href="/task/@task.Key.Id" class="list-group-item  d-flex justify-content-between align-items-center">
                             <span>
-                                <i class="fa-solid fa-list-check text-muted"></i> @task.Key.Name
+                                <i class="bi bi-list-check text-muted"></i> @task.Key.Name
                             </span>
                             <span class="badge bg-primary rounded-pill">@task.Value</span>
                         </a>
@@ -30,7 +30,7 @@
                     @foreach (var run in Model.LongestRuns)
                     {
                         <a href="/run/@run.Id" class="list-group-item  d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-person-running text-muted"></i> #@run.Id</span>
+                            <span><i class="bi bi-signpost text-muted"></i> #@run.Id</span>
                             <span class="badge bg-primary rounded-pill">@run.GetTotalElapsed().ToHuman()</span>
                         </a>
                     }
@@ -44,35 +44,35 @@
                 </div>
                 <div class="list-group">
                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-database text-muted"></i> SQLite DB Size</span>
+                        <span><i class="bi bi-file-bar-graph text-muted"></i> SQLite DB Size</span>
                         <span class="badge bg-primary rounded-pill">@Model.DbSize.ToByteSizeHuman()</span>
                     </div>
                     <a href="/task" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-list text-muted"></i> Total Saved Tasks</span>
+                        <span><i class="bi bi-list text-muted"></i> Total Saved Tasks</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskCount</span>
                     </a>
                     <a href="/run" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-person-running text-muted"></i> Total Runs</span>
+                        <span><i class="bi bi-signpost text-muted"></i> Total Runs</span>
                         <span class="badge bg-primary rounded-pill">@Model.RunCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Pending" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Pending</span>
+                        <span><i class="bi bi-caret-right text-muted"></i> Runs - Pending</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInPendingCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Running" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Running</span>
+                        <span><i class="bi bi-caret-right text-muted"></i> Runs - Running</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInRunningCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Completed" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Completed</span>
+                        <span><i class="bi bi-caret-right text-muted"></i> Runs - Completed</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInCompletedCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Stopped" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Stopped</span>
+                        <span><i class="bi bi-caret-right text-muted"></i> Runs - Stopped</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInStoppedCount</span>
                     </a>
                     <a href="/run?status=@PikaTaskStatus.Dead" class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa-solid fa-angle-right text-muted"></i> Runs - Dead</span>
+                        <span><i class="bi bi-caret-right text-muted"></i> Runs - Dead</span>
                         <span class="badge bg-primary rounded-pill">@Model.TaskInDeadCount</span>
                     </a>
                 </div>

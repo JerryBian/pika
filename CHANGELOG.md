@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.4.0
+
+Upgrade assets to latest version.
+
 ## 4.3.0
 
 Bug fix: 

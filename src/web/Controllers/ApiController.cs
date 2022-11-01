@@ -1,11 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Pika.Lib.Command;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
 using Pika.Web.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pika.Web.Controllers;
 
@@ -27,7 +27,7 @@ public class ApiController : ControllerBase
     [HttpDelete("task/{id}")]
     public async Task<ApiResponse<object>> DeleteTaskAsync([FromRoute] long id)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             await _repository.DeleteTaskAsync(id);
@@ -44,7 +44,7 @@ public class ApiController : ControllerBase
     [HttpPost("run/{id}/stop")]
     public ApiResponse<object> StopRun([FromRoute] long id)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             _commandManager.Stop(id);
@@ -61,10 +61,10 @@ public class ApiController : ControllerBase
     [HttpPut("run/{id}")]
     public async Task<ApiResponse<object>> RunAsync([FromRoute] long id)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
-            var runId = await StartRunAsync(id);
+            long runId = await StartRunAsync(id);
             response.RedirectTo = $"/run/{runId}";
         }
         catch (Exception ex)
@@ -78,8 +78,8 @@ public class ApiController : ControllerBase
 
     private async Task<long> StartRunAsync(long taskId)
     {
-        var task = await _repository.GetTaskAsync(taskId);
-        var run = new PikaTaskRun
+        PikaTask task = await _repository.GetTaskAsync(taskId);
+        PikaTaskRun run = new()
         {
             TaskId = taskId,
             Script = task.Script,
@@ -90,18 +90,18 @@ public class ApiController : ControllerBase
             CreatedAt = DateTime.Now.Ticks
         };
 
-        var runId = await _repository.AddTaskRunAsync(run);
+        long runId = await _repository.AddTaskRunAsync(run);
         return runId;
     }
 
     [HttpPut("task/add")]
     public async Task<ApiResponse<object>> AddTaskAsync([FromForm] PikaTask task)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             task.CreatedAt = task.LastModifiedAt = DateTime.Now.Ticks;
-            var isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
+            bool isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
             if (isTemp)
             {
                 task.IsTemp = true;
@@ -109,10 +109,10 @@ public class ApiController : ControllerBase
                 task.Description = "Temp one time task";
             }
 
-            var id = await _repository.AddTaskAsync(task);
+            long id = await _repository.AddTaskAsync(task);
             if (isTemp)
             {
-                var runId = await StartRunAsync(id);
+                long runId = await StartRunAsync(id);
                 response.RedirectTo = $"/run/{runId}";
             }
             else
@@ -132,7 +132,7 @@ public class ApiController : ControllerBase
     [HttpPost("task/update")]
     public async Task<ApiResponse<object>> UpdateTaskAsync([FromForm] PikaTask task)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             task.LastModifiedAt = DateTime.Now.Ticks;
@@ -151,7 +151,7 @@ public class ApiController : ControllerBase
     [HttpPost("shrinkDB")]
     public async Task<ApiResponse<object>> ShrinkDb()
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             await _repository.VacuumDbAsync();
@@ -170,10 +170,10 @@ public class ApiController : ControllerBase
     public async Task<ApiResponse<TaskRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
         [FromQuery] long lastPoint)
     {
-        var response = new ApiResponse<TaskRunOutputViewModel>();
+        ApiResponse<TaskRunOutputViewModel> response = new();
         try
         {
-            var taskRun = await _repository.GetTaskRunAsync(runId);
+            PikaTaskRun taskRun = await _repository.GetTaskRunAsync(runId);
             if (taskRun == null)
             {
                 response.IsOk = false;
@@ -181,10 +181,10 @@ public class ApiController : ControllerBase
             }
             else
             {
-                var outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
+                System.Collections.Generic.List<PikaTaskRunOutput> outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
                 outputs.Reverse();
-                var maxTimestamp = default(DateTime).Ticks;
-                var lastEl = outputs.LastOrDefault();
+                long maxTimestamp = default(DateTime).Ticks;
+                PikaTaskRunOutput lastEl = outputs.LastOrDefault();
                 if (lastEl != null)
                 {
                     maxTimestamp = lastEl.CreatedAt;
@@ -214,7 +214,7 @@ public class ApiController : ControllerBase
     [HttpPost("setting/update")]
     public async Task<ApiResponse<object>> UpdateSettingAsync([FromForm] PikaSetting setting)
     {
-        var response = new ApiResponse<object>();
+        ApiResponse<object> response = new();
         try
         {
             if (setting.ItemsPerPage is > 0 and <= 50)

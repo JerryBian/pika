@@ -25,10 +25,10 @@
                 <td class="text-start">@item.Task.Name</td>
                 <td>@item.RunCount</td>
                 <td>
-                    <a type="button" class="btn btn-primary btn-sm m-1" href="/task/@item.Task.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
-                    <a class="btn btn-info btn-sm m-1" href="/task/@item.Task.Id/update"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                    <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@item.Task.Id)"><i class="fa-solid fa-person-running"></i> Run</button>
-                    <button type="button" class="btn btn-danger btn-sm m-1" onclick="deleteTask(@item.Task.Id)"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                        <a type="button" class="btn btn-primary btn-sm m-1" href="/task/@item.Task.Id"><i class="bi bi-info"></i> Detail</a>
+                        <a class="btn btn-info btn-sm m-1" href="/task/@item.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                        <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@item.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                        <button type="button" class="btn btn-danger btn-sm m-1" onclick="deleteTask(@item.Task.Id)"><i class="bi bi-trash"></i> Delete</button>
                 </td>
             </tr>
         }

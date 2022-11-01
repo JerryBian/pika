@@ -1,5 +1,5 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
+using System.Data;
 
 namespace Pika.Lib.Dapper;
 

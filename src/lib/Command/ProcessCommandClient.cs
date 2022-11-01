@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Pika.Lib.Extension;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Pika.Lib.Extension;
 
 namespace Pika.Lib.Command;
 
@@ -35,7 +35,7 @@ public class ProcessCommandClient : ICommandClient
         Func<string, Task> outputHandler = null,
         Func<string, Task> errorHandler = null, Func<Task> stopHandler = null)
     {
-        var scriptFile = await GetScriptFileAsync(shellExt, script);
+        string scriptFile = await GetScriptFileAsync(shellExt, script);
         _process.StartInfo = new ProcessStartInfo(shellName, $"{shellOption} \"{scriptFile}\"")
         {
             CreateNoWindow = true,
@@ -75,7 +75,7 @@ public class ProcessCommandClient : ICommandClient
             }
         };
 
-        _process.Start();
+        _ = _process.Start();
         _logger.LogInformation(
             $"Process: {_process.Id} ==> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
 
@@ -124,8 +124,8 @@ public class ProcessCommandClient : ICommandClient
 
     private async Task<string> GetScriptFileAsync(string shellExt, string script)
     {
-        var tempFile = Path.GetTempFileName();
-        var scriptFile = $"{tempFile}{shellExt}";
+        string tempFile = Path.GetTempFileName();
+        string scriptFile = $"{tempFile}{shellExt}";
         await File.WriteAllTextAsync(scriptFile, script, new UTF8Encoding(false));
         return scriptFile;
     }

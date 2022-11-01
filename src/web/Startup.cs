@@ -23,45 +23,38 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddLogging(config =>
+        _ = services.AddLogging(config =>
         {
-            config.SetMinimumLevel(LogLevel.Debug);
-            config.AddConsole();
-            config.AddDebug();
+            _ = config.SetMinimumLevel(LogLevel.Debug);
+            _ = config.AddConsole();
+            _ = config.AddDebug();
         });
 
-        services.Configure<PikaOptions>(Configuration);
-        services.AddSingleton<PikaSetting>();
-        services.AddTransient<ICommandClient, ProcessCommandClient>();
-        services.AddSingleton<ICommandManager, CommandManager>();
-        services.AddSingleton<IDbRepository, SqliteDbRepository>();
+        _ = services.Configure<PikaOptions>(Configuration);
+        _ = services.AddSingleton<PikaSetting>();
+        _ = services.AddTransient<ICommandClient, ProcessCommandClient>();
+        _ = services.AddSingleton<ICommandManager, CommandManager>();
+        _ = services.AddSingleton<IDbRepository, SqliteDbRepository>();
 
-        services.AddHostedService<StartupHostedService>();
-        services.AddHostedService<TaskHostedService>();
+        _ = services.AddHostedService<StartupHostedService>();
+        _ = services.AddHostedService<TaskHostedService>();
 
-        services.AddControllersWithViews();
+        _ = services.AddControllersWithViews();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment())
+        _ = env.IsDevelopment() ? app.UseDeveloperExceptionPage() : app.UseExceptionHandler("/Home/Error");
+
+        _ = app.UseStaticFiles();
+
+        _ = app.UseRouting();
+
+        _ = app.UseAuthorization();
+
+        _ = app.UseEndpoints(endpoints =>
         {
-            app.UseDeveloperExceptionPage();
-        }
-        else
-        {
-            app.UseExceptionHandler("/Home/Error");
-        }
-
-        app.UseStaticFiles();
-
-        app.UseRouting();
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllerRoute(
+            _ = endpoints.MapControllerRoute(
                 "default",
                 "{controller=Home}/{action=Index}/{id?}");
         });

@@ -27,10 +27,10 @@
                 <td>@Html.Raw(item.Run.GetElapsedHtml(true))</td>
                 <td>@item.Run.Status</td>
                 <td>
-                    <a type="button" class="btn btn-primary btn-sm m-1" href="/run/@item.Run.Id"><i class="fa-solid fa-circle-info"></i> Detail</a>
+                        <a type="button" class="btn btn-primary btn-sm m-1" href="/run/@item.Run.Id"><i class="bi bi-info-circle"></i> Detail</a>
                     @if (item.Run.Status == PikaTaskStatus.Running)
                     {
-                        <button class="btn btn-danger btn-sm mx-1" onclick="stopRun('@item.Run.Id')"><i class="fa-solid fa-stop"></i> Stop</button>
+                            <button class="btn btn-danger btn-sm mx-1" onclick="stopRun('@item.Run.Id')"><i class="bi bi-stop-circle"></i> Stop</button>
                     }
                 </td>
             </tr>

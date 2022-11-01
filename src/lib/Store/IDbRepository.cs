@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Pika.Lib.Model;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Pika.Lib.Model;
 
 namespace Pika.Lib.Store;
 

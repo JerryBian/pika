@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using System;
 using System.Text;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Pika.Web.TagHelpers;
 
@@ -23,34 +23,45 @@ public class PageTagHelper : TagHelper
         output.Attributes.SetAttribute("class", "my-4 small");
 
         // No need to generate HTML markup as we only have one pagination
-        if (TotalPages < 2) return;
+        if (TotalPages < 2)
+        {
+            return;
+        }
 
-        if (CurrentPage < 1 || CurrentPage > TotalPages) throw new ArgumentOutOfRangeException(nameof(CurrentPage));
+        if (CurrentPage < 1 || CurrentPage > TotalPages)
+        {
+            throw new ArgumentOutOfRangeException(nameof(CurrentPage));
+        }
 
-        var html = new StringBuilder();
-        html.AppendLine("<ul class='pagination justify-content-center'>");
+        StringBuilder html = new();
+        _ = html.AppendLine("<ul class='pagination justify-content-center'>");
 
         // Prev item only be visible if CurrentPage is greater than one
-        if (CurrentPage > 1) html.AppendLine(GetLinkItem($"<span>{PrevLabel}</span>", GetUrl(CurrentPage - 1)));
+        if (CurrentPage > 1)
+        {
+            _ = html.AppendLine(GetLinkItem($"<span>{PrevLabel}</span>", GetUrl(CurrentPage - 1)));
+        }
 
-        for (var i = 1; i <= TotalPages; i++)
+        for (int i = 1; i <= TotalPages; i++)
         {
             // display CurrentPage item as active
             if (i == CurrentPage)
             {
-                html.AppendLine(GetActiveItem(i));
+                _ = html.AppendLine(GetActiveItem(i));
                 continue;
             }
 
-            html.AppendLine(GetLinkItem(i, GetUrl(i)));
+            _ = html.AppendLine(GetLinkItem(i, GetUrl(i)));
         }
 
         // Next item only be visible if CurrentPage is less than TotalPages
         if (CurrentPage < TotalPages)
-            html.AppendLine(GetLinkItem($"<span>{NextLabel}</span>", GetUrl(CurrentPage + 1)));
+        {
+            _ = html.AppendLine(GetLinkItem($"<span>{NextLabel}</span>", GetUrl(CurrentPage + 1)));
+        }
 
-        html.AppendLine("</ul>");
-        output.Content.SetHtmlContent(html.ToString());
+        _ = html.AppendLine("</ul>");
+        _ = output.Content.SetHtmlContent(html.ToString());
     }
 
     private string GetUrl(int item)

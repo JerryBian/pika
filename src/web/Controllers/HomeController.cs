@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Pika.Lib.Store;
 using Pika.Web.Models;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Pika.Web.Controllers;
 
@@ -17,13 +17,13 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var status = await _repository.GetSystemStatusAsync();
+        Lib.Model.PikaSystemStatus status = await _repository.GetSystemStatusAsync();
         return View(status);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
