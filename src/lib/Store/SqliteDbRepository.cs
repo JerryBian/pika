@@ -276,7 +276,7 @@ public class SqliteDbRepository : IDbRepository
             {
                 PikaTask task = new()
                 {
-                    Id = Convert.ToInt64(mostRunTask.id),
+                    Id = Convert.ToInt64((double)mostRunTask.id),
                     Name = Convert.ToString(mostRunTask.name)
                 };
                 status.MostRunTasks.Add(new KeyValuePair<PikaTask, int>(task, Convert.ToInt32(mostRunTask.run_count)));
