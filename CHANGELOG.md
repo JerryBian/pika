@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.6.0
+
+UI tweak
+
 ## 4.5.0
 
 Upgrade to .NET 7
