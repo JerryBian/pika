@@ -19,11 +19,11 @@
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.2.1",
     "bootstrap": "^5.2.3",
-    "bootstrap-icons": "^1.10.2",
-    "bootswatch": "^5.2.2",
+    "bootstrap-icons": "^1.10.3",
+    "bootswatch": "^5.2.3",
     "highlight.js": "^11.7.0",
-    "npm-check-updates": "^16.4.3",
-    "sass": "^1.56.1",
+    "npm-check-updates": "^16.6.2",
+    "sass": "^1.57.1",
     "uglify-js": "^3.17.4",
     "uglifycss": "^0.0.29",
     "@highlightjs/cdn-assets": "^11.7.0"

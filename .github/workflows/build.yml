@@ -24,7 +24,8 @@ jobs:
         run: |
           APP_VERSION=`cat VERSION`
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-          echo "APP_VERSION_LINK=${APP_VERSION//.}" >> $GITHUB_ENV
+          APP_VERSION_ARR=(${APP_VERSION//./ })
+          echo "APP_VERSION_LINK=${APP_VERSION_ARR[0]}${APP_VERSION_ARR[1]}" >> $GITHUB_ENV
 
       - uses: actions/setup-dotnet@v3
         with:
