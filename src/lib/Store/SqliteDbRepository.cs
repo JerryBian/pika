@@ -261,7 +261,8 @@ public class SqliteDbRepository : IDbRepository
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Stopped}';" +
                   $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Dead}';" +
                   "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id WHERE a.is_temp = 0 GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
-                  $"SELECT * FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}' ORDER BY (completed_at - created_at) DESC LIMIT 8 OFFSET 0";
+                  $"SELECT * FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}' ORDER BY (completed_at - created_at) DESC LIMIT 8 OFFSET 0;" +
+                  $"SELECT * FROM task_run ORDER BY created_at DESC LIMIT 8 OFFSET 0";
         using (SqlMapper.GridReader multi = await connection.QueryMultipleAsync(sql))
         {
             status.TaskCount = await multi.ReadSingleAsync<int>();
@@ -283,6 +284,7 @@ public class SqliteDbRepository : IDbRepository
             }
 
             status.LongestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
+            status.LatestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
         }
 
         status.DbSize = GetDbSize();

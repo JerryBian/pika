@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Pika.Lib.Model;
 
@@ -13,4 +14,6 @@ public class PikaTaskRunOutput
     [JsonPropertyName("isError")] public bool IsError { get; set; }
 
     [JsonPropertyName("createdAt")] public long CreatedAt { get; set; }
+
+    [JsonPropertyName("createdAtString")] public string CreatedAtString => new DateTime(CreatedAt).ToString("O");
 }

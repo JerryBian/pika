@@ -132,7 +132,7 @@
 
                 text = escapeHTML(text);
                 let div = document.createElement("div");
-                div.setAttribute("title", o.createdAt);
+                div.setAttribute("title", o.createdAtString);
                 if (o.isError) {
                     div.classList.add("text-danger");
                 }

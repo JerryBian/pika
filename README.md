@@ -41,8 +41,9 @@ This project is under active development, you can peek the [CHANGELOG](https://g
 
 ![Task List](./img/task-list.png)
 
+![Run List](./img/run-list.png)
 
-![Run](./img/run.png)
+![Run Detail](./img/run.png)
 
 
 ## License

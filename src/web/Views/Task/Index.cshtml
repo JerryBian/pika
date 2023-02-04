@@ -4,11 +4,11 @@
 }
 
 <div class="text-end mb-3">
-    <a href="/task/add" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Create new saved task</a>
+    <a href="/task/add" class="btn btn-secondary btn-sm"><i class="bi bi-plus-lg"></i> Create new saved task</a>
 </div>
 
 <div class="table-responsive">
-    <table class="table text-md-center align-middle ">
+    <table class="table text-md-center align-middle table-bordered table-striped">
         <thead>
         <tr>
             <th>Id</th>
@@ -25,10 +25,22 @@
                 <td class="text-start">@item.Task.Name</td>
                 <td>@item.RunCount</td>
                 <td>
-                        <a class="btn btn-primary btn-sm m-1" href="/task/@item.Task.Id"><i class="bi bi-info"></i> Detail</a>
-                        <a class="btn btn-info btn-sm m-1" href="/task/@item.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
-                        <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@item.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
-                        <button type="button" class="btn btn-danger btn-sm m-1" onclick="deleteTask(@item.Task.Id)"><i class="bi bi-trash"></i> Delete</button>
+                    <div class="row">
+                        <div class="col-md h-100 mb-2">
+                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                    <a class="btn btn-primary btn-sm" href="/task/@item.Task.Id"><i class="bi bi-info"></i> Detail</a>
+                                    <button type="button" class="btn btn-success btn-sm" onclick="runTask(@item.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                                </div>
+                                
+                        </div>
+                        <div class="col-md h-100 mb-2">
+                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                    <a class="btn btn-info btn-sm" href="/task/@item.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTask(@item.Task.Id)"><i class="bi bi-trash"></i> Delete</button>
+                                </div>
+                                
+                        </div>
+                    </div>  
                 </td>
             </tr>
         }

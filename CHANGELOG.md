@@ -1,8 +1,12 @@
 Listed change logs for release history.
 
+## 4.8
+
+UI tweak
+
 ## 4.7
 
-- Fix error stream issue
+- Update packages
 
 ## 4.6
 
