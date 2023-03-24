@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.9
+
+Improve performance of task output.
+
 ## 4.8
 
 UI tweak

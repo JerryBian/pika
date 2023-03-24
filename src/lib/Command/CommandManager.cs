@@ -39,10 +39,13 @@ public class CommandManager : ICommandManager
             item.Value.Stop();
         }
 
+        var outputs = new List<PikaTaskRunOutput>();
         while (_queue.TryDequeue(out PikaTaskRunOutput output))
         {
-            await ProcessRunOutputAsync(output);
+            outputs.Add(output);
         }
+
+        await ProcessRunOutputAsync(outputs);
     }
 
     public void Stop(long runId)
@@ -132,46 +135,42 @@ public class CommandManager : ICommandManager
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_queue.TryDequeue(out PikaTaskRunOutput output))
+                var outputs = new List<PikaTaskRunOutput>();
+                while (_queue.TryDequeue(out PikaTaskRunOutput output))
                 {
-                    await ProcessRunOutputAsync(output);
-                    continue;
+                    outputs.Add(output);
                 }
 
-                await Task.Delay(100, stoppingToken);
+                await ProcessRunOutputAsync(outputs);
+
+                if(!outputs.Any())
+                {
+                    await Task.Delay(100, stoppingToken);
+                }
             }
         }, stoppingToken));
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessRunOutputAsync(PikaTaskRunOutput output)
+    private async Task ProcessRunOutputAsync(List<PikaTaskRunOutput> output)
     {
         try
         {
-            if (output.Message != _completedLiteral)
-            {
-                await _dbRepository.AddTaskRunOutputAsync(output);
+            var nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
+            var completedOutputs = output.Except(nonCompletedOutputs);
 
-                if (output.IsError)
-                {
-                    _logger.LogError($"Run: {output.TaskRunId}, Message: {output.Message}");
-                }
-                else
-                {
-                    _logger.LogInformation($"Run: {output.TaskRunId}, Message: {output.Message}");
-                }
-            }
-            else
+            await _dbRepository.AddTaskRunOutputAsync(nonCompletedOutputs.ToList());
+
+            foreach(var item in completedOutputs)
             {
-                PikaTaskStatus status = output.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
-                await _dbRepository.UpdateTaskRunStatusAsync(output.TaskRunId, status);
-                _logger.LogInformation($"Run {output.TaskRunId} marked as {status}.");
+                PikaTaskStatus status = item.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
+                await _dbRepository.UpdateTaskRunStatusAsync(item.TaskRunId, status);
+                _logger.LogInformation($"Run {item.TaskRunId} marked as {status}.");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
-                $"Process output failed. Run: {output.Id}, IsError: {output.IsError}, Message: {output.Message}");
+            _logger.LogError(ex, $"Process output failed. {output.Count} output affected.");
         }
     }
 

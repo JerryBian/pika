@@ -6,6 +6,7 @@ using Pika.Lib.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -322,6 +323,36 @@ public class SqliteDbRepository : IDbRepository
                 isError = Convert.ToInt32(runOutput.IsError),
                 createdAt = runOutput.CreatedAt
             });
+    }
+
+    public async Task AddTaskRunOutputAsync(List<PikaTaskRunOutput> runOutputs)
+    {
+        if(runOutputs == null || !runOutputs.Any())
+        {
+            return;
+        }
+
+        var objs = new List<dynamic>();
+        foreach(var item in runOutputs)
+        {
+            objs.Add(new
+            {
+                runId = item.TaskRunId,
+                message = item.Message,
+                isError = Convert.ToInt32(item.IsError),
+                createdAt = item.CreatedAt
+            });
+        }
+
+        await using SqliteConnection connection = new(_connectionString);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+        
+        _ = await connection.ExecuteAsync(
+            "INSERT INTO task_run_output(run_id, message, is_error, created_at) VALUES(@runId, @message, @isError, @createdAt)",
+            objs, transaction: transaction);
+
+        await transaction.CommitAsync();
     }
 
     public async Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = default,

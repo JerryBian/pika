@@ -24,6 +24,8 @@ public interface IDbRepository
 
     Task<long> AddTaskRunAsync(PikaTaskRun run);
 
+    Task AddTaskRunOutputAsync(List<PikaTaskRunOutput> runOutputs);
+
     Task AddTaskRunOutputAsync(PikaTaskRunOutput runOutput);
 
     Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = default, int limit = -1,
