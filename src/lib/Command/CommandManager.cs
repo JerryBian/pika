@@ -136,7 +136,7 @@ public class CommandManager : ICommandManager
             while (!stoppingToken.IsCancellationRequested)
             {
                 var outputs = new List<PikaTaskRunOutput>();
-                while (_queue.TryDequeue(out PikaTaskRunOutput output))
+                while (outputs.Count < 100 && _queue.TryDequeue(out PikaTaskRunOutput output))
                 {
                     outputs.Add(output);
                 }
