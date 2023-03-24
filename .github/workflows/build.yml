@@ -74,7 +74,7 @@ jobs:
           commit: master
           artifactErrorsFailBuild: true
           body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
-      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
         name: Remove existing release for latest version
         with:
           delete_release: true
