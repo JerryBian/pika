@@ -55,7 +55,7 @@ jobs:
           cd win-arm && sudo zip -r ../pika-win-arm.zip * && cd ..
           cd win-arm64 && sudo zip -r ../pika-win-arm64.zip * && cd ..
           cd osx-x64 && sudo zip -r ../pika-osx-x64.zip * && cd ..
-      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
         name: Remove existing release for current version
         with:
           delete_release: true
