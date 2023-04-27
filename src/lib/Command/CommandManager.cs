@@ -90,6 +90,7 @@ public class CommandManager : ICommandManager
                                         CreatedAt = DateTime.Now.Ticks
                                     };
                                     _queue.Enqueue(output);
+                                    _logger.LogInformation(m);
                                     await Task.CompletedTask;
                                 }, async m =>
                                 {
@@ -101,6 +102,7 @@ public class CommandManager : ICommandManager
                                         CreatedAt = DateTime.Now.Ticks
                                     };
                                     _queue.Enqueue(output);
+                                    _logger.LogError(m);
                                     await Task.CompletedTask;
                                 }, async () =>
                                 {
