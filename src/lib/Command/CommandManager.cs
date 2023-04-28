@@ -39,7 +39,7 @@ public class CommandManager : ICommandManager
         });
         _batchTimerBlock = new TransformBlock<PikaTaskRunOutput, PikaTaskRunOutput>(x =>
         {
-            batchTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
+            batchTimer.Change(TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
             return x;
         }, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1, MaxMessagesPerTask = 1000 });
         _writeLogBlock = new ActionBlock<PikaTaskRunOutput[]>(ProcessRunOutputAsync, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = Environment.ProcessorCount });
