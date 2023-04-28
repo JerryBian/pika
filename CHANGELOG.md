@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 4.10
+
+Introduce TPL Dataflow for task output
+
 ## 4.9
 
 Improve performance of task output.

@@ -327,13 +327,13 @@ public class SqliteDbRepository : IDbRepository
 
     public async Task AddTaskRunOutputAsync(List<PikaTaskRunOutput> runOutputs)
     {
-        if(runOutputs == null || !runOutputs.Any())
+        if (runOutputs == null || !runOutputs.Any())
         {
             return;
         }
 
-        var objs = new List<dynamic>();
-        foreach(var item in runOutputs)
+        List<dynamic> objs = new();
+        foreach (PikaTaskRunOutput item in runOutputs)
         {
             objs.Add(new
             {
@@ -346,8 +346,8 @@ public class SqliteDbRepository : IDbRepository
 
         await using SqliteConnection connection = new(_connectionString);
         await connection.OpenAsync();
-        await using var transaction = await connection.BeginTransactionAsync();
-        
+        await using System.Data.Common.DbTransaction transaction = await connection.BeginTransactionAsync();
+
         _ = await connection.ExecuteAsync(
             "INSERT INTO task_run_output(run_id, message, is_error, created_at) VALUES(@runId, @message, @isError, @createdAt)",
             objs, transaction: transaction);

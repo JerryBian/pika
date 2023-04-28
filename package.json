@@ -17,13 +17,13 @@
   },
   "homepage": "https://github.com/JerryBian/pika#readme",
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^6.3.0",
+    "@fortawesome/fontawesome-free": "^6.4.0",
     "bootstrap": "^5.2.3",
-    "bootstrap-icons": "^1.10.3",
+    "bootstrap-icons": "^1.10.5",
     "bootswatch": "^5.2.3",
     "highlight.js": "^11.7.0",
-    "npm-check-updates": "^16.8.0",
-    "sass": "^1.60.0",
+    "npm-check-updates": "^16.10.9",
+    "sass": "^1.62.1",
     "uglify-js": "^3.17.4",
     "uglifycss": "^0.0.29",
     "@highlightjs/cdn-assets": "^11.7.0"
