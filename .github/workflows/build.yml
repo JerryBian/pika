@@ -34,15 +34,15 @@ jobs:
       - name: Publish Binaries
         run: |
           mkdir -p __ga
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-x64 -c Release -o __ga/linux-x64
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-musl-x64 -c Release -o __ga/linux-musl-x64
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-arm -c Release -o __ga/linux-arm
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r linux-arm64 -c Release -o __ga/linux-arm64
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-x64 -c Release -o __ga/win-x64
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-x86 -c Release -o __ga/win-x86
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-arm -c Release -o __ga/win-arm
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r win-arm64 -c Release -o __ga/win-arm64
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=true -p:PublishSingleFile=true -r osx-x64 -c Release -o __ga/osx-x64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-x64 -c Release -o __ga/linux-x64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-musl-x64 -c Release -o __ga/linux-musl-x64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-arm -c Release -o __ga/linux-arm
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-arm64 -c Release -o __ga/linux-arm64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x64 -c Release -o __ga/win-x64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x86 -c Release -o __ga/win-x86
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-arm -c Release -o __ga/win-arm
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-arm64 -c Release -o __ga/win-arm64
+          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r osx-x64 -c Release -o __ga/osx-x64
       - name: Package Binaries
         run: |
           cd __ga
