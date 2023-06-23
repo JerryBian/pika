@@ -33,18 +33,18 @@ public class CommandManager : ICommandManager
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _commandClients = new ConcurrentDictionary<long, ICommandClient>();
         _batchBlock = new BatchBlock<PikaTaskRunOutput>(100, new GroupingDataflowBlockOptions { EnsureOrdered = false });
-        var batchTimer = new Timer(x =>
+        Timer batchTimer = new(x =>
         {
             _batchBlock.TriggerBatch();
         });
         _batchTimerBlock = new TransformBlock<PikaTaskRunOutput, PikaTaskRunOutput>(x =>
         {
-            batchTimer.Change(TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
+            _ = batchTimer.Change(TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
             return x;
         }, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1, MaxMessagesPerTask = 1000 });
         _writeLogBlock = new ActionBlock<PikaTaskRunOutput[]>(ProcessRunOutputAsync, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1 });
-        _batchTimerBlock.LinkTo(_batchBlock, new DataflowLinkOptions { PropagateCompletion = true });
-        _batchBlock.LinkTo(_writeLogBlock, new DataflowLinkOptions { PropagateCompletion = true });
+        _ = _batchTimerBlock.LinkTo(_batchBlock, new DataflowLinkOptions { PropagateCompletion = true });
+        _ = _batchBlock.LinkTo(_writeLogBlock, new DataflowLinkOptions { PropagateCompletion = true });
     }
 
     public async Task StopAllAsync()
@@ -100,7 +100,7 @@ public class CommandManager : ICommandManager
                                         CreatedAt = DateTime.Now.Ticks
                                     };
 
-                                    await _batchTimerBlock.SendAsync(output);
+                                    _ = await _batchTimerBlock.SendAsync(output);
                                     _logger.LogInformation(m);
                                     await Task.CompletedTask;
                                 }, async m =>
@@ -113,7 +113,7 @@ public class CommandManager : ICommandManager
                                         CreatedAt = DateTime.Now.Ticks
                                     };
 
-                                    await _batchTimerBlock.SendAsync(output);
+                                    _ = await _batchTimerBlock.SendAsync(output);
                                     _logger.LogError(m);
 
                                 }, async () =>
@@ -130,7 +130,7 @@ public class CommandManager : ICommandManager
                                 CreatedAt = DateTime.Now.Ticks
                             };
 
-                            await _batchTimerBlock.SendAsync(output);
+                            _ = await _batchTimerBlock.SendAsync(output);
                             _ = _commandClients.TryRemove(run.Id, out _);
                         }
                         else
@@ -153,12 +153,12 @@ public class CommandManager : ICommandManager
     {
         try
         {
-            var nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
-            var completedOutputs = output.Except(nonCompletedOutputs);
+            IEnumerable<PikaTaskRunOutput> nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
+            IEnumerable<PikaTaskRunOutput> completedOutputs = output.Except(nonCompletedOutputs);
 
             await _dbRepository.AddTaskRunOutputAsync(nonCompletedOutputs.ToList());
 
-            foreach (var item in completedOutputs)
+            foreach (PikaTaskRunOutput item in completedOutputs)
             {
                 PikaTaskStatus status = item.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
                 await _dbRepository.UpdateTaskRunStatusAsync(item.TaskRunId, status);

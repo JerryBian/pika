@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 5.0
+
+Add Authentication.
+
 ## 4.10
 
 Introduce TPL Dataflow for task output

@@ -1,0 +1,49 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en" class="w-100 min-vh-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="googlebot" content="noindex,nofollow,noarchive" />
+    <title>LOGIN</title>
+    <link rel="stylesheet" href="~/style.min.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column w-100 min-vh-100">
+
+    <main class="container-fluid p-2 my-3">
+        <div class="container">
+            <fieldset>
+                <legend>Login to Pika</legend>
+                <div class="d-flex align-items-center justify-content-center">
+                    <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" role="form" class="w-100 p-3 needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="userName" class="form-label">User Name</label>
+                            <input type="text" name="userName" class="form-control" id="userName" placeholder="User Name" autocomplete="off" autofocus required>
+                            <div class="invalid-feedback">
+                                Required
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Password" autocomplete="off" required>
+                            <div class="invalid-feedback">
+                                Required
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Let's Rock!</button>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </main>
+    <footer class="mt-auto text-center p-2">
+        &copy; @DateTime.Now.Year
+    </footer>
+</body>
+</html>
