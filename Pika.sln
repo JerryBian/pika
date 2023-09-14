@@ -7,6 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pika.Web", "src\web\Pika.We
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pika.Lib", "src\lib\Pika.Lib.csproj", "{25972543-2907-495C-BFCF-57560338ADB3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{16100D7E-5B20-495C-BE19-F76B8FFB9B67}"
+	ProjectSection(SolutionItems) = preProject
+		build.ps1 = build.ps1
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE = LICENSE
+		package-lock.json = package-lock.json
+		package.json = package.json
+		README.md = README.md
+		VERSION = VERSION
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

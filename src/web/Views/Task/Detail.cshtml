@@ -12,44 +12,44 @@
     <table class="table align-middle table-borderless caption-top border table-striped mt-2">
         <caption>Task Information</caption>
         <tbody>
-        <tr>
-            <td>Id</td>
-            <td>#@Model.Task.Id</td>
-        </tr>
-        <tr>
-            <td>Name</td>
-            <td>@Model.Task.Name</td>
-        </tr>
-        <tr>
-            <td>Description</td>
-            <td>@Model.Task.Description</td>
-        </tr>
-        <tr>
-            <td>Run Times</td>
-            <td>@Model.RunCount</td>
-        </tr>
-        <tr>
-            <td>Shell</td>
-            <td>@Html.Raw(string.Join(" &middot; ", Model.Task.ShellName, Model.Task.ShellOption, Model.Task.ShellExt))</td>
-        </tr>
-        <tr>
-            <td>Script</td>
-            <td>
-                <div class="overflow-auto height-max-1 rounded">
-                    <pre class="m-0 p-2" id="script">@Model.Task.Script</pre>
-                </div>
-            </td>
-        </tr>
-        @if (!Model.Task.IsTemp)
-        {
             <tr>
-                <td>Actions</td>
+                <td class="fw-bold">Id</td>
+                <td>#@Model.Task.Id</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Name</td>
+                <td>@Model.Task.Name</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Description</td>
+                <td>@Model.Task.Description</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Run Times</td>
+                <td>@Model.RunCount</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Shell</td>
+                <td>@Html.Raw(string.Join(" &middot; ", Model.Task.ShellName, Model.Task.ShellOption, Model.Task.ShellExt))</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Script</td>
                 <td>
-                        <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
-                        <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                    <div class="overflow-auto height-max-1 rounded">
+                        <pre class="m-0 p-2" id="script">@Model.Task.Script</pre>
+                    </div>
                 </td>
             </tr>
-        }
+            @if (!Model.Task.IsTemp)
+            {
+                <tr>
+                    <td class="fw-bold">Actions</td>
+                    <td>
+                        <a class="btn btn-info btn-sm m-1" href="/task/@Model.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                        <button type="button" class="btn btn-success btn-sm m-1" onclick="runTask(@Model.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                    </td>
+                </tr>
+            }
 
         </tbody>
     </table>
@@ -59,29 +59,29 @@
     <table class="table align-middle caption-top text-md-center table-bordered table-striped">
         <caption>All Runs</caption>
         <thead>
-        <tr>
-            <th>#</th>
-            <th>Start At</th>
-            <th>Completed At</th>
-            <th>Elapsed</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>#</th>
+                <th>Start At</th>
+                <th>Completed At</th>
+                <th>Elapsed</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var item in Model.Runs)
-        {
-            <tr>
-                <td>#@item.Id</td>
-                <td>@Html.Raw(item.GetStartAtHtml())</td>
-                <td>@Html.Raw(item.GetCompletedAtHtml())</td>
-                <td>@Html.Raw(item.GetElapsedHtml(true))</td>
-                <td>@item.Status</td>
-                <td>
+            @foreach (var item in Model.Runs)
+            {
+                <tr>
+                    <td>#@item.Id</td>
+                    <td>@Html.Raw(item.GetStartAtHtml())</td>
+                    <td>@Html.Raw(item.GetCompletedAtHtml())</td>
+                    <td>@Html.Raw(item.GetElapsedHtml(true))</td>
+                    <td>@item.Status</td>
+                    <td>
                         <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Id"><i class="bi bi-info"></i> Detail</a>
-                </td>
-            </tr>
-        }
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>

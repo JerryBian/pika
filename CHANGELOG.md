@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 5.1
+
+Minor fix.
+
 ## 5.0
 
 Add Authentication.

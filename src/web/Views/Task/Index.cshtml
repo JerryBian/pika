@@ -7,43 +7,41 @@
     <a href="/task/add" class="btn btn-secondary btn-sm"><i class="bi bi-plus-lg"></i> Create new saved task</a>
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive overflow-hidden">
     <table class="table text-md-center align-middle table-bordered table-striped">
         <thead>
-        <tr>
-            <th>Id</th>
-            <th class="text-start">Task Name</th>
-            <th>Run Times</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>Id</th>
+                <th class="text-start">Task Name</th>
+                <th>Run Times</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var item in Model.Items)
-        {
-            <tr>
-                <td>#@item.Task.Id</td>
-                <td class="text-start">@item.Task.Name</td>
-                <td>@item.RunCount</td>
-                <td>
-                    <div class="row">
-                        <div class="col-md h-100 mb-2">
-                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                    <a class="btn btn-primary btn-sm" href="/task/@item.Task.Id"><i class="bi bi-info"></i> Detail</a>
-                                    <button type="button" class="btn btn-success btn-sm" onclick="runTask(@item.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
-                                </div>
-                                
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>#@item.Task.Id</td>
+                    <td class="text-start">@item.Task.Name</td>
+                    <td>@item.RunCount</td>
+                    <td>
+                        <div class="row">
+                            <div class="col mb-2 me-1">
+                                <a class="btn btn-primary btn-sm  w-100" href="/task/@item.Task.Id"><i class="bi bi-info"></i> Detail</a>
+                            </div>
+                            <div class="col mb-2 me-1">
+                                <button type="button" class="btn btn-success btn-sm  w-100" onclick="runTask(@item.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                            </div>
+                            <div class="col mb-2 me-1">
+                                <a class="btn btn-info btn-sm  w-100" href="/task/@item.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                            </div>
+                            <div class="col mb-2 me-1">
+                                <button type="button" class="btn btn-danger btn-sm  w-100" onclick="deleteTask(@item.Task.Id)"><i class="bi bi-trash"></i> Delete</button>
+                            </div>
                         </div>
-                        <div class="col-md h-100 mb-2">
-                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                    <a class="btn btn-info btn-sm" href="/task/@item.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTask(@item.Task.Id)"><i class="bi bi-trash"></i> Delete</button>
-                                </div>
-                                
-                        </div>
-                    </div>  
-                </td>
-            </tr>
-        }
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -55,11 +53,11 @@
     <script>
         function deleteTask(id) {
             showConfirmMessageModal(`Are your sure to delete task #${id}?`,
-                function() {
+                function () {
                     submitRequest(`/api/task/${id}`,
                         {
                             method: "DELETE",
-                            okAction: function(res) {
+                            okAction: function (res) {
                                 window.location.reload();
                             }
                         });

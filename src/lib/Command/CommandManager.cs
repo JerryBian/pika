@@ -32,14 +32,14 @@ public class CommandManager : ICommandManager
         _completedLiteral = Guid.NewGuid().ToString();
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _commandClients = new ConcurrentDictionary<long, ICommandClient>();
-        _batchBlock = new BatchBlock<PikaTaskRunOutput>(100, new GroupingDataflowBlockOptions { EnsureOrdered = false });
+        _batchBlock = new BatchBlock<PikaTaskRunOutput>(10, new GroupingDataflowBlockOptions { EnsureOrdered = false });
         Timer batchTimer = new(x =>
         {
             _batchBlock.TriggerBatch();
         });
         _batchTimerBlock = new TransformBlock<PikaTaskRunOutput, PikaTaskRunOutput>(x =>
         {
-            _ = batchTimer.Change(TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
+            _ = batchTimer.Change(TimeSpan.FromSeconds(2), Timeout.InfiniteTimeSpan);
             return x;
         }, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1, MaxMessagesPerTask = 1000 });
         _writeLogBlock = new ActionBlock<PikaTaskRunOutput[]>(ProcessRunOutputAsync, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1 });
