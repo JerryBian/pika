@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ExecDotnet;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -14,7 +15,7 @@ namespace Pika.Lib.Command;
 
 public class CommandManager : ICommandManager
 {
-    private readonly ConcurrentDictionary<long, ICommandClient> _commandClients;
+    private readonly ConcurrentDictionary<long, CancellationTokenSource> _commandClients;
     private readonly string _completedLiteral;
     private readonly IDbRepository _dbRepository;
     private readonly ILogger<CommandManager> _logger;
@@ -31,7 +32,7 @@ public class CommandManager : ICommandManager
         _serviceProvider = serviceProvider;
         _completedLiteral = Guid.NewGuid().ToString();
         _semaphoreSlim = new SemaphoreSlim(1, 1);
-        _commandClients = new ConcurrentDictionary<long, ICommandClient>();
+        _commandClients = new ConcurrentDictionary<long, CancellationTokenSource>();
         _batchBlock = new BatchBlock<PikaTaskRunOutput>(10, new GroupingDataflowBlockOptions { EnsureOrdered = false });
         Timer batchTimer = new(x =>
         {
@@ -49,9 +50,9 @@ public class CommandManager : ICommandManager
 
     public async Task StopAllAsync()
     {
-        foreach (KeyValuePair<long, ICommandClient> item in _commandClients)
+        foreach (var item in _commandClients)
         {
-            item.Value.Stop();
+            item.Value.Cancel();
         }
 
         _batchTimerBlock.Complete();
@@ -60,9 +61,9 @@ public class CommandManager : ICommandManager
 
     public void Stop(long runId)
     {
-        if (_commandClients.TryGetValue(runId, out ICommandClient commandClient))
+        if (_commandClients.TryGetValue(runId, out CancellationTokenSource commandClient))
         {
-            commandClient.Stop();
+            commandClient.Cancel();
             _ = _commandClients.TryRemove(runId, out _);
         }
     }
@@ -81,29 +82,16 @@ public class CommandManager : ICommandManager
                         PikaTaskRun run = await GetPendingTaskAsync(stoppingToken);
                         if (run != null)
                         {
-                            await using ICommandClient commandClient = _serviceProvider.GetService<ICommandClient>();
-                            if (commandClient == null)
-                            {
-                                continue;
-                            }
-
+                            var cts = new CancellationTokenSource();
                             bool stopped = false;
-                            _ = _commandClients.TryAdd(run.Id, commandClient);
-                            await commandClient.RunAsync(run.ShellName, run.ShellOption, run.ShellExt, run.Script,
-                                async m =>
-                                {
-                                    PikaTaskRunOutput output = new()
-                                    {
-                                        TaskRunId = run.Id,
-                                        IsError = false,
-                                        Message = m,
-                                        CreatedAt = DateTime.Now.Ticks
-                                    };
-
-                                    _ = await _batchTimerBlock.SendAsync(output);
-                                    _logger.LogInformation(m);
-                                    await Task.CompletedTask;
-                                }, async m =>
+                            _ = _commandClients.TryAdd(run.Id, cts);
+                            var execOption = new ExecOption
+                            {
+                                IsStreamed = true,
+                                Shell = run.ShellName,
+                                ShellExtension = run.ShellExt,
+                                ShellParameter = run.ShellOption,
+                                ErrorDataReceivedHandler = async m =>
                                 {
                                     PikaTaskRunOutput output = new()
                                     {
@@ -116,11 +104,28 @@ public class CommandManager : ICommandManager
                                     _ = await _batchTimerBlock.SendAsync(output);
                                     _logger.LogError(m);
 
-                                }, async () =>
+                                },
+                                OutputDataReceivedHandler = async m =>
+                                {
+                                    PikaTaskRunOutput output = new()
+                                    {
+                                        TaskRunId = run.Id,
+                                        IsError = false,
+                                        Message = m,
+                                        CreatedAt = DateTime.Now.Ticks
+                                    };
+
+                                    _ = await _batchTimerBlock.SendAsync(output);
+                                    _logger.LogInformation(m);
+                                    await Task.CompletedTask;
+                                },
+                                OnCancelledHandler = async () =>
                                 {
                                     stopped = true;
                                     await Task.CompletedTask;
-                                });
+                                }
+                            };
+                            await Exec.RunAsync(run.Script, execOption, cts.Token);
 
                             PikaTaskRunOutput output = new()
                             {

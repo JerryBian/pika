@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 5.2
+
+Introduce `Exec` package.
+
 ## 5.1
 
 Minor fix.
