@@ -40,7 +40,6 @@ jobs:
           dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-arm64 -c Release -o __ga/linux-arm64
           dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x64 -c Release -o __ga/win-x64
           dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x86 -c Release -o __ga/win-x86
-          dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-arm -c Release -o __ga/win-arm
           dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-arm64 -c Release -o __ga/win-arm64
           dotnet publish ./src/web/Pika.Web.csproj /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r osx-x64 -c Release -o __ga/osx-x64
       - name: Package Binaries
@@ -52,7 +51,6 @@ jobs:
           sudo tar -cvzf pika-linux-arm64.tar.gz --directory=linux-arm64 .
           cd win-x64 && sudo zip -r ../pika-win-x64.zip * && cd ..
           cd win-x86 && sudo zip -r ../pika-win-x86.zip * && cd ..
-          cd win-arm && sudo zip -r ../pika-win-arm.zip * && cd ..
           cd win-arm64 && sudo zip -r ../pika-win-arm64.zip * && cd ..
           cd osx-x64 && sudo zip -r ../pika-osx-x64.zip * && cd ..
       - uses: dev-drprasad/delete-tag-and-release@v0.2.1
