@@ -42,15 +42,15 @@ public class PikaTaskRun
 
     public TimeSpan GetTotalElapsed()
     {
-        DateTime completedAt = GetCompletedAtTime();
-        DateTime end = completedAt == default ? DateTime.Now : completedAt;
+        var completedAt = GetCompletedAtTime();
+        var end = completedAt == default ? DateTime.Now : completedAt;
         return end - GetCreatedAtTime();
     }
 
     public TimeSpan GetStartElapsed()
     {
-        DateTime startedAt = GetStartedAtTime();
-        DateTime end = startedAt == default ? DateTime.Now : startedAt;
+        var startedAt = GetStartedAtTime();
+        var end = startedAt == default ? DateTime.Now : startedAt;
         return end - GetCreatedAtTime();
     }
 
@@ -61,7 +61,7 @@ public class PikaTaskRun
             return TimeSpan.Zero;
         }
 
-        DateTime end = CompletedAt == default ? DateTime.Now : GetCompletedAtTime();
+        var end = CompletedAt == default ? DateTime.Now : GetCompletedAtTime();
         return end - GetStartedAtTime();
     }
 
@@ -72,7 +72,7 @@ public class PikaTaskRun
             return "<span title=\"Not started yet\">-</span>";
         }
 
-        DateTime startedAt = GetStartedAtTime();
+        var startedAt = GetStartedAtTime();
         return $"<span title=\"{startedAt}\">{startedAt.ToHuman()}</span>";
     }
 
@@ -83,26 +83,26 @@ public class PikaTaskRun
             return "<span title=\"Not completed yet\">-</span>";
         }
 
-        DateTime completedAt = GetCompletedAtTime();
+        var completedAt = GetCompletedAtTime();
         return $"<span title=\"{completedAt}\">{completedAt.ToHuman()}</span>";
     }
 
     public string GetCreatedAtHtml()
     {
-        DateTime createdAt = GetCreatedAtTime();
+        var createdAt = GetCreatedAtTime();
         return $"<span title=\"{createdAt}\">{createdAt.ToHuman()}</span>";
     }
 
     public string GetElapsedHtml(bool slim = false)
     {
-        TimeSpan totalElapsed = GetTotalElapsed();
+        var totalElapsed = GetTotalElapsed();
         if (slim)
         {
             return $"<span title=\"{totalElapsed}\">{totalElapsed.ToHuman()}</span> ";
         }
 
-        TimeSpan startElapsed = GetStartElapsed();
-        TimeSpan runElapsed = GetRunElapsed();
+        var startElapsed = GetStartElapsed();
+        var runElapsed = GetRunElapsed();
         return
             $"<span title=\"{totalElapsed}\">{totalElapsed.ToHuman()}</span> " +
             $"(<span class=\"fst-italic\" title=\"{startElapsed}\">pending to start</span>: {startElapsed.ToHuman()}, " +

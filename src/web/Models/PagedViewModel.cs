@@ -25,7 +25,7 @@ public class PagedViewModel<T>
         }
 
         CurrentPage = currentPage;
-        Items = new List<T>();
+        Items = [];
     }
 
     public int TotalPages { get; }

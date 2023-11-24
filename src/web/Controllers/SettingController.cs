@@ -33,13 +33,13 @@ public class SettingController : Controller
     [HttpPost("/setting/export")]
     public async Task<IActionResult> ExportAsync()
     {
-        System.Collections.Generic.List<PikaTask> tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
+        var tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
         PikaExport export = new()
         {
             Setting = _setting,
             Tasks = tasks
         };
-        byte[] content =
+        var content =
             Encoding.UTF8.GetBytes(JsonUtil.Serialize(export, true));
         return File(content, "application/json", "pika-export.json");
     }
@@ -49,8 +49,8 @@ public class SettingController : Controller
     {
         try
         {
-            await using System.IO.Stream stream = file.OpenReadStream();
-            PikaExport export = await JsonUtil.DeserializeAsync<PikaExport>(stream);
+            await using var stream = file.OpenReadStream();
+            var export = await JsonUtil.DeserializeAsync<PikaExport>(stream);
             if (export.Setting != null)
             {
                 if (export.Setting.RetainSizeInMb < 1)
@@ -68,7 +68,7 @@ public class SettingController : Controller
 
             if (export.Tasks != null)
             {
-                foreach (PikaTask pikaTask in export.Tasks)
+                foreach (var pikaTask in export.Tasks)
                 {
                     pikaTask.CreatedAt = DateTime.Now.Ticks;
                     pikaTask.LastModifiedAt = DateTime.Now.Ticks;

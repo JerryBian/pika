@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 5.3
+
+Bump .NET to 8
+
 ## 5.2
 
 Introduce `Exec` package.

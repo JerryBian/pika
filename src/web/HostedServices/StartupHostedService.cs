@@ -27,9 +27,9 @@ public class StartupHostedService : BackgroundService
     {
         await _repository.StartupAsync();
         await InitSettingAsync();
-        System.Collections.Generic.List<PikaTaskRun> runningTasks =
+        var runningTasks =
             await _repository.GetTaskRunsAsync(int.MaxValue, 0, $"status={(int)PikaTaskStatus.Running}");
-        foreach (PikaTaskRun runningTask in runningTasks)
+        foreach (var runningTask in runningTasks)
         {
             await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
             {
@@ -46,7 +46,7 @@ public class StartupHostedService : BackgroundService
 
     private async Task InitSettingAsync()
     {
-        string shellName = await _repository.GetSetting(SettingKey.ShellName);
+        var shellName = await _repository.GetSetting(SettingKey.ShellName);
         if (string.IsNullOrEmpty(shellName))
         {
             if (OperatingSystem.IsWindows())
@@ -67,14 +67,14 @@ public class StartupHostedService : BackgroundService
             }
         }
 
-        string itemsPerPage = await _repository.GetSetting(SettingKey.ItemsPerPage);
-        if (!int.TryParse(itemsPerPage, out int val) || val < 1)
+        var itemsPerPage = await _repository.GetSetting(SettingKey.ItemsPerPage);
+        if (!int.TryParse(itemsPerPage, out var val) || val < 1)
         {
             await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, "8");
         }
 
-        string retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
-        if (!int.TryParse(retainSizeInMb, out int val2) || val2 < 1)
+        var retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
+        if (!int.TryParse(retainSizeInMb, out var val2) || val2 < 1)
         {
             await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, "200");
         }

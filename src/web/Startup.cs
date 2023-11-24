@@ -56,7 +56,7 @@ public class Startup
 
         _ = services.AddControllersWithViews(config =>
         {
-            AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             config.Filters.Add(new AuthorizeFilter(policy));
         });
     }

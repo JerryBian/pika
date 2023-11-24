@@ -20,11 +20,11 @@ public class TaskController : Controller
     [HttpGet("/task")]
     public async Task<IActionResult> Index([FromQuery] int page = 1)
     {
-        int tasksCount = await _repository.GetTasksCountAsync();
+        var tasksCount = await _repository.GetTasksCountAsync();
         PagedViewModel<TaskDetailViewModel> pagedViewModel = new(page, tasksCount, _setting.ItemsPerPage);
-        System.Collections.Generic.List<PikaTask> tasks = await _repository.GetTasksAsync(_setting.ItemsPerPage,
+        var tasks = await _repository.GetTasksAsync(_setting.ItemsPerPage,
             (pagedViewModel.CurrentPage - 1) * _setting.ItemsPerPage, orderByClause: "created_at DESC");
-        foreach (PikaTask pikaTask in tasks)
+        foreach (var pikaTask in tasks)
         {
             TaskDetailViewModel taskDetailViewModel = new()
             {
@@ -41,14 +41,14 @@ public class TaskController : Controller
     [HttpGet("/task/{id}")]
     public async Task<IActionResult> Detail([FromRoute] long id)
     {
-        PikaTask task = await _repository.GetTaskAsync(id);
+        var task = await _repository.GetTaskAsync(id);
         if (task == null)
         {
             return NotFound();
         }
 
         TaskDetailViewModel taskDetailViewModel = new() { Task = task };
-        System.Collections.Generic.List<PikaTaskRun> runs = await _repository.GetTaskRunsAsync(100, 0, $"task_id={id}", "created_at DESC");
+        var runs = await _repository.GetTaskRunsAsync(100, 0, $"task_id={id}", "created_at DESC");
         taskDetailViewModel.Runs = runs;
         taskDetailViewModel.RunCount = await _repository.GetRunsCountAsync(task.Id);
         return View(taskDetailViewModel);
@@ -90,7 +90,7 @@ public class TaskController : Controller
     [HttpGet("/task/{id}/update")]
     public async Task<IActionResult> Update([FromRoute] long id)
     {
-        PikaTask task = await _repository.GetTaskAsync(id);
+        var task = await _repository.GetTaskAsync(id);
         return task == null ? NotFound() : View(task);
     }
 }

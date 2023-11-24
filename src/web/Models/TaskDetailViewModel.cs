@@ -9,5 +9,5 @@ public class TaskDetailViewModel
 
     public int RunCount { get; set; }
 
-    public List<PikaTaskRun> Runs { get; set; } = new();
+    public List<PikaTaskRun> Runs { get; set; } = [];
 }

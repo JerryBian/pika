@@ -8,7 +8,7 @@ public static class AppUtil
     {
         get
         {
-            System.Version version = Assembly.GetEntryAssembly()?.GetName().Version;
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
             return version == null ? "1.0" : version.ToString(2);
         }
     }

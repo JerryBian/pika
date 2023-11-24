@@ -17,7 +17,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        Lib.Model.PikaSystemStatus status = await _repository.GetSystemStatusAsync();
+        var status = await _repository.GetSystemStatusAsync();
         return View(status);
     }
 

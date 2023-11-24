@@ -42,11 +42,11 @@ namespace Pika.Web.Controllers
 
             if (userName == _option.AdminUserName && password == _option.AdminPassword)
             {
-                List<Claim> claims = new()
-                {
+                List<Claim> claims =
+                [
                     new("user", userName),
                     new("role", "admin")
-                };
+                ];
 
                 AuthenticationProperties authProperty = new()
                 {

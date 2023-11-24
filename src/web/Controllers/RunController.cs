@@ -23,23 +23,23 @@ public class RunController : Controller
     [HttpGet("/run")]
     public async Task<IActionResult> Index([FromQuery] int page = 1, [FromQuery] string status = "")
     {
-        string whereClause = "";
-        if (Enum.TryParse<PikaTaskStatus>(status, out PikaTaskStatus s))
+        var whereClause = "";
+        if (Enum.TryParse<PikaTaskStatus>(status, out var s))
         {
             whereClause = $"status={(int)s}";
         }
 
-        int runsCount = await _repository.GetRunsCountAsync(whereClause);
+        var runsCount = await _repository.GetRunsCountAsync(whereClause);
         PagedViewModel<RunDetailViewModel> pagedViewModel = new(page, runsCount, _setting.ItemsPerPage);
-        System.Collections.Generic.List<PikaTaskRun> runs = await _repository.GetTaskRunsAsync(_setting.ItemsPerPage,
+        var runs = await _repository.GetTaskRunsAsync(_setting.ItemsPerPage,
             (pagedViewModel.CurrentPage - 1) * _setting.ItemsPerPage, whereClause, "created_at DESC");
-        foreach (PikaTaskRun run in runs)
+        foreach (var run in runs)
         {
             RunDetailViewModel runDetailViewModel = new() { Run = run };
-            RunDetailViewModel vm = pagedViewModel.Items.FirstOrDefault(x => x.Run.TaskId == run.TaskId);
+            var vm = pagedViewModel.Items.FirstOrDefault(x => x.Run.TaskId == run.TaskId);
             if (vm == null)
             {
-                PikaTask task = await _repository.GetTaskAsync(run.TaskId);
+                var task = await _repository.GetTaskAsync(run.TaskId);
                 runDetailViewModel.TaskName = task.Name;
             }
             else
@@ -57,13 +57,13 @@ public class RunController : Controller
     [HttpGet("/run/{id}")]
     public async Task<IActionResult> Detail([FromRoute] long id)
     {
-        PikaTaskRun taskRun = await _repository.GetTaskRunAsync(id);
+        var taskRun = await _repository.GetTaskRunAsync(id);
         if (taskRun == null)
         {
             return NotFound();
         }
 
-        PikaTask task = await _repository.GetTaskAsync(taskRun.TaskId);
+        var task = await _repository.GetTaskAsync(taskRun.TaskId);
         if (task == null)
         {
             return NotFound();
@@ -80,7 +80,7 @@ public class RunController : Controller
     [HttpGet("/run/{id}/output/raw")]
     public async Task<IActionResult> RawOutput([FromRoute] long id)
     {
-        System.Collections.Generic.List<PikaTaskRunOutput> outputs = await _repository.GetTaskRunOutputs(id, desc: false);
+        var outputs = await _repository.GetTaskRunOutputs(id, desc: false);
         return Content(string.Join(Environment.NewLine, outputs.Select(x => x.Message)), "text/plain", Encoding.UTF8);
     }
 }

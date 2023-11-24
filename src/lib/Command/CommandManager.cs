@@ -1,5 +1,4 @@
 ﻿using ExecDotnet;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -61,7 +60,7 @@ public class CommandManager : ICommandManager
 
     public void Stop(long runId)
     {
-        if (_commandClients.TryGetValue(runId, out CancellationTokenSource commandClient))
+        if (_commandClients.TryGetValue(runId, out var commandClient))
         {
             commandClient.Cancel();
             _ = _commandClients.TryRemove(runId, out _);
@@ -70,8 +69,8 @@ public class CommandManager : ICommandManager
 
     public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        List<Task> tasks = new();
-        for (int i = 0; i < 5; i++)
+        List<Task> tasks = [];
+        for (var i = 0; i < 5; i++)
         {
             tasks.Add(Task.Run(async () =>
             {
@@ -79,11 +78,11 @@ public class CommandManager : ICommandManager
                 {
                     try
                     {
-                        PikaTaskRun run = await GetPendingTaskAsync(stoppingToken);
+                        var run = await GetPendingTaskAsync(stoppingToken);
                         if (run != null)
                         {
                             var cts = new CancellationTokenSource();
-                            bool stopped = false;
+                            var stopped = false;
                             _ = _commandClients.TryAdd(run.Id, cts);
                             var execOption = new ExecOption
                             {
@@ -158,14 +157,14 @@ public class CommandManager : ICommandManager
     {
         try
         {
-            IEnumerable<PikaTaskRunOutput> nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
-            IEnumerable<PikaTaskRunOutput> completedOutputs = output.Except(nonCompletedOutputs);
+            var nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
+            var completedOutputs = output.Except(nonCompletedOutputs);
 
             await _dbRepository.AddTaskRunOutputAsync(nonCompletedOutputs.ToList());
 
-            foreach (PikaTaskRunOutput item in completedOutputs)
+            foreach (var item in completedOutputs)
             {
-                PikaTaskStatus status = item.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
+                var status = item.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
                 await _dbRepository.UpdateTaskRunStatusAsync(item.TaskRunId, status);
                 _logger.LogInformation($"Run {item.TaskRunId} marked as {status}.");
             }
@@ -181,10 +180,10 @@ public class CommandManager : ICommandManager
         await _semaphoreSlim.WaitAsync(cancellationToken);
         try
         {
-            List<PikaTaskRun> pendingRuns =
+            var pendingRuns =
                 await _dbRepository.GetTaskRunsAsync(whereClause: $"status={(int)PikaTaskStatus.Pending}",
                     orderByClause: "created_at ASC");
-            PikaTaskRun run = pendingRuns.FirstOrDefault();
+            var run = pendingRuns.FirstOrDefault();
             if (run != null)
             {
                 await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Running);

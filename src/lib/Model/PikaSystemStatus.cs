@@ -18,11 +18,11 @@ public class PikaSystemStatus
 
     public int TaskInDeadCount { get; set; }
 
-    public List<KeyValuePair<PikaTask, int>> MostRunTasks { get; set; } = new();
+    public List<KeyValuePair<PikaTask, int>> MostRunTasks { get; set; } = [];
 
-    public List<PikaTaskRun> LongestRuns { get; set; } = new();
+    public List<PikaTaskRun> LongestRuns { get; set; } = [];
 
-    public List<PikaTaskRun> LatestRuns { get; set; } = new();
+    public List<PikaTaskRun> LatestRuns { get; set; } = [];
 
     public long DbSize { get; set; }
 }

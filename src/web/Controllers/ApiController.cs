@@ -64,7 +64,7 @@ public class ApiController : ControllerBase
         ApiResponse<object> response = new();
         try
         {
-            long runId = await StartRunAsync(id);
+            var runId = await StartRunAsync(id);
             response.RedirectTo = $"/run/{runId}";
         }
         catch (Exception ex)
@@ -78,7 +78,7 @@ public class ApiController : ControllerBase
 
     private async Task<long> StartRunAsync(long taskId)
     {
-        PikaTask task = await _repository.GetTaskAsync(taskId);
+        var task = await _repository.GetTaskAsync(taskId);
         PikaTaskRun run = new()
         {
             TaskId = taskId,
@@ -90,7 +90,7 @@ public class ApiController : ControllerBase
             CreatedAt = DateTime.Now.Ticks
         };
 
-        long runId = await _repository.AddTaskRunAsync(run);
+        var runId = await _repository.AddTaskRunAsync(run);
         return runId;
     }
 
@@ -101,7 +101,7 @@ public class ApiController : ControllerBase
         try
         {
             task.CreatedAt = task.LastModifiedAt = DateTime.Now.Ticks;
-            bool isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
+            var isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
             if (isTemp)
             {
                 task.IsTemp = true;
@@ -109,10 +109,10 @@ public class ApiController : ControllerBase
                 task.Description = "Temp one time task";
             }
 
-            long id = await _repository.AddTaskAsync(task);
+            var id = await _repository.AddTaskAsync(task);
             if (isTemp)
             {
-                long runId = await StartRunAsync(id);
+                var runId = await StartRunAsync(id);
                 response.RedirectTo = $"/run/{runId}";
             }
             else
@@ -173,7 +173,7 @@ public class ApiController : ControllerBase
         ApiResponse<TaskRunOutputViewModel> response = new();
         try
         {
-            PikaTaskRun taskRun = await _repository.GetTaskRunAsync(runId);
+            var taskRun = await _repository.GetTaskRunAsync(runId);
             if (taskRun == null)
             {
                 response.IsOk = false;
@@ -181,10 +181,10 @@ public class ApiController : ControllerBase
             }
             else
             {
-                System.Collections.Generic.List<PikaTaskRunOutput> outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
+                var outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
                 outputs.Reverse();
-                long maxTimestamp = default(DateTime).Ticks;
-                PikaTaskRunOutput lastEl = outputs.LastOrDefault();
+                var maxTimestamp = default(DateTime).Ticks;
+                var lastEl = outputs.LastOrDefault();
                 if (lastEl != null)
                 {
                     maxTimestamp = lastEl.CreatedAt;

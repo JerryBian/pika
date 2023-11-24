@@ -42,7 +42,7 @@ public class PageTagHelper : TagHelper
             _ = html.AppendLine(GetLinkItem($"<span>{PrevLabel}</span>", GetUrl(CurrentPage - 1)));
         }
 
-        for (int i = 1; i <= TotalPages; i++)
+        for (var i = 1; i <= TotalPages; i++)
         {
             // display CurrentPage item as active
             if (i == CurrentPage)
