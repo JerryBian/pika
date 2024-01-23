@@ -254,37 +254,14 @@ public class SqliteDbRepository : IDbRepository
     {
         PikaSystemStatus status = new();
         await using SqliteConnection connection = new(_connectionString);
-        var sql = "SELECT COUNT(*) FROM task WHERE is_temp = 0;" +
-                  "SELECT COUNT(*) FROM task_run;" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Pending}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Running}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Stopped}';" +
-                  $"SELECT COUNT(*) FROM task_run WHERE status='{(int)PikaTaskStatus.Dead}';" +
-                  "SELECT a.id, a.name, count(1) run_count FROM task a JOIN task_run b ON a.id = b.task_id WHERE a.is_temp = 0 GROUP BY a.id ORDER BY COUNT(1) DESC, a.created_at ASC LIMIT 8 OFFSET 0;" +
-                  $"SELECT * FROM task_run WHERE status='{(int)PikaTaskStatus.Completed}' ORDER BY (completed_at - created_at) DESC LIMIT 8 OFFSET 0;" +
-                  $"SELECT * FROM task_run ORDER BY created_at DESC LIMIT 8 OFFSET 0";
+        var sql =  "SELECT COUNT(*) FROM task_run;" +
+                  "SELECT a.*, (SELECT COUNT(1) FROM task_run WHERE task_id = a.id) AS RunCount, (SELECT MAX(created_at) FROM task_run WHERE task_id = a.id) AS LastRun FROM task a WHERE a.is_temp = 0 ORDER BY LastRun DESC;" +
+                  "SELECT a.*, b.name AS TaskName FROM task_run a JOIN task b ON a.task_id = b.id ORDER BY created_at DESC LIMIT 10 OFFSET 0;";
         using (var multi = await connection.QueryMultipleAsync(sql))
         {
-            status.TaskCount = await multi.ReadSingleAsync<int>();
             status.RunCount = await multi.ReadSingleAsync<int>();
-            status.TaskInPendingCount = await multi.ReadSingleAsync<int>();
-            status.TaskInRunningCount = await multi.ReadSingleAsync<int>();
-            status.TaskInCompletedCount = await multi.ReadSingleAsync<int>();
-            status.TaskInStoppedCount = await multi.ReadSingleAsync<int>();
-            status.TaskInDeadCount = await multi.ReadSingleAsync<int>();
-            var mostRunTasks = await multi.ReadAsync<dynamic>();
-            foreach (var mostRunTask in mostRunTasks)
-            {
-                PikaTask task = new()
-                {
-                    Id = Convert.ToInt64((double)mostRunTask.id),
-                    Name = Convert.ToString(mostRunTask.name)
-                };
-                status.MostRunTasks.Add(new KeyValuePair<PikaTask, int>(task, Convert.ToInt32(mostRunTask.run_count)));
-            }
+            status.SavedTasks.AddRange(await multi.ReadAsync<PikaTask>());
 
-            status.LongestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
             status.LatestRuns.AddRange(await multi.ReadAsync<PikaTaskRun>());
         }
 

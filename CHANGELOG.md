@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 5.4
+
+Redesign home page
+
 ## 5.3
 
 Bump .NET to 8

@@ -23,4 +23,6 @@ public class PikaTask
     [JsonPropertyName("lastModifiedAt")] public long LastModifiedAt { get; set; }
 
     [JsonPropertyName("isTemp")] public bool IsTemp { get; set; }
+
+    public int RunCount { get; set; }
 }

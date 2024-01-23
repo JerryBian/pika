@@ -25,6 +25,8 @@ public class PikaTaskRun
 
     public string ShellExt { get; set; }
 
+    public string TaskName { get; set; }
+
     public DateTime GetCreatedAtTime()
     {
         return new DateTime(CreatedAt);
@@ -107,5 +109,24 @@ public class PikaTaskRun
             $"<span title=\"{totalElapsed}\">{totalElapsed.ToHuman()}</span> " +
             $"(<span class=\"fst-italic\" title=\"{startElapsed}\">pending to start</span>: {startElapsed.ToHuman()}, " +
             $"<span class=\"fst-italic\" title=\"{runElapsed}\">run to completed</span>: {runElapsed.ToHuman()})";
+    }
+
+    public string GetStatusBadge()
+    {
+        switch(Status)
+        {
+            case PikaTaskStatus.Pending:
+                return "<span class=\"badge text-bg-light\">Pending</span>";
+            case PikaTaskStatus.Completed:
+                return "<span class=\"badge text-bg-success\">Completed</span>";
+            case PikaTaskStatus.Running:
+                return "<span class=\"badge text-bg-info\">Running</span>";
+            case PikaTaskStatus.Stopped:
+                return "<span class=\"badge text-bg-danger\">Stopped</span>";
+            case PikaTaskStatus.Dead:
+                return "<span class=\"badge text-bg-secondary\">Dead</span>";
+            default:
+                throw new NotSupportedException();
+        }
     }
 }

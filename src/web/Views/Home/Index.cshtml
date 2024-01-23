@@ -1,7 +1,88 @@
 ﻿@model PikaSystemStatus
 
 <div class="mt-5">
-    <div class="row">
+    <section>
+        <div class="mb-2">
+            <i class="bi bi-braces-asterisk small text-muted"></i> 
+            <span class="h5">Saved Tasks</span> <span class="text-muted small font-monospace">[@Model.SavedTasks.Count]</span>
+            <a href="/task/add" class="btn btn-secondary btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
+        </div>
+        <div class="border border-light px-2">
+            @foreach(var item in Model.SavedTasks)
+            {
+                <div class="row py-2 my-1">
+                    <div class="col-10 text-truncate">
+                        <i class="bi bi-arrow-right-short text-muted small"></i>
+                        <a class="text-reset text-decoration-none" href="/task/@item.Id">@item.Name</a>
+                    </div>
+                    <div class="col-2 text-truncate text-end">
+                        <span class="bg-primary-subtle px-1">@item.RunCount runs</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    @if(Model.LatestRuns.Any())
+    {
+        <section class="mt-5">
+            <div class="mb-2"><i class="bi bi-braces-asterisk small text-muted"></i> <span class="h5">Latest <span class="small font-monospace text-muted">@Model.LatestRuns.Count</span> runs</span></div>
+            <div class="border border-light px-2">
+                @foreach (var item in Model.LatestRuns)
+                {
+                    <div class="row py-2 my-1">
+                        <div class="col-6 text-truncate">
+                            <i class="bi bi-arrow-right-short text-muted small"></i>
+                            <a class="text-reset text-decoration-none" href="/run/@item.Id">@item.TaskName</a>
+                        </div>
+                        <div class="col-3 text-truncate text-end small text-muted">
+                            <span>@((new DateTime(item.CreatedAt)).ToHuman())</span>
+                        </div>
+                        <div class="col-3 text-truncate text-end">
+                            @Html.Raw(item.GetStatusBadge())
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+    <section class="mt-5">
+        <div class="mb-2"><i class="bi bi-braces-asterisk small text-muted"></i> <span class="h5">Statistics</span></div>
+        <div class="border border-light px-2">
+            <div class="row py-2 my-1">
+                <div class="col-10 text-truncate">
+                    <i class="bi bi-database text-muted"></i> Database size
+                </div>
+                <div class="col-2 font-monospace small text-muted bg-info-subtle text-end">
+                    @Model.DbSize.ToByteSizeHuman()
+                </div>
+            </div>
+            <div class="row py-2 my-1">
+                <div class="col-10 text-truncate">
+                    <i class="bi bi-terminal text-muted"></i> Total runs
+                </div>
+                <div class="col-2 font-monospace small text-muted bg-success-subtle text-end">
+                    @Model.RunCount
+                </div>
+            </div>
+        </div>
+    </section>
+    @* <div class="row">
+        <div class="col-sm-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header text-center">
+                    Saved Tasks
+                </div>
+                <div class="list-group">
+                    @foreach (var item in Model.SavedTasks)
+                    {
+                        <a href="/run/@item.Id" class="list-group-item  d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-signpost text-muted"></i> #@item.Name</span>
+                            
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
         <div class="col-sm-6 mb-3">
             <div class="card h-100">
                 <div class="card-header text-center">
@@ -18,45 +99,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 mb-3">
-            <div class="card h-100">
-                <div class="card-header text-center">
-                    Tasks run most often
-                </div>
-                <div class="list-group">
-                    @foreach (var task in Model.MostRunTasks)
-                    {
-                        <a href="/task/@task.Key.Id" class="list-group-item  d-flex justify-content-between align-items-center">
-                            <span>
-                                <i class="bi bi-list-check text-muted"></i> @task.Key.Name
-                            </span>
-                            <span class="badge bg-primary rounded-pill">@task.Value</span>
-                        </a>
-                    }
-
-                </div>
-            </div>
-        </div>
-        
     </div>
 
     <div class="row">
-        <div class="col-sm-6 mb-3">
-            <div class="card h-100">
-                <div class="card-header text-center">
-                    Runs take longest
-                </div>
-                <div class="list-group">
-                    @foreach (var run in Model.LongestRuns)
-                    {
-                        <a href="/run/@run.Id" class="list-group-item  d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-signpost text-muted"></i> #@run.Id</span>
-                            <span class="badge bg-primary rounded-pill">@run.GetTotalElapsed().ToHuman()</span>
-                        </a>
-                    }
-                </div>
-            </div>
-        </div>
         <div class="col-sm-6 mb-3">
             <div class="card h-100">
                 <div class="card-header text-center">
@@ -98,5 +143,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> *@
 </div>
