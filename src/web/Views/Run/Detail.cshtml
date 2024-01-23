@@ -113,7 +113,7 @@
 
         function addToOutput(outputs) {
             let existingEls = document.querySelectorAll("#output div");
-            let childrenLengthToRemove = Math.max(0, existingEls.length + outputs.length - 100);
+            let childrenLengthToRemove = Math.max(0, existingEls.length + outputs.length - 500);
             let k = 0;
             existingEls.forEach(el => {
                 if (k === childrenLengthToRemove) {
