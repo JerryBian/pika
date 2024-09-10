@@ -68,6 +68,94 @@ public class SqliteDbRepository : IDbRepository
         _ = await command.ExecuteNonQueryAsync();
     }
 
+    public async Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "",
+        string orderByClause = "")
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $" where {whereClause}";
+        orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
+        var limitClause = string.Empty;
+        if (limit > 0 && offset >= 0)
+        {
+            limitClause = $"LIMIT {limit} OFFSET {offset}";
+        }
+
+        var sql = $"SELECT * FROM app {whereClause} {orderByClause} {limitClause}";
+        return (await connection.QueryAsync<PikaApp>(sql)).AsList();
+    }
+
+    public async Task<PikaApp> GetAppAsync(long appId)
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        var result =
+            await connection.QuerySingleOrDefaultAsync<PikaApp>("SELECT * FROM app WHERE id=@id", new { id = appId });
+        return result;
+    }
+
+    public async Task<long> AddAppAsync(PikaApp app)
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        var id = await connection.ExecuteScalarAsync(
+            "INSERT INTO app(name, description, start_script, start_script_path, stop_script, stop_script_path, shell_name, shell_option, shell_ext, created_at, last_modified_at) " +
+            "VALUES(@name, @desc, @startScript, @startScriptPath, @stopScript, @stopScriptPath,  @shellName, @shellOption, @shellExt, @createdAt, @lastModifiedAt) RETURNING id",
+            new
+            {
+                name = app.Name,
+                desc = app.Description,
+                startScript = app.StartScript,
+                startScriptPath = app.StartScriptPath,
+                stopScript = app.StopScript,
+                stopScriptPath = app.StopScriptPath,
+                createdAt = app.CreatedAt,
+                lastModifiedAt = app.LastModifiedAt,
+                shellName = app.ShellName,
+                shellOption = app.ShellOption,
+                shellExt = app.ShellExt
+            });
+        return id == null ? -1 : Convert.ToInt64(id);
+    }
+
+    public async Task UpdateAppAsync(PikaApp app)
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        await connection.ExecuteAsync(
+            "UPDATE app " +
+            "SET name=@name, " +
+            "description=@desc, " +
+            "shell_name=@shellName, " +
+            "shell_option=@shellOption, " +
+            "shell_ext=@shellExt, " +
+            "start_script=@startScript, " +
+            "start_script_path=@startScriptPath, " +
+            "stop_script=@stopScript, " +
+            "stop_script_path=@stopScriptPath, " +
+            "last_modified_at=$lastModifiedAt WHERE id=$id",
+            new
+            {
+                name = app.Name,
+                desc = app.Description,
+                startScript = app.StartScript,
+                startScriptPath = app.StartScriptPath,
+                stopScript = app.StopScript,
+                stopScriptPath = app.StopScriptPath,
+                lastModifiedAt = app.LastModifiedAt,
+                shellName = app.ShellName,
+                shellOption = app.ShellOption,
+                shellExt = app.ShellExt,
+                id = app.Id
+            });
+    }
+
+    public async Task DeleteAppAsync(long appId)
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        _ = await connection.ExecuteAsync(
+            "DELETE FROM app WHERE id=@appId", new
+            {
+                appId
+            });
+    }
+
     public async Task<long> AddTaskAsync(PikaTask task)
     {
         await using SqliteConnection connection = new(_connectionString);

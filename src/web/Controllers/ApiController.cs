@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ExecDotnet;
+using Microsoft.AspNetCore.Mvc;
 using Pika.Lib.Command;
 using Pika.Lib.Model;
 using Pika.Lib.Store;
@@ -22,6 +23,165 @@ public class ApiController : ControllerBase
         _setting = setting;
         _repository = repository;
         _commandManager = commandManager;
+    }
+
+    [HttpDelete("app/{id}")]
+    public async Task<ApiResponse<object>> DeleteAppAsync([FromRoute] long id)
+    {
+        ApiResponse<object> response = new();
+        try
+        {
+            await _repository.DeleteAppAsync(id);
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPut("app/add")]
+    public async Task<ApiResponse<object>> AddAppAsync([FromForm] PikaApp app)
+    {
+        ApiResponse<object> response = new();
+        try
+        {
+            app.CreatedAt = app.LastModifiedAt = DateTime.Now.Ticks;
+            var id = await _repository.AddAppAsync(app);
+            response.RedirectTo = $"/app/{id}";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPost("app/update")]
+    public async Task<ApiResponse<object>> UpdateAppAsync([FromForm] PikaApp app)
+    {
+        ApiResponse<object> response = new();
+        try
+        {
+            app.LastModifiedAt = DateTime.Now.Ticks;
+            await _repository.UpdateAppAsync(app);
+            response.RedirectTo = $"/app/{app.Id}";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPost("app/{id}/start")]
+    public async Task<ApiResponse<string>> StartAppAsync([FromRoute] long id)
+    {
+        ApiResponse<string> response = new();
+        try
+        {
+            var app = await _repository.GetAppAsync(id);
+            if (app == null)
+            {
+                response.IsOk = false;
+                response.Message = "Failed to find app.";
+            }
+            else
+            {
+                var execOption = new ExecOption
+                {
+                    Shell = app.ShellName,
+                    ShellExtension = app.ShellExt,
+                    ShellParameter = app.ShellOption,
+                    Timeout = TimeSpan.FromHours(1)
+                };
+
+                var command = string.Empty;
+                if(System.IO.File.Exists(app.StartScriptPath))
+                {
+                    command = await System.IO.File.ReadAllTextAsync(app.StartScriptPath);
+                }
+
+                if(string.IsNullOrEmpty(command))
+                {
+                    command = app.StartScript;
+                }
+
+                if(string.IsNullOrEmpty(command))
+                {
+                    response.IsOk = false;
+                    response.Message = "No start script to execute.";
+                }
+
+                var output = await Exec.RunAsync(command);
+                response.Content = output;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    [HttpPost("app/{id}/stop")]
+    public async Task<ApiResponse<string>> StopAppAsync([FromRoute] long id)
+    {
+        ApiResponse<string> response = new();
+        try
+        {
+            var app = await _repository.GetAppAsync(id);
+            if (app == null)
+            {
+                response.IsOk = false;
+                response.Message = "Failed to find app.";
+            }
+            else
+            {
+                var execOption = new ExecOption
+                {
+                    Shell = app.ShellName,
+                    ShellExtension = app.ShellExt,
+                    ShellParameter = app.ShellOption,
+                    Timeout = TimeSpan.FromHours(1)
+                };
+
+                var command = string.Empty;
+                if (System.IO.File.Exists(app.StopScriptPath))
+                {
+                    command = await System.IO.File.ReadAllTextAsync(app.StopScriptPath);
+                }
+
+                if (string.IsNullOrEmpty(command))
+                {
+                    command = app.StopScript;
+                }
+
+                if (string.IsNullOrEmpty(command))
+                {
+                    response.IsOk = false;
+                    response.Message = "No stop script to execute.";
+                }
+
+                var output = await Exec.RunAsync(command);
+                response.Content = output;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
     }
 
     [HttpDelete("task/{id}")]
@@ -59,7 +219,7 @@ public class ApiController : ControllerBase
     }
 
     [HttpPut("run/{id}")]
-    public async Task<ApiResponse<object>> RunAsync([FromRoute] long id)
+    public async Task<ApiResponse<object>> RunTaskAsync([FromRoute] long id)
     {
         ApiResponse<object> response = new();
         try

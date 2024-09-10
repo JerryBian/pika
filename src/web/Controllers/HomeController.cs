@@ -17,8 +17,12 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var status = await _repository.GetSystemStatusAsync();
-        return View(status);
+        var model = new HomeViewModel();
+        model.Apps.AddRange(await _repository.GetAppsAsync());
+        model.Tasks.AddRange(await _repository.GetTasksAsync());
+        model.SystemStatus = await _repository.GetSystemStatusAsync();
+
+        return View(model);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

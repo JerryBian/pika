@@ -8,6 +8,17 @@ public interface IDbRepository
 {
     Task StartupAsync();
 
+    Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "",
+        string orderByClause = "");
+
+    Task<PikaApp> GetAppAsync(long appId);
+
+    Task<long> AddAppAsync(PikaApp app);
+
+    Task UpdateAppAsync(PikaApp app);
+
+    Task DeleteAppAsync(long appId);
+
     Task<long> AddTaskAsync(PikaTask task);
 
     Task UpdateTaskAsync(PikaTask task);

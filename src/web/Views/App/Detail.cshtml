@@ -1,0 +1,65 @@
+﻿@model PikaApp
+
+@{
+    ViewData["Title"] = $"App #{Model.Id}";
+}
+<div class="table-responsive">
+    <table class="table align-middle table-borderless caption-top border border-light table-striped mt-2">
+        <caption>App Information</caption>
+        <tbody>
+            <tr>
+                <td class="fw-bold">Id</td>
+                <td>#@Model.Id</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Name</td>
+                <td>@Model.Name</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Description</td>
+                <td>@Model.Description</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Shell</td>
+                <td>@Html.Raw(string.Join(" &middot; ", Model.ShellName, Model.ShellOption, Model.ShellExt))</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Start script</td>
+                <td>
+                    <div class="overflow-auto height-max-1 rounded">
+                        <pre class="m-0 p-2 script">@Model.StartScript</pre>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Start script path</td>
+                <td>@Model.StartScriptPath</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Stop script</td>
+                <td>
+                    <div class="overflow-auto height-max-1 rounded">
+                        <pre class="m-0 p-2 script">@Model.StopScript</pre>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Stop script path</td>
+                <td>@Model.StopScriptPath</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Actions</td>
+                <td>
+                    <a class="btn btn-info btn-sm m-1 w-25" href="/app/@Model.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts{
+    <script>
+        hljs.highlightElement(document.querySelector(".script"));
+        setActive("taskNav");
+    </script>
+}

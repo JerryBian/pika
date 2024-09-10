@@ -155,3 +155,23 @@ function stopRun(runId) {
 function escapeHTML(str) {
     return new Option(str).innerHTML;
 }
+
+function startApp(id) {
+    submitRequest(`/api/app/${id}/start`,
+        {
+            method: "POST",
+            okAction: function (res) {
+                showInfoMessageModal(`<pre>${res}</pre>`);
+            }
+        });
+}
+
+function stopApp(id) {
+    submitRequest(`/api/app/${id}/stop`,
+        {
+            method: "POST",
+            okAction: function (res) {
+                showInfoMessageModal(`<pre>${res}</pre>`);
+            }
+        });
+}

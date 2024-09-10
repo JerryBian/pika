@@ -1,0 +1,103 @@
+﻿@model PikaApp
+@{
+    ViewData["Title"] = $"Update app #{Model.Id}";
+}
+
+<fieldset>
+    <legend>Update app</legend>
+    <form class="needs-validation" novalidate>
+        <div class="mb-3 row">
+            <label for="name" class="col-sm-2 col-form-label">App Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="name" autocomplete="off" autofocus name="name" required value="@Model.Name">
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="desc" class="col-sm-2 col-form-label">App Description</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="desc" autocomplete="off" name="description" value="@Model.Description">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="shellName" class="col-sm-2 col-form-label">Shell Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellName" autocomplete="off" name="shellName" value="@Model.ShellName" required>
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="shellOption" class="col-sm-2 col-form-label">Shell Option</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellOption" autocomplete="off" name="shellOption" value="@Model.ShellOption">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="shellExt" class="col-sm-2 col-form-label">Shell Extension</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="shellExt" autocomplete="off" name="shellExt" value="@Model.ShellExt">
+                <div class="invalid-feedback">
+                    Required
+                </div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="startScript" class="col-sm-2 col-form-label">Start script</label>
+            <div class="col-sm-10">
+                <textarea class="form-control font-monospace" id="startScript" autocomplete="off" name="startScript" rows="8">@Model.StartScript</textarea>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="startScriptPath" class="col-sm-2 col-form-label">Start script path</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="startScriptPath" autocomplete="off" name="startScriptPath" aria-describedby="startScriptPathHelp" value="@Model.StartScriptPath">
+            </div>
+            <div id="startScriptPathHelp" class="form-text">Specify either start <code>script</code> or <code>path</code> (higher priority).</div>
+        </div>
+        <div class="mb-3 row">
+            <label for="stopScript" class="col-sm-2 col-form-label">Stop script</label>
+            <div class="col-sm-10">
+                <textarea class="form-control font-monospace" id="stopScript" autocomplete="off" name="stopScript" rows="8">@Model.StopScript</textarea>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="stopScriptPath" class="col-sm-2 col-form-label">Stop script path</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="stopScriptPath" autocomplete="off" name="stopScriptPath" aria-describedby="stopScriptPathHelp" value="@Model.StopScriptPath">
+            </div>
+            <div id="stopScriptPathHelp" class="form-text">Specify either stop <code>script</code> or <code>path</code> (higher priority).</div>
+        </div>
+        <div class="mb-3 row">
+            <label for="script" class="col-sm-2"></label>
+            <div class="col-sm-10 d-grid">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+        <input type="hidden" name="id" value="@Model.Id"/>
+    </form>
+</fieldset>
+
+@section Scripts{
+    <script>
+        const form = document.querySelector("form");
+        form.addEventListener('submit',
+            function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                submitRequest("/api/app/update",
+                    {
+                        form: form,
+                        method: "POST",
+                        body: new URLSearchParams(new FormData(form)),
+                        contentType: "application/x-www-form-urlencoded"
+                    });
+            });
+        setActive("runNav");
+    </script>
+}

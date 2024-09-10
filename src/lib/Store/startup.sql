@@ -51,6 +51,25 @@ CREATE TABLE IF NOT EXISTS task_run_output
 
 CREATE INDEX IF NOT EXISTS IX_task_run_output_created_at ON task_run_output(created_at ASC);
 
+-- task_run_output
+CREATE TABLE IF NOT EXISTS app
+(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL COLLATE BINARY,
+    description TEXT COLLATE BINARY,
+    start_script TEXT COLLATE BINARY,
+    start_script_path TEXT COLLATE BINARY,
+    stop_script TEXT COLLATE BINARY,
+    stop_script_path TEXT COLLATE BINARY,
+    shell_name TEXT NOT NULL COLLATE BINARY,
+    shell_option TEXT COLLATE BINARY,
+    shell_ext TEXT NOT NULL COLLATE BINARY,
+    created_at INTEGER NOT NULL,
+    last_modified_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS IX_app_created_at ON app(created_at ASC);
+
 -- setting
 CREATE TABLE IF NOT EXISTS setting
 (
