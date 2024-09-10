@@ -161,7 +161,7 @@ function startApp(id) {
         {
             method: "POST",
             okAction: function (res) {
-                showInfoMessageModal(`<pre>${res}</pre>`);
+                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
             }
         });
 }
@@ -171,7 +171,7 @@ function stopApp(id) {
         {
             method: "POST",
             okAction: function (res) {
-                showInfoMessageModal(`<pre>${res}</pre>`);
+                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
             }
         });
 }

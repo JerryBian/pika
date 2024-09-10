@@ -37,7 +37,8 @@ public class SettingController : Controller
         PikaExport export = new()
         {
             Setting = _setting,
-            Tasks = tasks
+            Tasks = tasks,
+            Apps = await _repository.GetAppsAsync()
         };
         var content =
             Encoding.UTF8.GetBytes(JsonUtil.Serialize(export, true));
@@ -76,7 +77,16 @@ public class SettingController : Controller
                 }
             }
 
-            return Redirect("~/task");
+            if(export.Apps != null)
+            {
+                foreach(var app in export.Apps)
+                {
+                    app.CreatedAt = app.LastModifiedAt = DateTime.Now.Ticks;
+                    await _repository.AddAppAsync(app);
+                }
+            }
+
+            return Redirect("~/");
         }
         catch (Exception ex)
         {

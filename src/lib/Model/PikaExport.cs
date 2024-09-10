@@ -12,4 +12,9 @@ public class PikaExport
     [JsonPropertyOrder(2)]
     [JsonPropertyName("setting")]
     public PikaSetting Setting { get; set; }
+
+    [JsonPropertyOrder(3)]
+    [JsonPropertyName("apps")]
+    public List<PikaApp> Apps { get; set; }
+
 }
