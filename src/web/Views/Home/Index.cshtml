@@ -5,7 +5,7 @@
         <div class="card-header text-white">
             <i class="bi bi-app small text-muted"></i>
             <span class="h5">Apps</span> <span class="text-muted small font-monospace">[@Model.Apps.Count]</span>
-            <a href="/app/add" class="btn btn-outline-secondary btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
+            <a href="/app/add" class="btn btn-outline-dark btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
         </div>
         <div class="card-body">
             @foreach (var item in Model.Apps)
@@ -16,9 +16,11 @@
                         @item.Name
                     </div>
                     <div class="text-start m-1">
-                        <a href="javascript:;" onclick="startApp(@item.Id)" class="btn btn-success btn-sm mb-1 px-4 me-2"><i class="bi bi-power"></i> Start</a>
-                        <a href="javascript:;" onclick="stopApp(@item.Id)" class="btn btn-outline-danger btn-sm mb-1 px-4 me-2"><i class="bi bi-stop-circle"></i> Stop</a>
-                        <a href="/app/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm mb-1 px-4"><i class="bi bi-info-circle"></i> Detail</a>
+                        <div class="row">
+                            <div class="col-sm-4 d-grid gap-1 mb-2"><a href="javascript:;" onclick="startApp(@item.Id)" class="btn btn-success btn-sm"><i class="bi bi-power"></i> Start</a></div>
+                            <div class="col-sm-4 d-grid gap-1 mb-2"><a href="javascript:;" onclick="stopApp(@item.Id)" class="btn btn-outline-danger btn-sm"><i class="bi bi-stop-circle"></i> Stop</a></div>
+                            <div class="col-sm-4 d-grid gap-1 mb-1"><a href="/app/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm"><i class="bi bi-info-circle"></i> Detail</a></div>
+                        </div>
                     </div>
                 </div>
             }
@@ -30,7 +32,7 @@
         <div class="card-header text-white">
             <i class="bi bi-code small text-muted"></i>
             <span class="h5">Tasks</span> <span class="text-muted small font-monospace">[@Model.Tasks.Count]</span>
-            <a href="/task/add" class="btn btn-outline-secondary btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
+            <a href="/task/add" class="btn btn-outline-dark btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
         </div>
         <div class="card-body">
             @foreach (var item in Model.Tasks)
@@ -41,8 +43,10 @@
                         @item.Name
                     </div>
                     <div class="text-start m-1">
-                        <a href="javascript:;" onclick="runTask(@item.Id)" class="btn btn-success btn-sm mb-1 px-4 me-2"><i class="bi bi-power"></i> Run</a>
-                        <a href="/task/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm mb-1 px-4"><i class="bi bi-info-circle"></i> Detail</a>
+                        <div class="row">
+                            <div class="col-sm-6 d-grid gap-1 mb-2"><a href="javascript:;" onclick="runTask(@item.Id)" class="btn btn-success btn-sm"><i class="bi bi-power"></i> Run</a></div>
+                            <div class="col-sm-6 d-grid gap-1 mb-1"><a href="/task/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm"><i class="bi bi-info-circle"></i> Detail</a></div>
+                        </div>
                     </div>
                 </div>
 

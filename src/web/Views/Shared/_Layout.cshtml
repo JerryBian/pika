@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="~/style.min.css" asp-append-version="true" />
 </head>
 <body class="w-100">
-    <div class="container-fluid min-vh-100 d-flex flex-column p-0">
+    <div class="container-fluid min-vh-100 d-flex flex-column p-0" id="container">
         <nav class="navbar navbar-expand navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="/">
@@ -29,6 +29,9 @@
                             <a href="/task/add?isTemp=true" class="nav-link text-success" id="runTempTask"><i class="bi bi-terminal"></i> Quick Run</a>
                         </li>
                         <li class="vr"></li>
+                        <li class="nav-item">
+                            <a href="/run" class="nav-link text-dark" id="runNav"><i class="bi bi-clock-history"></i> All Runs</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/setting" id="settingNav"><i class="bi bi-gear-fill"></i> Setting</a>
                         </li>
@@ -63,6 +66,12 @@
                 <div class="modal-footer" id="messageModalFooter">
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center vh-100 align-items-center d-none" id="spinner">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 

@@ -156,12 +156,48 @@ function escapeHTML(str) {
     return new Option(str).innerHTML;
 }
 
+function showContainer() {
+    let ele = document.querySelector("#container");
+    if (ele.classList.contains("d-none")) {
+        ele.classList.remove("d-none");
+    }
+}
+
+function hideContainer() {
+    let ele = document.querySelector("#container");
+    if (!ele.classList.contains("d-none")) {
+        ele.classList.add("d-none");
+    }
+}
+
+function showSpinner() {
+    let ele = document.querySelector("#spinner");
+    if (ele.classList.contains("d-none")) {
+        ele.classList.remove("d-none");
+    }
+}
+
+function hideSpinner() {
+    let ele = document.querySelector("#spinner");
+    if (!ele.classList.contains("d-none")) {
+        ele.classList.add("d-none");
+    }
+}
+
 function startApp(id) {
     submitRequest(`/api/app/${id}/start`,
         {
             method: "POST",
             okAction: function (res) {
                 showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
+            },
+            preAction: function () {
+                hideContainer();
+                showSpinner();
+            },
+            postAction: function () {
+                hideSpinner();
+                showContainer();
             }
         });
 }
@@ -172,6 +208,14 @@ function stopApp(id) {
             method: "POST",
             okAction: function (res) {
                 showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
+            },
+            preAction: function () {
+                hideContainer();
+                showSpinner();
+            },
+            postAction: function () {
+                hideSpinner();
+                showContainer();
             }
         });
 }
