@@ -219,3 +219,21 @@ function stopApp(id) {
             }
         });
 }
+
+function initApp(id) {
+    submitRequest(`/api/app/${id}/init`,
+        {
+            method: "POST",
+            okAction: function (res) {
+                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
+            },
+            preAction: function () {
+                hideContainer();
+                showSpinner();
+            },
+            postAction: function () {
+                hideSpinner();
+                showContainer();
+            }
+        });
+}

@@ -10,6 +10,10 @@ namespace Pika.Lib.Model
 
         [JsonPropertyName("description")] public string Description { get; set; }
 
+        [JsonPropertyName("init_script")] public string InitScript { get; set; }
+
+        [JsonPropertyName("init_script_path")] public string InitScriptPath { get; set; }
+
         [JsonPropertyName("start_script")] public string StartScript { get; set; }
 
         [JsonPropertyName("start_script_path")] public string StartScriptPath { get; set; }

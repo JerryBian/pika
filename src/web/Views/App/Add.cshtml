@@ -48,6 +48,19 @@
             </div>
         </div>
         <div class="mb-3 row">
+            <label for="initScript" class="col-sm-2 col-form-label">Init script</label>
+            <div class="col-sm-10">
+                <textarea class="form-control font-monospace" id="initScript" autocomplete="off" name="initScript" rows="8"></textarea>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="initScriptPath" class="col-sm-2 col-form-label">Init script path</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="initScriptPath" autocomplete="off" name="initScriptPath" aria-describedby="initScriptPathHelp">
+            </div>
+            <div id="initScriptPathHelp" class="form-text">Specify either init <code>script</code> or <code>path</code> (higher priority).</div>
+        </div>
+        <div class="mb-3 row">
             <label for="startScript" class="col-sm-2 col-form-label">Start script</label>
             <div class="col-sm-10">
                 <textarea class="form-control font-monospace" id="startScript" autocomplete="off" name="startScript" rows="8"></textarea>

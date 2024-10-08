@@ -80,6 +80,58 @@ public class ApiController : ControllerBase
         return response;
     }
 
+    [HttpPost("app/{id}/init")]
+    public async Task<ApiResponse<string>> InitAppAsync([FromRoute] long id)
+    {
+        ApiResponse<string> response = new();
+        try
+        {
+            var app = await _repository.GetAppAsync(id);
+            if (app == null)
+            {
+                response.IsOk = false;
+                response.Message = "Failed to find app.";
+            }
+            else
+            {
+                var execOption = new ExecOption
+                {
+                    Shell = app.ShellName,
+                    ShellExtension = app.ShellExt,
+                    ShellParameter = app.ShellOption,
+                    Timeout = TimeSpan.FromHours(1)
+                };
+
+                var command = string.Empty;
+                if (System.IO.File.Exists(app.InitScriptPath))
+                {
+                    command = await System.IO.File.ReadAllTextAsync(app.InitScriptPath);
+                }
+
+                if (string.IsNullOrEmpty(command))
+                {
+                    command = app.InitScript;
+                }
+
+                if (string.IsNullOrEmpty(command))
+                {
+                    response.IsOk = false;
+                    response.Message = "No init script to execute.";
+                }
+
+                var output = await Exec.RunAsync(command);
+                response.Content = output;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
     [HttpPost("app/{id}/start")]
     public async Task<ApiResponse<string>> StartAppAsync([FromRoute] long id)
     {

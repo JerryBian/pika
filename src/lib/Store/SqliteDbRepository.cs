@@ -96,12 +96,14 @@ public class SqliteDbRepository : IDbRepository
     {
         await using SqliteConnection connection = new(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO app(name, description, start_script, start_script_path, stop_script, stop_script_path, shell_name, shell_option, shell_ext, created_at, last_modified_at) " +
-            "VALUES(@name, @desc, @startScript, @startScriptPath, @stopScript, @stopScriptPath,  @shellName, @shellOption, @shellExt, @createdAt, @lastModifiedAt) RETURNING id",
+            "INSERT INTO app(name, description, init_script, init_script_path, start_script, start_script_path, stop_script, stop_script_path, shell_name, shell_option, shell_ext, created_at, last_modified_at) " +
+            "VALUES(@name, @desc, @initScript, @initScriptPath, @startScript, @startScriptPath, @stopScript, @stopScriptPath,  @shellName, @shellOption, @shellExt, @createdAt, @lastModifiedAt) RETURNING id",
             new
             {
                 name = app.Name,
                 desc = app.Description,
+                initScript = app.InitScript,
+                initScriptPath = app.InitScriptPath,
                 startScript = app.StartScript,
                 startScriptPath = app.StartScriptPath,
                 stopScript = app.StopScript,
@@ -125,6 +127,8 @@ public class SqliteDbRepository : IDbRepository
             "shell_name=@shellName, " +
             "shell_option=@shellOption, " +
             "shell_ext=@shellExt, " +
+            "init_script=@initScript, " +
+            "init_script_path=@initScriptPath, " +
             "start_script=@startScript, " +
             "start_script_path=@startScriptPath, " +
             "stop_script=@stopScript, " +
@@ -134,6 +138,8 @@ public class SqliteDbRepository : IDbRepository
             {
                 name = app.Name,
                 desc = app.Description,
+                initScript = app.InitScript,
+                initScriptPath = app.InitScriptPath,
                 startScript = app.StartScript,
                 startScriptPath = app.StartScriptPath,
                 stopScript = app.StopScript,
