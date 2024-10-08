@@ -24,6 +24,18 @@
                 <td>@Html.Raw(string.Join(" &middot; ", Model.ShellName, Model.ShellOption, Model.ShellExt))</td>
             </tr>
             <tr>
+                <td class="fw-bold">Init script</td>
+                <td>
+                    <div class="overflow-auto height-max-1 rounded">
+                        <pre class="m-0 p-2 script">@Model.InitScript</pre>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Init script path</td>
+                <td>@Model.InitScriptPath</td>
+            </tr>
+            <tr>
                 <td class="fw-bold">Start script</td>
                 <td>
                     <div class="overflow-auto height-max-1 rounded">
