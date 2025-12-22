@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>pika</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ByteSize" Version="2.1.2" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Exec" Version="2.0.0" />
+    <PackageReference Include="Humanizer.Core" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <!-- Add Razor runtime compilation package to satisfy hosting startup loader when present -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
+    <PackageReference Include="SSH.NET" Version="2025.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Common\Store\startup.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

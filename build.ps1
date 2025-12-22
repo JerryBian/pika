@@ -1,4 +1,4 @@
-$WWWRootLoc = Join-Path $PSScriptRoot src web wwwroot
+$WWWRootLoc = Join-Path $PSScriptRoot src wwwroot
 $NodeModulesLoc = Join-Path $PSScriptRoot node_modules
 
 npm install
@@ -19,7 +19,9 @@ Write-Output "Minify CSS completed."
 
 npx uglifyjs --compress -o $(Join-Path $WWWRootLoc script.min.js) `
     $(Join-Path $NodeModulesLoc \@highlightjs cdn-assets highlight.js) `
-    $(Join-Path $NodeModulesLoc bootstrap dist js bootstrap.js) `
+    $(Join-Path $NodeModulesLoc bootstrap dist js/bootstrap.bundle.js) `
+    $(Join-Path $NodeModulesLoc \@microsoft/signalr dist/browser/signalr.js) `
+    $(Join-Path $NodeModulesLoc chart.js dist/chart.umd.js) `
     $(Join-Path $WWWRootLoc src script.js)
 Write-Output "Minify JS completed."
 

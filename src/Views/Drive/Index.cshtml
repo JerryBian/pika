@@ -1,0 +1,56 @@
+﻿@model IEnumerable<PikaDriveIndexViewModel>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var item in Model)
+    {
+        <div class="col">
+            <a href="/drive/@item.DriveId" class="text-decoration-none">
+                <div class="card text-center bg-light bg-gradient ">
+                    <div class="card-img-top text-center py-2">
+                        <div class="fs-2"><i class="bi @item.DeviceIcon"></i></div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <h5 class="card-title font-monospace">@item.DrivePath</h5>
+                        <div class="small text-muted">@item.MountPoints</div>
+                        <div class="fs-5 card-text font-monospace">
+                            @item.DriveType &middot; 
+                            @item.Size &middot; 
+                            <span id="@item.PowerStatusSpanId"></span></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (async () => {
+            const connection = await startSignalRConnection("/hub/drive");
+
+            @foreach (var item in Model)
+            {
+                   <text>
+                   connection.stream("GetDrivePowerStatus", "@item.DrivePath")
+                       .subscribe({
+                            next: (item) => {
+                                console.log(item);
+                                     document.getElementById("@item.PowerStatusSpanId").innerText = item.stateString;
+                                     document.getElementById("@item.PowerStatusSpanId").className = item.className;
+                            },
+                        complete: () => {
+                                console.log("complete");
+                        },
+                        error: (err) => {
+                                console.log(err);
+                        },
+
+                    });
+
+                   </text>
+            }
+        })();
+
+        
+
+    </script>
+}

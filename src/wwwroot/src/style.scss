@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400;
+    src: local(''),
+            url('./fonts/raleway-v28-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+            url('./fonts/raleway-v28-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+$card-bg: transparent;
+
+$font-family-sans-serif: "Raleway", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+@import "../../../node_modules/bootstrap-icons/font/bootstrap-icons";
+/*@import "../../../../node_modules/bootswatch/dist/cyborg/variables";*/
+@import "../../../node_modules/bootstrap/scss/bootstrap";
+/*@import "../../../../node_modules/bootswatch/dist/cyborg/bootswatch";*/
+
+.height-max-1 {
+    max-height: 200px;
+}
+
+.height-max-2 {
+    max-height: 450px;
+}

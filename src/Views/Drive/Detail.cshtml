@@ -1,0 +1,334 @@
+﻿@model PikaDriveDetailViewModel
+@{
+    var lastSmart = Model.SmartctlTable?.OrderByDescending(s => s.CreatedAt).FirstOrDefault();
+    var previousSmart = Model.SmartctlTable?.OrderByDescending(s => s.CreatedAt).Skip(1).FirstOrDefault();
+}
+<nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/drive">Drive</a></li>
+        <li class="breadcrumb-item active">@Model.DevicePath</li>
+    </ol>
+</nav>
+<div class="card bg-light bg-gradient ">
+    <div class="card-body row">
+        <div class="col-4 d-flex justify-content-center align-items-center"><i class="bi @Model.DeviceIcon fs-1"></i></div>
+        <div class="col-8">
+            <h5 class="card-title font-monospace">@Model.DevicePath</h5>
+            <div class="fs-5 card-text font-monospace">
+                @Model.DeviceType &middot; @Model.Size &middot;
+                <span class="text-warning" id="device_powerstate">Standby</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-4">
+                Model
+            </div>
+            <div class="col-8">
+                @Model.Model
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-4">
+                Serial
+            </div>
+            <div class="col-8">
+                @Model.SerialNumber
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (lastSmart != null)
+{
+    <div class="accordion mt-4" id="accordionFlushDeviceHealthy">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button id="device_healthy" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                    @(lastSmart.Passed ? "Healthy" : "Unhealthy")
+                </button>
+            </h2>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushDeviceHealthy">
+                <div class="accordion-body">
+                    <div class="small text-muted mb-1">
+                        Last scanned at @lastSmart.CreatedAtString
+                        @if (previousSmart != null)
+                        {
+                            <span>&middot; Diff scan at @previousSmart.CreatedAtString.</span>
+                        }
+                    </div>
+                    <table class="table table-bordered table-responsive">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Attribute</th>
+                                <th scope="col">Value</th>
+                                <th scope="col">Diff</th>
+                                <th scope="col">History</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <tr>
+                                <th scope="row">reallocated_sector_ct</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.ReallocatedSectorCt)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.ReallocatedSectorCt, previousSmart?.ReallocatedSectorCt)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReallocatedSectorCt);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">current_pending_sector</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.CurrentPendingSector)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.CurrentPendingSector, previousSmart?.CurrentPendingSector)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CurrentPendingSector);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">offline_uncorrectable</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.OfflineUncorrectable)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.OfflineUncorrectable, previousSmart?.OfflineUncorrectable)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.OfflineUncorrectable);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">reported_uncorrect</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.ReportedUncorrect)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.ReportedUncorrect, previousSmart?.ReportedUncorrect)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReportedUncorrect);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">start_stop_count</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.StartStopCount)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.StartStopCount, previousSmart?.StartStopCount)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.StartStopCount);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">power_on_hours</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.PowerOnHours)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerOnHours, previousSmart?.PowerOnHours)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOnHours);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">power_cycle_count</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.PowerCycleCount)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerCycleCount, previousSmart?.PowerCycleCount)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerCycleCount);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">command_timeout</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.CommandTimeout)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.CommandTimeout, previousSmart?.CommandTimeout)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CommandTimeout);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">power_off_restart_count</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.PowerOffRestartCount)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerOffRestartCount, previousSmart?.PowerOffRestartCount)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOffRestartCount);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">load_cycle_count</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.LoadCycleCount)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.LoadCycleCount, previousSmart?.LoadCycleCount)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.LoadCycleCount);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">udma_crc_error_count</th>
+                                <td>@StringUtil.DisplayLong(lastSmart?.UdmaCrcErrorCount)</td>
+                                <td>@StringUtil.DisplayDiff(lastSmart?.UdmaCrcErrorCount, previousSmart?.UdmaCrcErrorCount)</td>
+                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.UdmaCrcErrorCount);"><i class="bi bi-graph-up"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<h5 class="mt-4">Partitions <span class="badge text-bg-info">@Model.Partitions.Count</span></h5>
+@foreach (var item in Model.Partitions)
+{
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4">
+                    Name
+                </div>
+                <div class="col-8">
+                    @item.PartitionName
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(item.FileSystemType))
+            {
+                <div class="row mt-2">
+                    <div class="col-4">
+                        System Type
+                    </div>
+                    <div class="col-8">
+                        @item.FileSystemType
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(item.Capacity))
+            {
+                <div class="row mt-2">
+                    <div class="col-4">
+                        Capacity
+                    </div>
+                    <div class="col-8">
+                        @item.Capacity
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(item.MountPoint))
+            {
+                <div class="row mt-2">
+                    <div class="col-4">
+                        Mount Point
+                    </div>
+                    <div class="col-8">
+                        @item.MountPoint
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(item.Label))
+            {
+                <div class="row mt-2">
+                    <div class="col-4">
+                        Label
+                    </div>
+                    <div class="col-8">
+                        @item.Label
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(item.Uuid))
+            {
+                <div class="row mt-2">
+                    <div class="col-4">
+                        UUID
+                    </div>
+                    <div class="col-8">
+                        @item.Uuid
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (async () => {
+           const connection = await startSignalRConnection("/hub/drive");
+           const powerStateEle = document.querySelector("#device_powerstate");
+
+           // chart configs generated from server-side SmartctlTable (labels + per-attribute data)
+           const _labels = @Html.Raw(Model.SmartctlTable.LabelsJson());
+
+           window.history.ReallocatedSectorCt = {
+              labels: _labels,
+              datasets: [{ label: 'ReallocatedSectorCt', data: @Html.Raw(Model.SmartctlTable.ReallocatedSectorCtDataJson()), borderColor: 'green', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.CurrentPendingSector = {
+              labels: _labels,
+              datasets: [{ label: 'CurrentPendingSector', data: @Html.Raw(Model.SmartctlTable.CurrentPendingSectorDataJson()), borderColor: 'blue', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.OfflineUncorrectable = {
+              labels: _labels,
+              datasets: [{ label: 'OfflineUncorrectable', data: @Html.Raw(Model.SmartctlTable.OfflineUncorrectableDataJson()), borderColor: 'orange', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.ReportedUncorrect = {
+              labels: _labels,
+              datasets: [{ label: 'ReportedUncorrect', data: @Html.Raw(Model.SmartctlTable.ReportedUncorrectDataJson()), borderColor: 'purple', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.StartStopCount = {
+              labels: _labels,
+              datasets: [{ label: 'StartStopCount', data: @Html.Raw(Model.SmartctlTable.StartStopCountDataJson()), borderColor: 'teal', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.PowerOnHours = {
+              labels: _labels,
+              datasets: [{ label: 'PowerOnHours', data: @Html.Raw(Model.SmartctlTable.PowerOnHoursDataJson()), borderColor: 'maroon', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.PowerCycleCount = {
+              labels: _labels,
+              datasets: [{ label: 'PowerCycleCount', data: @Html.Raw(Model.SmartctlTable.PowerCycleCountDataJson()), borderColor: 'navy', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.CommandTimeout = {
+              labels: _labels,
+              datasets: [{ label: 'CommandTimeout', data: @Html.Raw(Model.SmartctlTable.CommandTimeoutDataJson()), borderColor: 'olive', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.PowerOffRestartCount = {
+              labels: _labels,
+              datasets: [{ label: 'PowerOffRestartCount', data: @Html.Raw(Model.SmartctlTable.PowerOffRestartCountDataJson()), borderColor: 'brown', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.LoadCycleCount = {
+              labels: _labels,
+              datasets: [{ label: 'LoadCycleCount', data: @Html.Raw(Model.SmartctlTable.LoadCycleCountDataJson()), borderColor: 'gray', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.UdmaCrcErrorCount = {
+              labels: _labels,
+              datasets: [{ label: 'UdmaCrcErrorCount', data: @Html.Raw(Model.SmartctlTable.UdmaCrcErrorCountDataJson()), borderColor: 'black', backgroundColor: 'rgba(0,0,0,0)' }]
+           };
+
+           window.history.Temperature = {
+              labels: _labels,
+              datasets: [{ label: 'Temperature', data: @Html.Raw(Model.SmartctlTable.TemperatureDataJson()), borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.1)' }]
+           };
+
+
+           connection.stream("GetDrivePowerStatus", "@Model.DevicePath")
+                .subscribe({
+                    next: (item) => {
+                        console.log(item);
+                        powerStateEle.className = item.className;
+                        powerStateEle.innerText = item.stateString;
+                    },
+                complete: () => {
+                        console.log("complete");
+                },
+                error: (err) => {
+                        console.log(err);
+                },
+
+           });
+
+           window.viewAttributeHistory = function(data){
+                showMessageModal("View SMART Attribute", `<canvas id="myChart"></canvas>`, null, true);
+                      const ctx = document.getElementById('myChart');
+
+                    new Chart(ctx, {
+          type: 'line',
+          data: data,
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+              title: {
+                display: false,
+                text: 'Chart.js Line Chart'
+              }
+            }
+          },
+        });
+           }
+           })();
+    </script>
+}
