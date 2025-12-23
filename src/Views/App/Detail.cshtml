@@ -1,4 +1,5 @@
-﻿@model PikaApp
+﻿@using Pika.Common.App
+@model PikaApp
 
 @{
     ViewData["Title"] = $"App #{Model.Id}";
@@ -60,6 +61,26 @@
                 <td>@Model.StopScriptPath</td>
             </tr>
             <tr>
+                <td class="fw-bold">State script</td>
+                <td>
+                    <div class="overflow-auto height-max-1 rounded">
+                        <pre class="m-0 p-2 script">@Model.StateScript</pre>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="fw-bold">State script path</td>
+                <td>@Model.StateScriptPath</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Running state</td>
+                <td>@Model.RunningState</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">URL port</td>
+                <td>@Model.Port</td>
+            </tr>
+            <tr>
                 <td class="fw-bold">Actions</td>
                 <td>
                     <a class="btn btn-info btn-sm m-1 w-25" href="/app/@Model.Id/update"><i class="bi bi-pen"></i> Edit</a>
@@ -71,7 +92,7 @@
 
 @section Scripts{
     <script>
+        setActive("navApp");
         hljs.highlightElement(document.querySelectorAll(".script"));
-        setActive("taskNav");
     </script>
 }

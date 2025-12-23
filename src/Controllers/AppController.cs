@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ExecDotnet;
+using Microsoft.AspNetCore.Mvc;
 using Pika.Common.Model;
 using Pika.Common.Store;
+using Pika.Models;
 
 namespace Pika.Controllers;
 
@@ -19,7 +21,37 @@ public class AppController : Controller
     public async Task<IActionResult> Index([FromQuery] int page = 1)
     {
         var apps = await _repository.GetAppsAsync(orderByClause: "created_at DESC");
-        return View(apps);
+        var model = new List<PikaAppViewModel>();
+        foreach(var app in apps)
+        {
+            var vm = new PikaAppViewModel
+            {
+                App = app,
+                State = "Stopped",
+                StateClassName = "text-warning",
+                Url = $"{Request.Scheme}://{Request.Host.Host}:{app.Port}"
+            };
+
+            var stateScript = app.StateScript;
+            if(!string.IsNullOrWhiteSpace(app.StateScriptPath))
+            {
+                stateScript = await System.IO.File.ReadAllTextAsync(app.StartScriptPath);
+            }
+
+            if(!string.IsNullOrWhiteSpace(stateScript))
+            {
+                var execResult = await Exec.RunAsync(stateScript);
+                if(execResult.ExitCode == 0 && execResult.Output.Trim().Contains(app.RunningState, StringComparison.OrdinalIgnoreCase))
+                {
+                    vm.State = "Running";
+                    vm.StateClassName = "text-success";
+                }
+            }
+
+            model.Add(vm);
+        }
+
+        return View(model);
     }
 
     [HttpGet("/app/{id}")]

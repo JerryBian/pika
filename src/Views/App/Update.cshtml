@@ -1,4 +1,5 @@
-﻿@model PikaApp
+﻿@using Pika.Common.App
+@model PikaApp
 @{
     ViewData["Title"] = $"Update app #{Model.Id}";
 }
@@ -87,6 +88,31 @@
             <div id="stopScriptPathHelp" class="form-text">Specify either stop <code>script</code> or <code>path</code> (higher priority).</div>
         </div>
         <div class="mb-3 row">
+            <label for="stateScript" class="col-sm-2 col-form-label">State script</label>
+            <div class="col-sm-10">
+                <textarea class="form-control font-monospace" id="stateScript" autocomplete="off" name="stateScript" rows="8">@Model.StateScript</textarea>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="stateScriptPath" class="col-sm-2 col-form-label">State script path</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="stateScriptPath" autocomplete="off" name="stateScriptPath" aria-describedby="stateScriptPathHelp" value="@Model.StateScriptPath">
+            </div>
+            <div id="stateScriptPathHelp" class="form-text">Specify either state <code>script</code> or <code>path</code> (higher priority).</div>
+        </div>
+        <div class="mb-3 row">
+            <label for="runningState" class="col-sm-2 col-form-label">Running state</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="runningState" autocomplete="off" name="runningState" value="@Model.RunningState">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="port" class="col-sm-2 col-form-label">URL port</label>
+            <div class="col-sm-10">
+                <input type="number" min="80" class="form-control" id="port" autocomplete="off" name="port" value="@Model.Port">
+            </div>
+        </div>
+        <div class="mb-3 row">
             <label for="script" class="col-sm-2"></label>
             <div class="col-sm-10 d-grid">
                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -94,7 +120,13 @@
         </div>
         <input type="hidden" name="id" value="@Model.Id"/>
     </form>
+    
 </fieldset>
+
+<hr />
+<div class="d-grid bg-warning p-2">
+    <button type="button" class="btn btn-danger btn-sm" onclick="deleteApp('@Model.Id')">Delete</button>
+</div>
 
 @section Scripts{
     <script>
@@ -111,6 +143,19 @@
                         contentType: "application/x-www-form-urlencoded"
                     });
             });
-        setActive("runNav");
+
+            function deleteApp(id) {
+            showConfirmMessageModal(`Are your sure to delete app #${id}?`,
+                function () {
+                    submitRequest(`/api/app/${id}`,
+                        {
+                            method: "DELETE",
+                            okAction: function (res) {
+                                window.location.href="/app";
+                            }
+                        });
+                });
+        }
+        setActive("navApp");
     </script>
 }

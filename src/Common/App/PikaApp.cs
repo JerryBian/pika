@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Pika.Common.Model
+namespace Pika.Common.App
 {
     public class PikaApp
     {
@@ -21,6 +21,14 @@ namespace Pika.Common.Model
         [JsonPropertyName("stop_script")] public string StopScript { get; set; }
 
         [JsonPropertyName("stop_script_path")] public string StopScriptPath { get; set; }
+
+        [JsonPropertyName("state_script")] public string StateScript { get; set; }
+
+        [JsonPropertyName("state_script_path")] public string StateScriptPath { get; set; }
+
+        [JsonPropertyName("running_state")] public string RunningState { get; set; }
+
+        [JsonPropertyName("port")] public int Port { get; set; }
 
         [JsonPropertyName("shell_name")] public string ShellName { get; set; }
 

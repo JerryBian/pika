@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
+using Pika.Common.App;
 using Pika.Common.Dapper;
 using Pika.Common.Drive;
 using Pika.Common.Model;
@@ -64,6 +65,8 @@ public class SqliteDbRepository : IDbRepository
         _ = await command.ExecuteNonQueryAsync();
     }
 
+    #region App
+
     public async Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "",
         string orderByClause = "")
     {
@@ -92,8 +95,8 @@ public class SqliteDbRepository : IDbRepository
     {
         await using SqliteConnection connection = new(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO app(name, description, init_script, init_script_path, start_script, start_script_path, stop_script, stop_script_path, shell_name, shell_option, shell_ext, created_at, last_modified_at) " +
-            "VALUES(@name, @desc, @initScript, @initScriptPath, @startScript, @startScriptPath, @stopScript, @stopScriptPath,  @shellName, @shellOption, @shellExt, @createdAt, @lastModifiedAt) RETURNING id",
+            "INSERT INTO app(name, description, init_script, init_script_path, start_script, start_script_path, stop_script, stop_script_path, state_script, state_script_path, running_state, port, shell_name, shell_option, shell_ext, created_at, last_modified_at) " +
+            "VALUES(@name, @desc, @initScript, @initScriptPath, @startScript, @startScriptPath, @stopScript, @stopScriptPath, @stateScript, @stateScriptPath, @runningState, @port, @shellName, @shellOption, @shellExt, @createdAt, @lastModifiedAt) RETURNING id",
             new
             {
                 name = app.Name,
@@ -108,7 +111,11 @@ public class SqliteDbRepository : IDbRepository
                 lastModifiedAt = app.LastModifiedAt,
                 shellName = app.ShellName,
                 shellOption = app.ShellOption,
-                shellExt = app.ShellExt
+                shellExt = app.ShellExt,
+                stateScript = app.StateScript,
+                stateScriptPath = app.StateScriptPath,
+                runningState = app.RunningState,
+                port = app.Port
             });
         return id == null ? -1 : Convert.ToInt64(id);
     }
@@ -129,6 +136,10 @@ public class SqliteDbRepository : IDbRepository
             "start_script_path=@startScriptPath, " +
             "stop_script=@stopScript, " +
             "stop_script_path=@stopScriptPath, " +
+            "state_script=@stateScript, " +
+            "state_script_path=@stateScriptPath, " +
+            "running_state=@runningState, " +
+            "port=@port, " +
             "last_modified_at=$lastModifiedAt WHERE id=$id",
             new
             {
@@ -144,7 +155,11 @@ public class SqliteDbRepository : IDbRepository
                 shellName = app.ShellName,
                 shellOption = app.ShellOption,
                 shellExt = app.ShellExt,
-                id = app.Id
+                id = app.Id,
+                stateScript = app.StateScript,
+                stateScriptPath = app.StateScriptPath,
+                runningState = app.RunningState,
+                port = app.Port
             });
     }
 
@@ -157,6 +172,8 @@ public class SqliteDbRepository : IDbRepository
                 appId
             });
     }
+
+    #endregion
 
     public async Task<long> AddTaskAsync(PikaTask task)
     {

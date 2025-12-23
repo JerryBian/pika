@@ -20,80 +20,6 @@ async function startSignalRConnection(endpoint) {
     }
 }
 
-async function callHubMethod(hubCall, option) {
-    if (option.form) {
-        if (option.form.classList.contains("needs-validation")) {
-            if (option.form.checkValidity()) {
-                option.form.classList.add("was-validated");
-            } else {
-                option.form.classList.add("was-validated");
-                return;
-            }
-
-        }
-
-        const fieldset = option.form.closest("fieldset");
-        if (fieldset) {
-            fieldset.disabled = true;
-        }
-    }
-
-    if (option.preAction) {
-        option.preAction();
-    }
-
-    const formPostAction = function () {
-        if (option.form) {
-            if (option.form.classList.contains("was-validated")) {
-                option.form.classList.remove("was-validated");
-            }
-
-            const fieldset = option.form.closest("fieldset");
-            if (fieldset) {
-                fieldset.disabled = false;
-            }
-        }
-    };
-
-    try {
-        var result = await hubCall();
-        console.log(result);
-    } catch (err) {
-        console.error(err);
-    }
-    //hubCall
-
-    //window.fetch(url,
-    //    {
-    //        method: method,
-    //        headers: {
-    //            "Content-Type": contentType
-    //        },
-    //        body: body
-    //    }).then(response => response.json()).then(result => {
-    //        if (!result.ok) {
-    //            showErrorMessageModal(result.message);
-    //            formPostAction();
-    //        } else {
-    //            if (result.redirectTo) {
-    //                window.location.href = result.redirectTo;
-    //            } else {
-    //                if (option.okAction) {
-    //                    option.okAction(result.content);
-    //                }
-    //            }
-    //        }
-
-    //        if (option.postAction) {
-    //            formPostAction();
-    //            option.postAction();
-    //        }
-    //    }).catch(error => {
-    //        showErrorMessageModal(error);
-    //        formPostAction();
-    //    });
-}
-
 function submitRequest(url, option) {
     if (option.form) {
         if (option.form.classList.contains("needs-validation")) {
@@ -163,7 +89,7 @@ function submitRequest(url, option) {
         });
 }
 
-function showMessageModal(title, bodyHtml, footerHtml, isLargeScreen) {
+function showMessageModal(title, bodyHtml, footerHtml, isLargeScreen, onHidden) {
     let messageModalEl = document.querySelector("#messageModal");
     if (!messageModalEl) {
         return;
@@ -197,11 +123,15 @@ function showMessageModal(title, bodyHtml, footerHtml, isLargeScreen) {
         if (isLargeScreen) {
             document.querySelector(".modal-dialog").classList.remove("modal-xl");
         }
+
+        if (onHidden) {
+            onHidden();
+        }
     })
 }
 
-function showInfoMessageModal(message) {
-    showMessageModal(`<i class="fa-solid fa-circle-info text-info"></i> Info`, `<p>${message}</p>`);
+function showInfoMessageModal(message, onHidden) {
+    showMessageModal(`<i class="fa-solid fa-circle-info text-info"></i> Info`, `<p>${message}</p>`, null, null, onHidden);
 }
 
 function showErrorMessageModal(message) {
@@ -281,58 +211,4 @@ function hideSpinner() {
     if (!ele.classList.contains("d-none")) {
         ele.classList.add("d-none");
     }
-}
-
-function startApp(id) {
-    submitRequest(`/api/app/${id}/start`,
-        {
-            method: "POST",
-            okAction: function (res) {
-                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
-            },
-            preAction: function () {
-                hideContainer();
-                showSpinner();
-            },
-            postAction: function () {
-                hideSpinner();
-                showContainer();
-            }
-        });
-}
-
-function stopApp(id) {
-    submitRequest(`/api/app/${id}/stop`,
-        {
-            method: "POST",
-            okAction: function (res) {
-                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
-            },
-            preAction: function () {
-                hideContainer();
-                showSpinner();
-            },
-            postAction: function () {
-                hideSpinner();
-                showContainer();
-            }
-        });
-}
-
-function initApp(id) {
-    submitRequest(`/api/app/${id}/init`,
-        {
-            method: "POST",
-            okAction: function (res) {
-                showInfoMessageModal(`<pre style="background:white;color:black;padding:3px;">${res}</pre>`);
-            },
-            preAction: function () {
-                hideContainer();
-                showSpinner();
-            },
-            postAction: function () {
-                hideSpinner();
-                showContainer();
-            }
-        });
 }

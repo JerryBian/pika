@@ -224,6 +224,7 @@
 
 @section Scripts {
     <script>
+        setActive("navDrive");
         (async () => {
            const connection = await startSignalRConnection("/hub/drive");
            const powerStateEle = document.querySelector("#device_powerstate");

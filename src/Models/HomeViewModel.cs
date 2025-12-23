@@ -1,4 +1,5 @@
-﻿using Pika.Common.Model;
+﻿using Pika.Common.App;
+using Pika.Common.Model;
 using System.Collections.Generic;
 
 namespace Pika.Models

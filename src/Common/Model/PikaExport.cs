@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Pika.Common.App;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Pika.Common.Model;

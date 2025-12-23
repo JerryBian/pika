@@ -1,5 +1,6 @@
 ﻿using ExecDotnet;
 using Microsoft.AspNetCore.Mvc;
+using Pika.Common.App;
 using Pika.Common.Command;
 using Pika.Common.Model;
 using Pika.Common.Store;
@@ -24,6 +25,8 @@ public class ApiController : ControllerBase
         _repository = repository;
         _commandManager = commandManager;
     }
+
+    #region App
 
     [HttpDelete("app/{id}")]
     public async Task<ApiResponse<object>> DeleteAppAsync([FromRoute] long id)
@@ -235,6 +238,8 @@ public class ApiController : ControllerBase
 
         return response;
     }
+
+    #endregion
 
     [HttpDelete("task/{id}")]
     public async Task<ApiResponse<object>> DeleteTaskAsync([FromRoute] long id)

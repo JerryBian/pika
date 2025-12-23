@@ -1,63 +1,43 @@
-﻿@using Pika.Common.Extension
-@model HomeViewModel
+﻿@model HomeViewModel
 
-<div class="card-group">
-    <div class="card border-light me-md-1">
-        <div class="card-header text-white">
-            <i class="bi bi-app small text-muted"></i>
-            <span class="h5">Apps</span> <span class="text-muted small font-monospace">[@Model.Apps.Count]</span>
-            <a href="/app/add" class="btn btn-outline-dark btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
-        </div>
+<h5 class="mb-3"><i class="bi bi-card-list"></i> Components</h5>
+
+<a href="/app" class="text-decoration-none">
+    <div class="card border-secondary mb-4 text-center py-3">
         <div class="card-body">
-            @foreach (var item in Model.Apps)
-            {
-                <div class="mb-2 mt-1">
-                    <div class="text-truncate my-2 py-1">
-                        <i class="bi bi-arrow-right-short text-muted small"></i>
-                        @item.Name
-                    </div>
-                    <div class="text-start m-1">
-                        <div class="row">
-                            <div class="col-sm-3 d-grid gap-1 mb-2"><a href="javascript:;" onclick="initApp(@item.Id)" class="btn btn-light btn-sm"><i class="bi bi-box"></i> Init</a></div>
-                            <div class="col-sm-3 d-grid gap-1 mb-2"><a href="javascript:;" onclick="startApp(@item.Id)" class="btn btn-success btn-sm"><i class="bi bi-power"></i> Start</a></div>
-                            <div class="col-sm-3 d-grid gap-1 mb-2"><a href="javascript:;" onclick="stopApp(@item.Id)" class="btn btn-outline-danger btn-sm"><i class="bi bi-stop-circle"></i> Stop</a></div>
-                            <div class="col-sm-3 d-grid gap-1 mb-1"><a href="/app/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm"><i class="bi bi-info-circle"></i> Detail</a></div>
-                        </div>
-                    </div>
-                </div>
-            }
-
+            <div class="fs-2"><i class="bi bi-window-desktop small"></i> App</div>
+            <div class="small text-muted">Manage applications: view state, start or stop...</div>
         </div>
     </div>
+</a>
 
-    <div class="card border-light">
-        <div class="card-header text-white">
-            <i class="bi bi-code small text-muted"></i>
-            <span class="h5">Tasks</span> <span class="text-muted small font-monospace">[@Model.Tasks.Count]</span>
-            <a href="/task/add" class="btn btn-outline-dark btn-sm float-end"><i class="bi bi-plus-lg"></i> New</a>
-        </div>
+<a href="/script" class="text-decoration-none">
+    <div class="card border-secondary mb-4 text-center py-3">
         <div class="card-body">
-            @foreach (var item in Model.Tasks)
-            {
-                <div class="mb-2 mt-1">
-                    <div class="text-truncate my-2 py-1">
-                        <i class="bi bi-arrow-right-short text-muted small"></i>
-                        @item.Name
-                    </div>
-                    <div class="text-start m-1">
-                        <div class="row">
-                            <div class="col-sm-6 d-grid gap-1 mb-2"><a href="javascript:;" onclick="runTask(@item.Id)" class="btn btn-success btn-sm"><i class="bi bi-power"></i> Run</a></div>
-                            <div class="col-sm-6 d-grid gap-1 mb-1"><a href="/task/@item.Id" onclick="startApp(@item.Id)" class="btn btn-outline-info btn-sm"><i class="bi bi-info-circle"></i> Detail</a></div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr/>
-            }
+            <div class="fs-2"><i class="bi bi-terminal small"></i> Script</div>
+            <div class="small text-muted">Manage script: running scripts, saved script...</div>
         </div>
     </div>
-</div>
+</a>
 
+<a href="/drive" class="text-decoration-none">
+    <div class="card border-secondary mb-4 text-center py-3">
+        <div class="card-body">
+            <div class="fs-2"><i class="bi bi-hdd small"></i> Drive</div>
+            <div class="small text-muted">Manage drive: view HDD/SSD S.M.A.R,T, power state...</div>
+        </div>
+    </div>
+</a>
+
+@* <a href="/ups" class="text-decoration-none">
+    <div class="card border-secondary mb-4 text-center py-3">
+        <div class="card-body">
+            <div class="fs-2"><i class="bi bi-plug small"></i> UPS</div>
+            <div class="small text-muted">Manage UPS: history load, battery usage...</div>
+        </div>
+    </div>
+</a>
+ *@
 
 <div class="mt-3">
     <section class="mt-5">

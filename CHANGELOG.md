@@ -1,5 +1,9 @@
 Listed change logs for release history.
 
+## 7.0
+
+Redesign and restructure.
+
 ## 6.3
 
 Add Drive page.
