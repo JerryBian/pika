@@ -1,6 +1,6 @@
 ﻿namespace Pika.Models;
 
-public class TaskAddViewModel
+public class PikaScriptNewScriptViewModel
 {
     public bool IsTemp { get; set; }
 

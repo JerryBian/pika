@@ -25,7 +25,7 @@ namespace Pika.Controllers
         [HttpGet("add")]
         public async Task<IActionResult> AddScript([FromQuery] bool isTemp, [FromQuery] long sourceTaskId)
         {
-            TaskAddViewModel model = new()
+            PikaScriptNewScriptViewModel model = new()
             {
                 IsTemp = isTemp
             };
@@ -52,7 +52,7 @@ namespace Pika.Controllers
                 model.ShellOption = _setting.DefaultShellOption;
             }
 
-            return View(model);
+            return View("AddScript", model);
         }
     }
 }

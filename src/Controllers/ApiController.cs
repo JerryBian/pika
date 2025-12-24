@@ -1,8 +1,10 @@
 ﻿using ExecDotnet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Pika.Common.App;
 using Pika.Common.Command;
 using Pika.Common.Model;
+using Pika.Common.Script;
 using Pika.Common.Store;
 using Pika.Models;
 using System;
@@ -18,12 +20,14 @@ public class ApiController : ControllerBase
     private readonly ICommandManager _commandManager;
     private readonly IDbRepository _repository;
     private readonly PikaSetting _setting;
+    private readonly ILogger<ApiController> _logger;
 
-    public ApiController(PikaSetting setting, IDbRepository repository, ICommandManager commandManager)
+    public ApiController(PikaSetting setting, IDbRepository repository, ICommandManager commandManager, ILogger<ApiController> logger)
     {
         _setting = setting;
         _repository = repository;
         _commandManager = commandManager;
+        _logger = logger;
     }
 
     #region App
@@ -311,22 +315,22 @@ public class ApiController : ControllerBase
         return runId;
     }
 
-    [HttpPut("task/add")]
-    public async Task<ApiResponse<object>> AddTaskAsync([FromForm] PikaTask task)
+    [HttpPut("script/add")]
+    public async Task<ApiResponse<object>> AddScriptAsync([FromForm][Bind(Prefix = "")] PikaScript script)
     {
         ApiResponse<object> response = new();
         try
         {
-            task.CreatedAt = task.LastModifiedAt = DateTime.Now.Ticks;
-            var isTemp = task.IsTemp || string.IsNullOrEmpty(task.Name);
+            script.CreatedAt = script.LastModifiedAt = DateTime.Now.Ticks;
+            var isTemp = script.IsTemp || string.IsNullOrEmpty(script.Name);
             if (isTemp)
             {
-                task.IsTemp = true;
-                task.Name = $"temp_{Guid.NewGuid():N}";
-                task.Description = "Temp one time task";
+                script.IsTemp = true;
+                script.Name = $"temp_{Guid.NewGuid():N}";
+                script.Description = "Temp one time script";
             }
 
-            var id = await _repository.AddTaskAsync(task);
+            var id = await _repository.AddScriptAsync(script);
             if (isTemp)
             {
                 var runId = await StartRunAsync(id);
@@ -334,11 +338,12 @@ public class ApiController : ControllerBase
             }
             else
             {
-                response.RedirectTo = $"/task/{id}";
+                response.RedirectTo = $"/script/{id}";
             }
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "AddTaskAsync failed");
             response.IsOk = false;
             response.Message = ex.Message;
         }
@@ -346,15 +351,15 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpPost("task/update")]
-    public async Task<ApiResponse<object>> UpdateTaskAsync([FromForm] PikaTask task)
+    [HttpPost("script/update")]
+    public async Task<ApiResponse<object>> UpdateTaskAsync([FromForm] PikaScript script)
     {
         ApiResponse<object> response = new();
         try
         {
-            task.LastModifiedAt = DateTime.Now.Ticks;
-            await _repository.UpdateTaskAsync(task);
-            response.RedirectTo = $"/task/{task.Id}";
+            script.LastModifiedAt = DateTime.Now.Ticks;
+            await _repository.UpdateScriptAsync(script);
+            response.RedirectTo = $"/task/{script.Id}";
         }
         catch (Exception ex)
         {

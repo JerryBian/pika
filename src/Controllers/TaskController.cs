@@ -57,7 +57,7 @@ public class TaskController : Controller
     [HttpGet("/task/add")]
     public async Task<IActionResult> Add([FromQuery] bool isTemp, [FromQuery] long sourceTaskId)
     {
-        TaskAddViewModel model = new()
+        PikaScriptNewScriptViewModel model = new()
         {
             IsTemp = isTemp
         };

@@ -17,7 +17,7 @@ namespace Pika.Hubs
 
         public async Task AddScriptAsync(PikaTask task)
         {
-            await _repository.AddTaskAsync(task);
+            //await _repository.AddScriptAsync(task);
         }
 
         //public async IAsyncEnumerable<int> Counter(

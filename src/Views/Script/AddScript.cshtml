@@ -1,16 +1,16 @@
-﻿@model TaskAddViewModel
+﻿@model PikaScriptNewScriptViewModel
 @{
-    ViewData["Title"] = "Add new task";
+    ViewData["Title"] = "Add new script";
 }
 
 <fieldset>
     @if (Model.IsTemp)
     {
-        <legend>Run new Temp Task</legend>
+        <legend>Run new Temp Script</legend>
     }
     else
     {
-        <legend>Create new Saved Task</legend>
+        <legend>Create new Saved Script</legend>
     }
     <form class="needs-validation" novalidate>
         @if (!Model.IsTemp)
@@ -86,15 +86,11 @@
 @section Scripts {
     <script>
         const form = document.querySelector("form");
-        const connection = startSignalRConnection("/hub/script");
-        await callHubMethod(async () =>{
-            await connection.invoke("AddScriptAsync");
-        }, {});
         form.addEventListener('submit',
             function(event) {
                 event.preventDefault();
                 event.stopPropagation();
-                submitRequest("/api/task/add",
+                submitRequest("/api/script/add",
                     {
                         form: form,
                         method: "PUT",

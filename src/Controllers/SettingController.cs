@@ -73,7 +73,7 @@ public class SettingController : Controller
                 {
                     pikaTask.CreatedAt = DateTime.Now.Ticks;
                     pikaTask.LastModifiedAt = DateTime.Now.Ticks;
-                    _ = await _repository.AddTaskAsync(pikaTask);
+                    //_ = await _repository.AddScriptAsync(pikaTask);
                 }
             }
 

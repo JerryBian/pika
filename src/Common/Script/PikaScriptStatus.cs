@@ -1,6 +1,6 @@
 ﻿namespace Pika.Common.Model;
 
-public enum PikaScriptStatus
+public enum PikaTaskStatus
 {
     Pending = 1,
 

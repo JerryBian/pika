@@ -1,6 +1,7 @@
 ﻿using Pika.Common.App;
 using Pika.Common.Drive;
 using Pika.Common.Model;
+using Pika.Common.Script;
 
 namespace Pika.Common.Store
 {
@@ -9,10 +10,10 @@ namespace Pika.Common.Store
         Task<long> AddAppAsync(PikaApp app);
         Task AddOrUpdatePikaDrivesAsync(List<PikaDriveTable> drives);
         Task AddPikaDriveSmartctlAsync(PikaDriveSmartctlTable pikaDriveSmartctl);
-        Task<long> AddTaskAsync(PikaTask task);
+        Task<long> AddScriptAsync(PikaScript script);
         Task<long> AddTaskRunAsync(PikaTaskRun run);
-        Task AddTaskRunOutputAsync(List<PikaTaskRunOutput> runOutputs);
-        Task AddTaskRunOutputAsync(PikaTaskRunOutput runOutput);
+        Task AddTaskRunOutputAsync(List<Model.PikaTaskRunOutput> runOutputs);
+        Task AddTaskRunOutputAsync(Model.PikaTaskRunOutput runOutput);
         Task DeleteAppAsync(long appId);
         Task DeleteTaskAsync(long taskId);
         Task<PikaApp> GetAppAsync(long appId);
@@ -27,14 +28,14 @@ namespace Pika.Common.Store
         Task<PikaSystemStatus> GetSystemStatusAsync();
         Task<PikaTask> GetTaskAsync(long taskId);
         Task<PikaTaskRun> GetTaskRunAsync(long runId);
-        Task<List<PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = 0, int limit = -1, bool desc = true);
+        Task<List<Model.PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = 0, int limit = -1, bool desc = true);
         Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
         Task<List<PikaTask>> GetTasksAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
         Task<int> GetTasksCountAsync();
         Task InsertOrUpdateSetting(string key, string value);
         Task StartupAsync();
         Task UpdateAppAsync(PikaApp app);
-        Task UpdateTaskAsync(PikaTask task);
+        Task UpdateScriptAsync(PikaScript script);
         Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status);
         Task VacuumDbAsync();
     }

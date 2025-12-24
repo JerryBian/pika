@@ -43,7 +43,8 @@ function submitRequest(url, option) {
     }
 
     const method = option.method ?? "POST";
-    const contentType = option.contentType ?? "application/json";
+    // only set contentType header when caller explicitly provided one
+    const contentType = option.hasOwnProperty('contentType') ? option.contentType : undefined;
     const body = option.body ?? "";
     const formPostAction = function () {
         if (option.form) {
@@ -58,12 +59,15 @@ function submitRequest(url, option) {
         }
     };
 
+    const headers = {};
+    if (contentType) {
+        headers["Content-Type"] = contentType;
+    }
+
     window.fetch(url,
         {
             method: method,
-            headers: {
-                "Content-Type": contentType
-            },
+            headers: Object.keys(headers).length ? headers : undefined,
             body: body
         }).then(response => response.json()).then(result => {
             if (!result.ok) {

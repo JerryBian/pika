@@ -5,6 +5,7 @@ using Pika.Common.App;
 using Pika.Common.Dapper;
 using Pika.Common.Drive;
 using Pika.Common.Model;
+using Pika.Common.Script;
 using System.Text;
 
 namespace Pika.Common.Store;
@@ -175,42 +176,44 @@ public class SqliteDbRepository : IDbRepository
 
     #endregion
 
-    public async Task<long> AddTaskAsync(PikaTask task)
+    #region Script
+
+    public async Task<long> AddScriptAsync(PikaScript script)
     {
         await using SqliteConnection connection = new(_connectionString);
         var id = await connection.ExecuteScalarAsync(
-            "INSERT INTO task(name, script, description, shell_name, shell_option, shell_ext, is_temp, created_at, last_modified_at) " +
+            "INSERT INTO script(name, script, description, shell_name, shell_option, shell_ext, is_temp, created_at, last_modified_at) " +
             "VALUES(@name, @script, @desc, @shellName, @shellOption, @shellExt, @isTemp, @createdAt, @lastModifiedAt) RETURNING id",
             new
             {
-                name = task.Name,
-                script = task.Script,
-                desc = task.Description,
-                shellName = task.ShellName,
-                shellOption = task.ShellOption,
-                shellExt = task.ShellExt,
-                isTemp = task.IsTemp,
-                createdAt = task.CreatedAt,
-                lastModifiedAt = task.LastModifiedAt
+                name = script.Name,
+                script = script.Script,
+                desc = script.Description,
+                shellName = script.ShellName,
+                shellOption = script.ShellOption,
+                shellExt = script.ShellExt,
+                isTemp = script.IsTemp,
+                createdAt = script.CreatedAt,
+                lastModifiedAt = script.LastModifiedAt
             });
         return id == null ? -1 : Convert.ToInt64(id);
     }
 
-    public async Task UpdateTaskAsync(PikaTask task)
+    public async Task UpdateScriptAsync(PikaScript script)
     {
         await using SqliteConnection connection = new(_connectionString);
         _ = await connection.ExecuteAsync(
-            "UPDATE task SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=@lastModifiedAt WHERE id=@id",
+            "UPDATE script SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=@lastModifiedAt WHERE id=@id",
             new
             {
-                name = task.Name,
-                script = task.Script,
-                desc = task.Description,
-                id = task.Id,
-                shellName = task.ShellName,
-                shellOption = task.ShellOption,
-                shellExt = task.ShellExt,
-                lastModifiedAt = task.LastModifiedAt
+                name = script.Name,
+                script = script.Script,
+                desc = script.Description,
+                id = script.Id,
+                shellName = script.ShellName,
+                shellOption = script.ShellOption,
+                shellExt = script.ShellExt,
+                lastModifiedAt = script.LastModifiedAt
             });
     }
 
@@ -475,6 +478,10 @@ public class SqliteDbRepository : IDbRepository
             new { id = runId });
     }
 
+    #endregion
+
+    #region Setting
+
     public async Task<string> GetSetting(string key)
     {
         await using SqliteConnection connection = new(_connectionString);
@@ -490,7 +497,9 @@ public class SqliteDbRepository : IDbRepository
             new { key, value, time = DateTime.Now.Ticks });
     }
 
-    #region PikaDrive
+    #endregion
+
+    #region Drive
 
     public async Task AddOrUpdatePikaDrivesAsync(List<PikaDriveTable> drives)
     {
@@ -549,13 +558,13 @@ public class SqliteDbRepository : IDbRepository
     {
         await using SqliteConnection connection = new(_connectionString);
         var result = (await connection.QueryAsync<PikaDriveTable>("SELECT * FROM drive ORDER BY name")).AsList();
-        if(!result.Any())
+        if (!result.Any())
         {
             return result;
         }
 
         var partitions = (await connection.QueryAsync<PikaDrivePartitionTable>("SELECT * FROM drive_partition")).AsList();
-        foreach(var item in result)
+        foreach (var item in result)
         {
             item.Partitions.AddRange(partitions.Where(x => x.DriveId == item.Id).OrderBy(x => x.Name));
         }
