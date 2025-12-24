@@ -12,9 +12,9 @@ $card-bg: transparent;
 $font-family-sans-serif: "Raleway", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 @import "../../../node_modules/bootstrap-icons/font/bootstrap-icons";
-@import "../../../node_modules/bootswatch/dist/zephyr/variables";
+@import "../../../node_modules/bootswatch/dist/minty/variables";
 @import "../../../node_modules/bootstrap/scss/bootstrap";
-@import "../../../node_modules/bootswatch/dist/zephyr/bootswatch";
+@import "../../../node_modules/bootswatch/dist/minty/bootswatch";
 
 .height-max-1 {
     max-height: 200px;
