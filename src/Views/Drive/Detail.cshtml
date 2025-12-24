@@ -4,9 +4,9 @@
     var previousSmart = Model.SmartctlTable?.OrderByDescending(s => s.CreatedAt).Skip(1).FirstOrDefault();
 }
 <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/drive">Drive</a></li>
-        <li class="breadcrumb-item active">@Model.DevicePath</li>
+    <ol class="breadcrumb bg-transparent">
+        <li class="breadcrumb-item"><a href="/drive" class="text-dark">Drive</a></li>
+        <li class="breadcrumb-item active text-dark">@Model.DevicePath</li>
     </ol>
 </nav>
 <div class="card bg-body bg-gradient ">
@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<div class="card mt-4">
+<div class="card mt-4 bg-body bg-gradient">
     <div class="card-body">
         <div class="row">
             <div class="col-4">
@@ -45,7 +45,7 @@
 
 @if (lastSmart != null)
 {
-    <div class="accordion mt-4" id="accordionFlushDeviceHealthy">
+    <div class="accordion mt-4 bg-body bg-gradient" id="accordionFlushDeviceHealthy">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button id="device_healthy" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
@@ -61,84 +61,86 @@
                             <span>&middot; Diff scan at @previousSmart.CreatedAtString.</span>
                         }
                     </div>
-                    <table class="table table-bordered table-responsive">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">Attribute</th>
-                                <th scope="col">Value</th>
-                                <th scope="col">Diff</th>
-                                <th scope="col">History</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider">
-                            <tr>
-                                <th scope="row">reallocated_sector_ct</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.ReallocatedSectorCt)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.ReallocatedSectorCt, previousSmart?.ReallocatedSectorCt)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReallocatedSectorCt);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">current_pending_sector</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.CurrentPendingSector)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.CurrentPendingSector, previousSmart?.CurrentPendingSector)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CurrentPendingSector);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">offline_uncorrectable</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.OfflineUncorrectable)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.OfflineUncorrectable, previousSmart?.OfflineUncorrectable)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.OfflineUncorrectable);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">reported_uncorrect</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.ReportedUncorrect)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.ReportedUncorrect, previousSmart?.ReportedUncorrect)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReportedUncorrect);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">start_stop_count</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.StartStopCount)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.StartStopCount, previousSmart?.StartStopCount)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.StartStopCount);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">power_on_hours</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.PowerOnHours)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerOnHours, previousSmart?.PowerOnHours)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOnHours);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">power_cycle_count</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.PowerCycleCount)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerCycleCount, previousSmart?.PowerCycleCount)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerCycleCount);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">command_timeout</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.CommandTimeout)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.CommandTimeout, previousSmart?.CommandTimeout)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CommandTimeout);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">power_off_restart_count</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.PowerOffRestartCount)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.PowerOffRestartCount, previousSmart?.PowerOffRestartCount)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOffRestartCount);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">load_cycle_count</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.LoadCycleCount)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.LoadCycleCount, previousSmart?.LoadCycleCount)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.LoadCycleCount);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                            <tr>
-                                <th scope="row">udma_crc_error_count</th>
-                                <td>@StringUtil.DisplayLong(lastSmart?.UdmaCrcErrorCount)</td>
-                                <td>@StringUtil.DisplayDiff(lastSmart?.UdmaCrcErrorCount, previousSmart?.UdmaCrcErrorCount)</td>
-                                <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.UdmaCrcErrorCount);"><i class="bi bi-graph-up"></i></a></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered bg-body bg-gradient">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Attribute</th>
+                                    <th scope="col">Value</th>
+                                    <th scope="col">Diff</th>
+                                    <th scope="col">History</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                <tr>
+                                    <th scope="row">reallocated_sector_ct</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.ReallocatedSectorCt)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.ReallocatedSectorCt, previousSmart?.ReallocatedSectorCt)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReallocatedSectorCt);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">current_pending_sector</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.CurrentPendingSector)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.CurrentPendingSector, previousSmart?.CurrentPendingSector)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CurrentPendingSector);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">offline_uncorrectable</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.OfflineUncorrectable)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.OfflineUncorrectable, previousSmart?.OfflineUncorrectable)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.OfflineUncorrectable);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">reported_uncorrect</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.ReportedUncorrect)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.ReportedUncorrect, previousSmart?.ReportedUncorrect)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.ReportedUncorrect);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">start_stop_count</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.StartStopCount)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.StartStopCount, previousSmart?.StartStopCount)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.StartStopCount);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">power_on_hours</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.PowerOnHours)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.PowerOnHours, previousSmart?.PowerOnHours)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOnHours);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">power_cycle_count</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.PowerCycleCount)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.PowerCycleCount, previousSmart?.PowerCycleCount)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerCycleCount);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">command_timeout</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.CommandTimeout)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.CommandTimeout, previousSmart?.CommandTimeout)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.CommandTimeout);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">power_off_restart_count</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.PowerOffRestartCount)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.PowerOffRestartCount, previousSmart?.PowerOffRestartCount)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.PowerOffRestartCount);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">load_cycle_count</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.LoadCycleCount)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.LoadCycleCount, previousSmart?.LoadCycleCount)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.LoadCycleCount);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">udma_crc_error_count</th>
+                                    <td>@StringUtil.DisplayLong(lastSmart?.UdmaCrcErrorCount)</td>
+                                    <td>@StringUtil.DisplayDiff(lastSmart?.UdmaCrcErrorCount, previousSmart?.UdmaCrcErrorCount)</td>
+                                    <td><a href="javascript:;" onclick="viewAttributeHistory(window.history.UdmaCrcErrorCount);"><i class="bi bi-graph-up"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -149,7 +151,7 @@
 <h5 class="mt-4">Partitions <span class="badge text-bg-info">@Model.Partitions.Count</span></h5>
 @foreach (var item in Model.Partitions)
 {
-    <div class="card mt-4">
+    <div class="card mt-4 bg-body bg-gradient">
         <div class="card-body">
             <div class="row">
                 <div class="col-4">
