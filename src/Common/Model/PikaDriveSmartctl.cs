@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Pika.Common.Drive
+namespace Pika.Common.Model
 {
     public class PikaDriveSmartctl
     {

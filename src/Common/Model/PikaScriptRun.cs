@@ -1,13 +1,12 @@
 ﻿using Pika.Common.Extension;
-using Pika.Common.Model;
 
-namespace Pika.Common.Script
+namespace Pika.Common.Model
 {
     public class PikaScriptRun
     {
         public long Id { get; set; }
 
-        public long TaskId { get; set; }
+        public long ScriptId { get; set; }
 
         public string Script { get; set; }
 
@@ -17,7 +16,7 @@ namespace Pika.Common.Script
 
         public long CompletedAt { get; set; }
 
-        public PikaTaskStatus Status { get; set; }
+        public PikaScriptStatus Status { get; set; }
 
         public string ShellName { get; set; }
 
@@ -115,15 +114,15 @@ namespace Pika.Common.Script
         {
             switch (Status)
             {
-                case PikaTaskStatus.Pending:
+                case PikaScriptStatus.Pending:
                     return "<span class=\"badge text-bg-light\">Pending</span>";
-                case PikaTaskStatus.Completed:
+                case PikaScriptStatus.Completed:
                     return "<span class=\"badge text-bg-success\">Completed</span>";
-                case PikaTaskStatus.Running:
+                case PikaScriptStatus.Running:
                     return "<span class=\"badge text-bg-info\">Running</span>";
-                case PikaTaskStatus.Stopped:
+                case PikaScriptStatus.Stopped:
                     return "<span class=\"badge text-bg-danger\">Stopped</span>";
-                case PikaTaskStatus.Dead:
+                case PikaScriptStatus.Dead:
                     return "<span class=\"badge text-bg-secondary\">Dead</span>";
                 default:
                     throw new NotSupportedException();

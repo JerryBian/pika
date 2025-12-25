@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Pika.Common.App
+namespace Pika.Common.Model
 {
     public class PikaApp
     {

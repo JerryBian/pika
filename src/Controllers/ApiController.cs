@@ -1,10 +1,8 @@
 ﻿using ExecDotnet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Pika.Common.App;
 using Pika.Common.Command;
 using Pika.Common.Model;
-using Pika.Common.Script;
 using Pika.Common.Store;
 using Pika.Models;
 using System;
@@ -18,11 +16,11 @@ namespace Pika.Controllers;
 public class ApiController : ControllerBase
 {
     private readonly ICommandManager _commandManager;
-    private readonly IDbRepository _repository;
+    private readonly IPikaStore _repository;
     private readonly PikaSetting _setting;
     private readonly ILogger<ApiController> _logger;
 
-    public ApiController(PikaSetting setting, IDbRepository repository, ICommandManager commandManager, ILogger<ApiController> logger)
+    public ApiController(PikaSetting setting, IPikaStore repository, ICommandManager commandManager, ILogger<ApiController> logger)
     {
         _setting = setting;
         _repository = repository;
@@ -251,7 +249,7 @@ public class ApiController : ControllerBase
         ApiResponse<object> response = new();
         try
         {
-            await _repository.DeleteTaskAsync(id);
+            await _repository.DeleteScriptAsync(id);
         }
         catch (Exception ex)
         {
@@ -286,7 +284,7 @@ public class ApiController : ControllerBase
         try
         {
             var runId = await StartRunAsync(id);
-            response.RedirectTo = $"/run/{runId}";
+            response.RedirectTo = $"/script/run/{runId}";
         }
         catch (Exception ex)
         {
@@ -299,19 +297,19 @@ public class ApiController : ControllerBase
 
     private async Task<long> StartRunAsync(long taskId)
     {
-        var task = await _repository.GetTaskAsync(taskId);
-        PikaTaskRun run = new()
+        var task = await _repository.GetScriptAsync(taskId);
+        PikaScriptRun run = new()
         {
-            TaskId = taskId,
+            ScriptId = taskId,
             Script = task.Script,
             ShellName = task.ShellName,
             ShellOption = task.ShellOption,
             ShellExt = task.ShellExt,
-            Status = PikaTaskStatus.Pending,
+            Status = PikaScriptStatus.Pending,
             CreatedAt = DateTime.Now.Ticks
         };
 
-        var runId = await _repository.AddTaskRunAsync(run);
+        var runId = await _repository.AddScriptRunAsync(run);
         return runId;
     }
 
@@ -352,14 +350,14 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost("script/update")]
-    public async Task<ApiResponse<object>> UpdateTaskAsync([FromForm] PikaScript script)
+    public async Task<ApiResponse<object>> UpdateScriptAsync([FromForm][Bind(Prefix = "")] PikaScript script)
     {
         ApiResponse<object> response = new();
         try
         {
             script.LastModifiedAt = DateTime.Now.Ticks;
             await _repository.UpdateScriptAsync(script);
-            response.RedirectTo = $"/task/{script.Id}";
+            response.RedirectTo = $"/script/{script.Id}";
         }
         catch (Exception ex)
         {
@@ -389,13 +387,13 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost("run/{runId}/output")]
-    public async Task<ApiResponse<TaskRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
+    public async Task<ApiResponse<PikaScriptRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
         [FromQuery] long lastPoint)
     {
-        ApiResponse<TaskRunOutputViewModel> response = new();
+        ApiResponse<PikaScriptRunOutputViewModel> response = new();
         try
         {
-            var taskRun = await _repository.GetTaskRunAsync(runId);
+            var taskRun = await _repository.GetScriptRunAsync(runId);
             if (taskRun == null)
             {
                 response.IsOk = false;
@@ -403,7 +401,7 @@ public class ApiController : ControllerBase
             }
             else
             {
-                var outputs = await _repository.GetTaskRunOutputs(runId, lastPoint, 100);
+                var outputs = await _repository.GetScriptRunOutputs(runId, lastPoint, 100);
                 outputs.Reverse();
                 var maxTimestamp = default(DateTime).Ticks;
                 var lastEl = outputs.LastOrDefault();
@@ -413,7 +411,7 @@ public class ApiController : ControllerBase
                 }
 
                 maxTimestamp = Math.Max(lastPoint, maxTimestamp);
-                response.Content = new TaskRunOutputViewModel
+                response.Content = new PikaScriptRunOutputViewModel
                 {
                     LastPoint = maxTimestamp.ToString(),
                     Outputs = outputs,
@@ -441,7 +439,7 @@ public class ApiController : ControllerBase
         {
             if (setting.ItemsPerPage is > 0 and <= 50)
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, setting.ItemsPerPage.ToString());
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ItemsPerPage, setting.ItemsPerPage.ToString());
                 _setting.ItemsPerPage = setting.ItemsPerPage;
             }
             else
@@ -453,7 +451,7 @@ public class ApiController : ControllerBase
 
             if (setting.RetainSizeInMb > 0)
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, setting.RetainSizeInMb.ToString());
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.RetainSizeInMb, setting.RetainSizeInMb.ToString());
                 _setting.RetainSizeInMb = setting.RetainSizeInMb;
             }
             else
@@ -465,7 +463,7 @@ public class ApiController : ControllerBase
 
             if (!string.IsNullOrEmpty(setting.DefaultShellName))
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellName, setting.DefaultShellName);
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellName, setting.DefaultShellName);
                 _setting.DefaultShellName = setting.DefaultShellName;
             }
             else
@@ -477,7 +475,7 @@ public class ApiController : ControllerBase
 
             if (!string.IsNullOrEmpty(setting.DefaultShellExt))
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellExt, setting.DefaultShellExt);
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellExt, setting.DefaultShellExt);
                 _setting.DefaultShellExt = setting.DefaultShellExt;
             }
             else
@@ -489,7 +487,7 @@ public class ApiController : ControllerBase
 
             if (!string.IsNullOrEmpty(setting.DefaultShellOption))
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellOptions, setting.DefaultShellOption);
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellOptions, setting.DefaultShellOption);
                 _setting.DefaultShellOption = setting.DefaultShellOption;
             }
         }

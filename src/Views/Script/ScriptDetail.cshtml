@@ -1,28 +1,28 @@
-﻿@model TaskDetailViewModel
+﻿@model PikaScriptDetailViewModel
 
 @{
-    ViewData["Title"] = $"Task #{Model.Task.Id}";
+    ViewData["Title"] = $"Task #{Model.Script.Id}";
 }
 <div class="table-responsive">
     <div>
-        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Task.Id" class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard"></i> Clone to Temp task</a>
+        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Script.Id" class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard"></i> Clone to Temp task</a>
         <span class="vr"></span>
-        <a href="/task/add?sourceTaskId=@Model.Task.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-clipboard-plus"></i> Clone to Saved task</a>
+        <a href="/task/add?sourceTaskId=@Model.Script.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-clipboard-plus"></i> Clone to Saved task</a>
     </div>
     <table class="table align-middle table-borderless caption-top border border-light table-striped mt-2">
         <caption>Task Information</caption>
         <tbody>
             <tr>
                 <td class="fw-bold">Id</td>
-                <td>#@Model.Task.Id</td>
+                <td>#@Model.Script.Id</td>
             </tr>
             <tr>
                 <td class="fw-bold">Name</td>
-                <td>@Model.Task.Name</td>
+                <td>@Model.Script.Name</td>
             </tr>
             <tr>
                 <td class="fw-bold">Description</td>
-                <td>@Model.Task.Description</td>
+                <td>@Model.Script.Description</td>
             </tr>
             <tr>
                 <td class="fw-bold">Run Times</td>
@@ -30,23 +30,23 @@
             </tr>
             <tr>
                 <td class="fw-bold">Shell</td>
-                <td>@Html.Raw(string.Join(" &middot; ", Model.Task.ShellName, Model.Task.ShellOption, Model.Task.ShellExt))</td>
+                <td>@Html.Raw(string.Join(" &middot; ", Model.Script.ShellName, Model.Script.ShellOption, Model.Script.ShellExt))</td>
             </tr>
             <tr>
                 <td class="fw-bold">Script</td>
                 <td>
                     <div class="overflow-auto height-max-1 rounded">
-                        <pre class="m-0 p-2" id="script">@Model.Task.Script</pre>
+                        <pre class="m-0 p-2" id="script">@Model.Script.Script</pre>
                     </div>
                 </td>
             </tr>
-            @if (!Model.Task.IsTemp)
+            @if (!Model.Script.IsTemp)
             {
                 <tr>
                     <td class="fw-bold">Actions</td>
                     <td>
-                        <a class="btn btn-info btn-sm m-1 w-25" href="/task/@Model.Task.Id/update"><i class="bi bi-pen"></i> Edit</a>
-                        <button type="button" class="btn btn-success btn-sm m-1 w-25" onclick="runTask(@Model.Task.Id)"><i class="bi bi-signpost"></i> Run</button>
+                        <a class="btn btn-info btn-sm m-1 w-25" href="/task/@Model.Script.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                        <button type="button" class="btn btn-success btn-sm m-1 w-25" onclick="runTask(@Model.Script.Id)"><i class="bi bi-signpost"></i> Run</button>
                     </td>
                 </tr>
             }
@@ -86,7 +86,7 @@
     </table>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         hljs.highlightElement(document.querySelector("#script"));
         setActive("taskNav");

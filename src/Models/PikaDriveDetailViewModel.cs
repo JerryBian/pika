@@ -1,4 +1,4 @@
-﻿using Pika.Common.Drive;
+﻿using Pika.Common.Model;
 
 namespace Pika.Models
 {

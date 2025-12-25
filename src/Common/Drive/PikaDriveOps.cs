@@ -1,4 +1,5 @@
 ﻿using ExecDotnet;
+using Pika.Common.Model;
 using Pika.Common.Store;
 using Pika.Common.Util;
 using System.Text.Json;
@@ -7,10 +8,10 @@ namespace Pika.Common.Drive
 {
     public class PikaDriveOps : IPikaDriveOps
     {
-        private readonly IDbRepository _repository;
+        private readonly IPikaStore _repository;
         private readonly ILogger<PikaDriveOps> _logger;
 
-        public PikaDriveOps(IDbRepository repository, ILogger<PikaDriveOps> logger)
+        public PikaDriveOps(IPikaStore repository, ILogger<PikaDriveOps> logger)
         {
             _repository = repository;
             _logger = logger;

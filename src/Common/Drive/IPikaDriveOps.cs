@@ -1,4 +1,6 @@
 ﻿
+using Pika.Common.Model;
+
 namespace Pika.Common.Drive
 {
     public interface IPikaDriveOps

@@ -8,10 +8,10 @@ namespace Pika.Controllers;
 
 public class AppController : Controller
 {
-    private readonly IDbRepository _repository;
+    private readonly IPikaStore _repository;
     private readonly PikaSetting _setting;
 
-    public AppController(PikaSetting setting, IDbRepository repository)
+    public AppController(PikaSetting setting, IPikaStore repository)
     {
         _setting = setting;
         _repository = repository;

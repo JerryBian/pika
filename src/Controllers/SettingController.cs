@@ -14,10 +14,10 @@ namespace Pika.Controllers;
 public class SettingController : Controller
 {
     private readonly ILogger<SettingController> _logger;
-    private readonly IDbRepository _repository;
+    private readonly IPikaStore _repository;
     private PikaSetting _setting;
 
-    public SettingController(PikaSetting setting, IDbRepository repository, ILogger<SettingController> logger)
+    public SettingController(PikaSetting setting, IPikaStore repository, ILogger<SettingController> logger)
     {
         _setting = setting;
         _logger = logger;
@@ -33,7 +33,7 @@ public class SettingController : Controller
     [HttpPost("/setting/export")]
     public async Task<IActionResult> ExportAsync()
     {
-        var tasks = await _repository.GetTasksAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
+        var tasks = await _repository.GetScriptsAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
         PikaExport export = new()
         {
             Setting = _setting,
@@ -69,11 +69,11 @@ public class SettingController : Controller
 
             if (export.Tasks != null)
             {
-                foreach (var pikaTask in export.Tasks)
+                foreach (var PikaScript in export.Tasks)
                 {
-                    pikaTask.CreatedAt = DateTime.Now.Ticks;
-                    pikaTask.LastModifiedAt = DateTime.Now.Ticks;
-                    //_ = await _repository.AddScriptAsync(pikaTask);
+                    PikaScript.CreatedAt = DateTime.Now.Ticks;
+                    PikaScript.LastModifiedAt = DateTime.Now.Ticks;
+                    //_ = await _repository.AddScriptAsync(PikaScript);
                 }
             }
 

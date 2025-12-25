@@ -15,7 +15,7 @@ builder.Services.Configure<PikaOptions>(builder.Configuration);
 builder.Services.AddSingleton<PikaSetting>();
 builder.Services.AddSingleton<IPikaDriveOps, PikaDriveOps>();
 builder.Services.AddSingleton<ICommandManager, CommandManager>();
-builder.Services.AddSingleton<IDbRepository, SqliteDbRepository>();
+builder.Services.AddSingleton<IPikaStore, PikaStore>();
 
 builder.Services.AddHostedService<StartupHostedService>();
 builder.Services.AddHostedService<TaskHostedService>();
@@ -44,7 +44,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/error");
 }
 app.UseRouting();
 

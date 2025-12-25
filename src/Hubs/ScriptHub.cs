@@ -8,14 +8,14 @@ namespace Pika.Hubs
     [Route("/hub/script")]
     public class ScriptHub : Hub
     {
-        private readonly IDbRepository _repository;
+        private readonly IPikaStore _repository;
 
-        public ScriptHub(IDbRepository repository)
+        public ScriptHub(IPikaStore repository)
         {
             _repository = repository;
         }
 
-        public async Task AddScriptAsync(PikaTask task)
+        public async Task AddScriptAsync(PikaScript task)
         {
             //await _repository.AddScriptAsync(task);
         }

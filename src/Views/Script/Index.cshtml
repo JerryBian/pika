@@ -15,20 +15,16 @@
                     <div class="fs-2"><i class="bi bi-command"></i></div>
                 </div>
                 <div class="card-body pt-0">
-                    @* <h5 class="card-title font-monospace">@item.Name</h5>
+                    <h5 class="card-title font-monospace">@item.Name</h5>
                     <div class="mb-3">
-                        <a href="@item.Url" target="_blank" class="bg-info-subtle p-2 link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover">
-                            <i class="bi bi-link-45deg"></i> @item.Url
-                        </a>
+                        @item.Description
                     </div>
                     <div class="fs-5 card-text font-monospace">
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-secondary" onclick="initApp('@item.App.Id')"><i class="bi bi-nut"></i> Init</button>
-                            <button type="button" class="btn btn-success" onclick="startApp('@item.App.Id')"><i class="bi bi-toggle-on"></i> Start</button>
-                            <button type="button" class="btn btn-warning" onclick="stopApp('@item.App.Id')"> <i class="bi bi-toggle-off"></i> Stop</button>
-                            <button type="button" class="btn btn-info" onclick="updateApp('@item.App.Id')"><i class="bi bi-pen"></i> Edit</button>
+                            <button type="button" class="btn btn-success" onclick="runTask('@item.Id')"><i class="bi bi-toggle-on"></i> Run</button>
+                            <a class="btn btn-info" href="/script/@item.Id/update"><i class="bi bi-pen"></i> Edit</a>
                         </div>
-                    </div> *@
+                    </div>
                 </div>
             </div>
         </div>

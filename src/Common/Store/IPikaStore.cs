@@ -1,21 +1,18 @@
-﻿using Pika.Common.App;
-using Pika.Common.Drive;
-using Pika.Common.Model;
-using Pika.Common.Script;
+﻿using Pika.Common.Model;
 
 namespace Pika.Common.Store
 {
-    public interface IDbRepository
+    public interface IPikaStore
     {
         Task<long> AddAppAsync(PikaApp app);
         Task AddOrUpdatePikaDrivesAsync(List<PikaDriveTable> drives);
         Task AddPikaDriveSmartctlAsync(PikaDriveSmartctlTable pikaDriveSmartctl);
         Task<long> AddScriptAsync(PikaScript script);
-        Task<long> AddTaskRunAsync(PikaTaskRun run);
-        Task AddTaskRunOutputAsync(List<Model.PikaTaskRunOutput> runOutputs);
-        Task AddTaskRunOutputAsync(Model.PikaTaskRunOutput runOutput);
+        Task<long> AddScriptRunAsync(PikaScriptRun run);
+        Task AddScriptRunOutputAsync(List<PikaScriptRunOutput> runOutputs);
+        Task AddScriptRunOutputAsync(PikaScriptRunOutput runOutput);
         Task DeleteAppAsync(long appId);
-        Task DeleteTaskAsync(long taskId);
+        Task DeleteScriptAsync(long scriptId);
         Task<PikaApp> GetAppAsync(long appId);
         Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
         long GetDbSize();
@@ -23,20 +20,19 @@ namespace Pika.Common.Store
         Task<List<PikaDriveSmartctlTable>> GetPikaDriveSmartctlTablesAsync(string driveId, DateTime from);
         Task<PikaDriveSmartctlTable> GetPikaDriveSmartTableAsync(string driveId);
         Task<int> GetRunsCountAsync(string whereClause = "");
-        Task<int> GetRunsCountAsync(long taskId);
+        Task<int> GetRunsCountAsync(long scriptId);
+        Task<PikaScript> GetScriptAsync(long scriptId);
+        Task<PikaScriptRun> GetScriptRunAsync(long runId);
+        Task<List<PikaScriptRunOutput>> GetScriptRunOutputs(long scriptRunId, long laterThan = 0, int limit = -1, bool desc = true);
+        Task<List<PikaScriptRun>> GetScriptRunsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
+        Task<List<PikaScript>> GetScriptsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
         Task<string> GetSetting(string key);
-        Task<PikaSystemStatus> GetSystemStatusAsync();
-        Task<PikaTask> GetTaskAsync(long taskId);
-        Task<PikaTaskRun> GetTaskRunAsync(long runId);
-        Task<List<Model.PikaTaskRunOutput>> GetTaskRunOutputs(long taskRunId, long laterThan = 0, int limit = -1, bool desc = true);
-        Task<List<PikaTaskRun>> GetTaskRunsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
-        Task<List<PikaTask>> GetTasksAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
         Task<int> GetTasksCountAsync();
         Task InsertOrUpdateSetting(string key, string value);
         Task StartupAsync();
         Task UpdateAppAsync(PikaApp app);
         Task UpdateScriptAsync(PikaScript script);
-        Task UpdateTaskRunStatusAsync(long runId, PikaTaskStatus status);
+        Task UpdateScriptRunStatusAsync(long runId, PikaScriptStatus status);
         Task VacuumDbAsync();
     }
 }

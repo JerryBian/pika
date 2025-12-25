@@ -1,18 +1,14 @@
-﻿using Microsoft.Extensions.Hosting;
-using Pika.Common.Model;
+﻿using Pika.Common.Model;
 using Pika.Common.Store;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Pika.HostedServices;
 
 public class StartupHostedService : BackgroundService
 {
-    private readonly IDbRepository _repository;
+    private readonly IPikaStore _repository;
     private readonly PikaSetting _setting;
 
-    public StartupHostedService(IDbRepository dbRepository, PikaSetting setting)
+    public StartupHostedService(IPikaStore dbRepository, PikaSetting setting)
     {
         _setting = setting;
         _repository = dbRepository;
@@ -28,17 +24,17 @@ public class StartupHostedService : BackgroundService
         await _repository.StartupAsync();
         await InitSettingAsync();
         var runningTasks =
-            await _repository.GetTaskRunsAsync(int.MaxValue, 0, $"status={(int)PikaTaskStatus.Running}");
+            await _repository.GetScriptRunsAsync(int.MaxValue, 0, $"status={(int)PikaScriptStatus.Running}");
         foreach (var runningTask in runningTasks)
         {
-            await _repository.AddTaskRunOutputAsync(new PikaTaskRunOutput
+            await _repository.AddScriptRunOutputAsync(new PikaScriptRunOutput
             {
                 IsError = true,
                 Message = "Flag as dead during startup.",
                 TaskRunId = runningTask.Id,
                 CreatedAt = DateTime.Now.Ticks
             });
-            await _repository.UpdateTaskRunStatusAsync(runningTask.Id, PikaTaskStatus.Dead);
+            await _repository.UpdateScriptRunStatusAsync(runningTask.Id, PikaScriptStatus.Dead);
         }
 
         await base.StartAsync(cancellationToken);
@@ -46,20 +42,20 @@ public class StartupHostedService : BackgroundService
 
     private async Task InitSettingAsync()
     {
-        var shellName = await _repository.GetSetting(SettingKey.ShellName);
+        var shellName = await _repository.GetSetting(PikaSettingKey.ShellName);
         if (string.IsNullOrEmpty(shellName))
         {
             if (OperatingSystem.IsWindows())
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellName, "cmd.exe");
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellOptions, "/q /c");
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellExt, ".bat");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellName, "cmd.exe");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellOptions, "/q /c");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellExt, ".bat");
             }
             else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
             {
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellName, "/bin/bash");
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellOptions, "");
-                await _repository.InsertOrUpdateSetting(SettingKey.ShellExt, ".sh");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellName, "/bin/bash");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellOptions, "");
+                await _repository.InsertOrUpdateSetting(PikaSettingKey.ShellExt, ".sh");
             }
             else
             {
@@ -67,22 +63,22 @@ public class StartupHostedService : BackgroundService
             }
         }
 
-        var itemsPerPage = await _repository.GetSetting(SettingKey.ItemsPerPage);
+        var itemsPerPage = await _repository.GetSetting(PikaSettingKey.ItemsPerPage);
         if (!int.TryParse(itemsPerPage, out var val) || val < 1)
         {
-            await _repository.InsertOrUpdateSetting(SettingKey.ItemsPerPage, "8");
+            await _repository.InsertOrUpdateSetting(PikaSettingKey.ItemsPerPage, "8");
         }
 
-        var retainSizeInMb = await _repository.GetSetting(SettingKey.RetainSizeInMb);
+        var retainSizeInMb = await _repository.GetSetting(PikaSettingKey.RetainSizeInMb);
         if (!int.TryParse(retainSizeInMb, out var val2) || val2 < 1)
         {
-            await _repository.InsertOrUpdateSetting(SettingKey.RetainSizeInMb, "200");
+            await _repository.InsertOrUpdateSetting(PikaSettingKey.RetainSizeInMb, "200");
         }
 
-        _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(SettingKey.ItemsPerPage));
-        _setting.RetainSizeInMb = Convert.ToInt32(await _repository.GetSetting(SettingKey.RetainSizeInMb));
-        _setting.DefaultShellName = await _repository.GetSetting(SettingKey.ShellName);
-        _setting.DefaultShellOption = await _repository.GetSetting(SettingKey.ShellOptions);
-        _setting.DefaultShellExt = await _repository.GetSetting(SettingKey.ShellExt);
+        _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(PikaSettingKey.ItemsPerPage));
+        _setting.RetainSizeInMb = Convert.ToInt32(await _repository.GetSetting(PikaSettingKey.RetainSizeInMb));
+        _setting.DefaultShellName = await _repository.GetSetting(PikaSettingKey.ShellName);
+        _setting.DefaultShellOption = await _repository.GetSetting(PikaSettingKey.ShellOptions);
+        _setting.DefaultShellExt = await _repository.GetSetting(PikaSettingKey.ShellExt);
     }
 }

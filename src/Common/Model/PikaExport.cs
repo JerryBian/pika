@@ -1,6 +1,4 @@
-﻿using Pika.Common.App;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Pika.Common.Model;
 
@@ -8,7 +6,7 @@ public class PikaExport
 {
     [JsonPropertyOrder(1)]
     [JsonPropertyName("tasks")]
-    public List<PikaTask> Tasks { get; set; }
+    public List<PikaScript> Tasks { get; set; }
 
     [JsonPropertyOrder(2)]
     [JsonPropertyName("setting")]

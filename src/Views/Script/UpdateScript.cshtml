@@ -1,6 +1,6 @@
-﻿@model PikaTask
+﻿@model PikaScript
 @{
-    ViewData["Title"] = $"Update task #{Model.Id}";
+    ViewData["Title"] = $"Update script #{Model.Id}";
 }
 
 <fieldset>
@@ -60,18 +60,18 @@
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
         </div>
-        <input type="hidden" name="id" value="@Model.Id"/>
+        <input type="hidden" name="id" value="@Model.Id" />
     </form>
 </fieldset>
 
-@section Scripts{
+@section Scripts {
     <script>
         const form = document.querySelector("form");
         form.addEventListener('submit',
             function(event) {
                 event.preventDefault();
                 event.stopPropagation();
-                submitRequest("/api/task/update",
+                submitRequest("/api/script/update",
                     {
                         form: form,
                         method: "POST",

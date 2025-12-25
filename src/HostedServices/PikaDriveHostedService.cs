@@ -1,6 +1,7 @@
 ﻿
 using Pika.Common.Drive;
 using Pika.Common.Extension;
+using Pika.Common.Model;
 
 namespace Pika.HostedServices
 {

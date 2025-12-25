@@ -1,6 +1,6 @@
 ﻿namespace Pika.Common.Model;
 
-public class SettingKey
+public class PikaSettingKey
 {
     public const string ShellName = "default_shell_name";
 

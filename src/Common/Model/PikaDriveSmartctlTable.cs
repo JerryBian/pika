@@ -1,6 +1,6 @@
 using Pika.Common.Extension;
 
-namespace Pika.Common.Drive
+namespace Pika.Common.Model
 {
     public class PikaDriveSmartctlTable
     {

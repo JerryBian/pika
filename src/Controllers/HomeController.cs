@@ -10,26 +10,19 @@ namespace Pika.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly IDbRepository _repository;
+    private readonly IPikaStore _repository;
 
-    public HomeController(IDbRepository repository)
+    public HomeController(IPikaStore repository)
     {
         _repository = repository;
     }
 
     public async Task<IActionResult> Index()
     {
-        var model = new HomeViewModel();
-        model.Apps.AddRange(await _repository.GetAppsAsync());
-        model.Tasks.AddRange(await _repository.GetTasksAsync());
-        model.SystemStatus = await _repository.GetSystemStatusAsync();
-
-        //var foo = await RemoteCommandExecutor.RunAsync("lsblk -O -J",CancellationToken.None);
-        //var j = JsonUtil.Deserialize<PikaDriveLsblk>(foo.Output);
-        //var x = j.BlockDevices.Where(d => d.Type == "disk").ToList();
-        return View(model);
+        return View();
     }
 
+    [Route("/error")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

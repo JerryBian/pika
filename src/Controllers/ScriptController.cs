@@ -2,24 +2,31 @@
 using Pika.Common.Model;
 using Pika.Common.Store;
 using Pika.Models;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Pika.Controllers
 {
     [Route("script")]
     public class ScriptController : Controller
     {
-        private readonly IDbRepository _repository;
+        private readonly IPikaStore _repository;
         private readonly PikaSetting _setting;
 
-        public ScriptController(IDbRepository repository, PikaSetting setting)
+        public ScriptController(IPikaStore repository, PikaSetting setting)
         {
             _repository = repository;
             _setting = setting;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var model = new PikaScriptIndexViewModel
+            {
+            };
+
+            model.SavedScripts = await _repository.GetScriptsAsync();
+            return View(model);
         }
 
         [HttpGet("add")]
@@ -30,10 +37,10 @@ namespace Pika.Controllers
                 IsTemp = isTemp
             };
 
-            PikaTask sourceTask = null;
+            PikaScript sourceTask = null;
             if (sourceTaskId > 0)
             {
-                sourceTask = await _repository.GetTaskAsync(sourceTaskId);
+                sourceTask = await _repository.GetScriptAsync(sourceTaskId);
             }
 
             if (sourceTask != null)
@@ -53,6 +60,58 @@ namespace Pika.Controllers
             }
 
             return View("AddScript", model);
+        }
+
+        [HttpGet("{id}/update")]
+        public async Task<IActionResult> UpdateScript([FromRoute] long id)
+        {
+            var task = await _repository.GetScriptAsync(id);
+            return task == null ? NotFound() : View("UpdateScript", task);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ScriptDetail([FromRoute] long id)
+        {
+            var script = await _repository.GetScriptAsync(id);
+            if (script == null)
+            {
+                return NotFound();
+            }
+
+            PikaScriptDetailViewModel model = new() { Script = script };
+            var runs = await _repository.GetScriptRunsAsync(100, 0, $"task_id={id}", "created_at DESC");
+            model.Runs = runs;
+            model.RunCount = await _repository.GetRunsCountAsync(script.Id);
+            return View("ScriptDetail", model);
+        }
+
+        [HttpGet("run/{id}")]
+        public async Task<IActionResult> ScriptRun([FromRoute] long id, [FromQuery] string format)
+        {
+            if(string.Equals(format, "raw", StringComparison.OrdinalIgnoreCase))
+            {
+                var outputs = await _repository.GetScriptRunOutputs(id, desc: false);
+                return Content(string.Join(Environment.NewLine, outputs.Select(x => x.Message)), "text/plain", Encoding.UTF8);
+            }
+
+            var taskRun = await _repository.GetScriptRunAsync(id);
+            if (taskRun == null)
+            {
+                return NotFound();
+            }
+
+            var task = await _repository.GetScriptAsync(taskRun.ScriptId);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            PikaScriptRunViewModel viewModel = new()
+            {
+                Task = task,
+                Run = taskRun
+            };
+            return View(viewModel);
         }
     }
 }

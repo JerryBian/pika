@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Pika.Common.Drive;
 using Pika.Common.Extension;
+using Pika.Common.Model;
 using Pika.Models;
 using System.Runtime.CompilerServices;
 

@@ -16,15 +16,15 @@ public class CommandManager : ICommandManager
 {
     private readonly ConcurrentDictionary<long, CancellationTokenSource> _commandClients;
     private readonly string _completedLiteral;
-    private readonly IDbRepository _dbRepository;
+    private readonly IPikaStore _dbRepository;
     private readonly ILogger<CommandManager> _logger;
-    private readonly BatchBlock<PikaTaskRunOutput> _batchBlock;
-    private readonly TransformBlock<PikaTaskRunOutput, PikaTaskRunOutput> _batchTimerBlock;
-    private readonly ActionBlock<PikaTaskRunOutput[]> _writeLogBlock;
+    private readonly BatchBlock<PikaScriptRunOutput> _batchBlock;
+    private readonly TransformBlock<PikaScriptRunOutput, PikaScriptRunOutput> _batchTimerBlock;
+    private readonly ActionBlock<PikaScriptRunOutput[]> _writeLogBlock;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IServiceProvider _serviceProvider;
 
-    public CommandManager(IDbRepository repository, ILogger<CommandManager> logger, IServiceProvider serviceProvider)
+    public CommandManager(IPikaStore repository, ILogger<CommandManager> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _dbRepository = repository;
@@ -32,17 +32,17 @@ public class CommandManager : ICommandManager
         _completedLiteral = Guid.NewGuid().ToString();
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _commandClients = new ConcurrentDictionary<long, CancellationTokenSource>();
-        _batchBlock = new BatchBlock<PikaTaskRunOutput>(10, new GroupingDataflowBlockOptions { EnsureOrdered = false });
+        _batchBlock = new BatchBlock<PikaScriptRunOutput>(10, new GroupingDataflowBlockOptions { EnsureOrdered = false });
         Timer batchTimer = new(x =>
         {
             _batchBlock.TriggerBatch();
         });
-        _batchTimerBlock = new TransformBlock<PikaTaskRunOutput, PikaTaskRunOutput>(x =>
+        _batchTimerBlock = new TransformBlock<PikaScriptRunOutput, PikaScriptRunOutput>(x =>
         {
             _ = batchTimer.Change(TimeSpan.FromSeconds(2), Timeout.InfiniteTimeSpan);
             return x;
         }, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1, MaxMessagesPerTask = 1000 });
-        _writeLogBlock = new ActionBlock<PikaTaskRunOutput[]>(ProcessRunOutputAsync, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1 });
+        _writeLogBlock = new ActionBlock<PikaScriptRunOutput[]>(ProcessRunOutputAsync, new ExecutionDataflowBlockOptions { EnsureOrdered = false, MaxDegreeOfParallelism = 1 });
         _ = _batchTimerBlock.LinkTo(_batchBlock, new DataflowLinkOptions { PropagateCompletion = true });
         _ = _batchBlock.LinkTo(_writeLogBlock, new DataflowLinkOptions { PropagateCompletion = true });
     }
@@ -92,7 +92,7 @@ public class CommandManager : ICommandManager
                                 ShellParameter = run.ShellOption,
                                 ErrorDataReceivedHandler = async m =>
                                 {
-                                    PikaTaskRunOutput output = new()
+                                    PikaScriptRunOutput output = new()
                                     {
                                         TaskRunId = run.Id,
                                         IsError = true,
@@ -106,7 +106,7 @@ public class CommandManager : ICommandManager
                                 },
                                 OutputDataReceivedHandler = async m =>
                                 {
-                                    PikaTaskRunOutput output = new()
+                                    PikaScriptRunOutput output = new()
                                     {
                                         TaskRunId = run.Id,
                                         IsError = false,
@@ -126,7 +126,7 @@ public class CommandManager : ICommandManager
                             };
                             await Exec.RunAsync(run.Script, execOption, cts.Token);
 
-                            PikaTaskRunOutput output = new()
+                            PikaScriptRunOutput output = new()
                             {
                                 TaskRunId = run.Id,
                                 IsError = stopped,
@@ -153,19 +153,19 @@ public class CommandManager : ICommandManager
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessRunOutputAsync(PikaTaskRunOutput[] output)
+    private async Task ProcessRunOutputAsync(PikaScriptRunOutput[] output)
     {
         try
         {
             var nonCompletedOutputs = output.Where(x => x.Message != _completedLiteral);
             var completedOutputs = output.Except(nonCompletedOutputs);
 
-            await _dbRepository.AddTaskRunOutputAsync(nonCompletedOutputs.ToList());
+            await _dbRepository.AddScriptRunOutputAsync(nonCompletedOutputs.ToList());
 
             foreach (var item in completedOutputs)
             {
-                var status = item.IsError ? PikaTaskStatus.Stopped : PikaTaskStatus.Completed;
-                await _dbRepository.UpdateTaskRunStatusAsync(item.TaskRunId, status);
+                var status = item.IsError ? PikaScriptStatus.Stopped : PikaScriptStatus.Completed;
+                await _dbRepository.UpdateScriptRunStatusAsync(item.TaskRunId, status);
                 _logger.LogInformation($"Run {item.TaskRunId} marked as {status}.");
             }
         }
@@ -175,18 +175,18 @@ public class CommandManager : ICommandManager
         }
     }
 
-    private async Task<PikaTaskRun> GetPendingTaskAsync(CancellationToken cancellationToken)
+    private async Task<PikaScriptRun> GetPendingTaskAsync(CancellationToken cancellationToken)
     {
         await _semaphoreSlim.WaitAsync(cancellationToken);
         try
         {
             var pendingRuns =
-                await _dbRepository.GetTaskRunsAsync(whereClause: $"status={(int)PikaTaskStatus.Pending}",
+                await _dbRepository.GetScriptRunsAsync(whereClause: $"status={(int)PikaScriptStatus.Pending}",
                     orderByClause: "created_at ASC");
             var run = pendingRuns.FirstOrDefault();
             if (run != null)
             {
-                await _dbRepository.UpdateTaskRunStatusAsync(run.Id, PikaTaskStatus.Running);
+                await _dbRepository.UpdateScriptRunStatusAsync(run.Id, PikaScriptStatus.Running);
             }
 
             return run;

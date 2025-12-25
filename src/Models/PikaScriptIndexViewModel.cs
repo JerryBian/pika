@@ -1,4 +1,4 @@
-﻿using Pika.Common.Script;
+﻿using Pika.Common.Model;
 
 namespace Pika.Models
 {
