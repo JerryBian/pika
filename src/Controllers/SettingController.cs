@@ -33,7 +33,7 @@ public class SettingController : Controller
     [HttpPost("export")]
     public async Task<IActionResult> ExportAsync()
     {
-        var tasks = await _repository.GetScriptsAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
+        var tasks = await _repository.GetScriptsAsync();
         PikaExport export = new()
         {
             Setting = _setting,

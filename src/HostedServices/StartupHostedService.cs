@@ -24,7 +24,7 @@ public class StartupHostedService : BackgroundService
         await _repository.StartupAsync();
         await InitSettingAsync();
         var runningTasks =
-            await _repository.GetScriptRunsAsync(int.MaxValue, 0, $"status={(int)PikaScriptStatus.Running}");
+            await _repository.GetScriptRunsByStatusAsync(PikaScriptStatus.Running, false);
         foreach (var runningTask in runningTasks)
         {
             await _repository.AddScriptRunOutputAsync(new PikaScriptRunOutput

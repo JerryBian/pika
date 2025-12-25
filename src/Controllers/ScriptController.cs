@@ -3,7 +3,6 @@ using Pika.Common.Model;
 using Pika.Common.Store;
 using Pika.Models;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Pika.Controllers
 {
@@ -21,11 +20,9 @@ namespace Pika.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var model = new PikaScriptIndexViewModel
-            {
-            };
-
-            model.SavedScripts = await _repository.GetScriptsAsync();
+            var model = new PikaScriptIndexViewModel();
+            var scripts = await _repository.GetScriptsAsync();
+            model.SavedScripts = [.. scripts.OrderBy(x => x.Name)];
             return View(model);
         }
 
@@ -79,9 +76,8 @@ namespace Pika.Controllers
             }
 
             PikaScriptDetailViewModel model = new() { Script = script };
-            var runs = await _repository.GetScriptRunsAsync(100, 0, $"task_id={id}", "created_at DESC");
+            var runs = await _repository.GetScriptRunsByScriptIdAsync(id, 100);
             model.Runs = runs;
-            model.RunCount = await _repository.GetRunsCountAsync(script.Id);
             return View("ScriptDetail", model);
         }
 

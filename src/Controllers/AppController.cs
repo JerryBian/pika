@@ -5,6 +5,7 @@ using Pika.Models;
 
 namespace Pika.Controllers;
 
+[Route("app")]
 public class AppController : Controller
 {
     private readonly IPikaStore _repository;
@@ -14,7 +15,7 @@ public class AppController : Controller
         _repository = repository;
     }
 
-    public async Task<IActionResult> Index([FromQuery] int page = 1)
+    public async Task<IActionResult> Index()
     {
         var apps = await _repository.GetAppsAsync();
         var model = new List<PikaAppViewModel>();

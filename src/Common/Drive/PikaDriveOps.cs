@@ -67,7 +67,7 @@ namespace Pika.Common.Drive
         public async Task<List<PikaDriveTable>> GetActivePikaDrivesAsync()
         {
             var result = await _repository.GetPikaDrivesAsync();
-            return result.OrderBy(x => x.Name).ToList();
+            return [.. result.OrderBy(x => x.Name)];
         }
 
         public async Task<PikaDrivePowerStatus> GetDevicePowerStatusAsync(string devicePath)

@@ -1,7 +1,7 @@
 ﻿@model PikaScriptDetailViewModel
 
 @{
-    ViewData["Title"] = $"Task #{Model.Script.Id}";
+    ViewData["Title"] = $"Script #{Model.Script.Id}";
 }
 <div class="table-responsive">
     <div>
@@ -25,8 +25,8 @@
                 <td>@Model.Script.Description</td>
             </tr>
             <tr>
-                <td class="fw-bold">Run Times</td>
-                <td>@Model.RunCount</td>
+                <td class="fw-bold">Run Count</td>
+                <td>@Model.Runs.Count</td>
             </tr>
             <tr>
                 <td class="fw-bold">Shell</td>
@@ -89,6 +89,6 @@
 @section Scripts {
     <script>
         hljs.highlightElement(document.querySelector("#script"));
-        setActive("taskNav");
+        setActive("navScript");
     </script>
 }

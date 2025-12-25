@@ -1,10 +1,21 @@
 ﻿@model PikaScriptIndexViewModel
-
-<h5 class="mb-3"><i class="bi bi-card-list"></i> Saved scripts</h5>
+@{
+    ViewData["Title"] = "Script";
+}
 
 <div class="text-end mb-3">
-    <a href="/app/add" class="btn btn-secondary btn-sm"><i class="bi bi-plus-lg"></i> Create new script</a>
+    <div class="btn-group">
+        <a class="btn btn-primary" href="/script/add?isTemp=true"><i class="bi bi-plus-lg"></i> Create temp script</a>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/script/add"><i class="bi bi-plus-lg"></i> Create new saved script</a></li>
+        </ul>
+    </div>
 </div>
+
+<h5 class="mb-3"><i class="bi bi-card-list"></i> Saved scripts</h5>
 
 <div class="row row-cols-1 row-cols-md-2 g-4">
     @foreach (var item in Model.SavedScripts)
@@ -21,6 +32,7 @@
                     </div>
                     <div class="fs-5 card-text font-monospace">
                         <div class="btn-group" role="group">
+                            <a class="btn btn-secondary" href="/script/@item.Id"><i class="bi bi-info-lg"></i> Detail</a>
                             <button type="button" class="btn btn-success" onclick="runTask('@item.Id')"><i class="bi bi-toggle-on"></i> Run</button>
                             <a class="btn btn-info" href="/script/@item.Id/update"><i class="bi bi-pen"></i> Edit</a>
                         </div>
@@ -30,3 +42,9 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        setActive("navScript");
+    </script>
+}

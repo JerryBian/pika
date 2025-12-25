@@ -181,8 +181,7 @@ public class CommandManager : ICommandManager
         try
         {
             var pendingRuns =
-                await _dbRepository.GetScriptRunsAsync(whereClause: $"status={(int)PikaScriptStatus.Pending}",
-                    orderByClause: "created_at ASC");
+                await _dbRepository.GetScriptRunsByStatusAsync(PikaScriptStatus.Pending, false);
             var run = pendingRuns.FirstOrDefault();
             if (run != null)
             {

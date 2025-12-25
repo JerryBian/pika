@@ -6,8 +6,6 @@ namespace Pika.Models
     {
         public PikaScript Script { get; set; }
 
-        public int RunCount { get; set; }
-
         public List<PikaScriptRun> Runs { get; set; } = [];
     }
 }

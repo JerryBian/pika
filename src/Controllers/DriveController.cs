@@ -21,7 +21,7 @@ namespace Pika.Controllers
             var activeDrives = await _pikaDriveOps.GetActivePikaDrivesAsync();
             foreach (var drive in activeDrives)
             {
-                var m =new PikaDriveIndexViewModel
+                var m = new PikaDriveIndexViewModel
                 {
                     DrivePath = drive.Path,
                     DriveType = drive.Type,

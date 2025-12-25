@@ -190,7 +190,7 @@ public class PikaStore : IPikaStore
     public async Task UpdateScriptAsync(PikaScript script)
     {
         await using SqliteConnection connection = new(_connectionString);
-        _ = await connection.ExecuteAsync(
+        await connection.ExecuteAsync(
             "UPDATE script SET name=@name, script=@script, description=@desc, shell_name=@shellName, shell_option=@shellOption, shell_ext=@shellExt, last_modified_at=@lastModifiedAt WHERE id=@id",
             new
             {
@@ -205,32 +205,6 @@ public class PikaStore : IPikaStore
             });
     }
 
-    public async Task<int> GetRunsCountAsync(string whereClause = "")
-    {
-        await using SqliteConnection connection = new(_connectionString);
-        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
-        var result =
-            await connection.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM script_run {whereClause}");
-        return result;
-    }
-
-    public async Task<int> GetRunsCountAsync(long scriptId)
-    {
-        await using SqliteConnection connection = new(_connectionString);
-        var result =
-            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM script_run WHERE script_id=@scriptId",
-                new { scriptId });
-        return result;
-    }
-
-    public async Task<int> GetTasksCountAsync()
-    {
-        await using SqliteConnection connection = new(_connectionString);
-        var result =
-            await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM task WHERE is_temp = 0");
-        return result;
-    }
-
     public async Task<PikaScript> GetScriptAsync(long scriptId)
     {
         await using SqliteConnection connection = new(_connectionString);
@@ -242,45 +216,38 @@ public class PikaStore : IPikaStore
     public async Task DeleteScriptAsync(long scriptId)
     {
         await using SqliteConnection connection = new(_connectionString);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
         _ = await connection.ExecuteAsync(
             "DELETE FROM script_run_output WHERE run_id IN(SELECT id FROM script_run WHERE script_id=@scriptId);" +
             "DELETE FROM script_run WHERE task_id=@scriptId;" +
             "DELETE FROM script WHERE id=@scriptId", new
             {
                 scriptId
-            });
+            }, transaction);
+        await transaction.CommitAsync();
     }
 
-    public async Task<List<PikaScript>> GetScriptsAsync(int limit = 0, int offset = -1, string whereClause = "",
-        string orderByClause = "")
+    public async Task<List<PikaScript>> GetScriptsAsync()
     {
         await using SqliteConnection connection = new(_connectionString);
-        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"AND {whereClause}";
-        orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        var limitClause = string.Empty;
-        if (limit > 0 && offset >= 0)
-        {
-            limitClause = $"LIMIT {limit} OFFSET {offset}";
-        }
-
-        var sql = $"SELECT * FROM script WHERE is_temp = 0 {whereClause} {orderByClause} {limitClause}";
+        var sql = $"SELECT * FROM script WHERE is_temp = 0";
         return (await connection.QueryAsync<PikaScript>(sql)).AsList();
     }
 
-    public async Task<List<PikaScriptRun>> GetScriptRunsAsync(int limit = 0, int offset = -1, string whereClause = "",
-        string orderByClause = "")
+    public async Task<List<PikaScriptRun>> GetScriptRunsByScriptIdAsync(long scriptId, int limit = int.MaxValue)
     {
         await using SqliteConnection connection = new(_connectionString);
-        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $"WHERE {whereClause}";
-        orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        var limitClause = string.Empty;
-        if (limit > 0 && offset >= 0)
-        {
-            limitClause = $"LIMIT {limit} OFFSET {offset}";
-        }
+        var sql = $"SELECT * FROM script_run WHERE script_id=@scriptId ORDER BY created_at DESC limit {limit}";
+        return (await connection.QueryAsync<PikaScriptRun>(sql, new { scriptId })).AsList();
+    }
 
-        var sql = $"SELECT * FROM script_run {whereClause} {orderByClause} {limitClause}";
-        return (await connection.QueryAsync<PikaScriptRun>(sql)).AsList();
+    public async Task<List<PikaScriptRun>> GetScriptRunsByStatusAsync(PikaScriptStatus status, bool desc = true)
+    {
+        await using SqliteConnection connection = new(_connectionString);
+        var orderByLiteral = desc ? "DESC" : "ASC";
+        var sql = $"SELECT * FROM script_run WHERE status=@status ORDER BY created_at {orderByLiteral}";
+        return (await connection.QueryAsync<PikaScriptRun>(sql, new { status = (int)status })).AsList();
     }
 
     public async Task<long> AddScriptRunAsync(PikaScriptRun run)
@@ -346,8 +313,11 @@ public class PikaStore : IPikaStore
         await transaction.CommitAsync();
     }
 
-    public async Task<List<PikaScriptRunOutput>> GetScriptRunOutputs(long scriptRunId, long laterThan = default,
-        int limit = -1, bool desc = true)
+    public async Task<List<PikaScriptRunOutput>> GetScriptRunOutputs(
+        long scriptRunId,
+        long laterThan = default,
+        int limit = -1,
+        bool desc = true)
     {
         await using SqliteConnection connection = new(_connectionString);
         var createdAtClause = laterThan == default ? "" : "AND created_at>@laterThan";
@@ -461,7 +431,7 @@ public class PikaStore : IPikaStore
     public async Task<List<PikaDriveTable>> GetPikaDrivesAsync()
     {
         await using SqliteConnection connection = new(_connectionString);
-        var result = (await connection.QueryAsync<PikaDriveTable>("SELECT * FROM drive ORDER BY name")).AsList();
+        var result = (await connection.QueryAsync<PikaDriveTable>("SELECT * FROM drive")).AsList();
         if (!result.Any())
         {
             return result;
@@ -478,7 +448,10 @@ public class PikaStore : IPikaStore
 
     public async Task AddPikaDriveSmartctlAsync(PikaDriveSmartctlTable pikaDriveSmartctl)
     {
-        if (pikaDriveSmartctl == null) return;
+        if (pikaDriveSmartctl == null)
+        {
+            return;
+        }
 
         await using SqliteConnection connection = new(_connectionString);
 
