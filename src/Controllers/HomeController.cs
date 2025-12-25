@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Pika.Common.Command;
-using Pika.Common.Model;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Pika.Common.Extension;
 using Pika.Common.Store;
-using Pika.Common.Util;
 using Pika.Models;
 using System.Diagnostics;
 
@@ -17,12 +16,15 @@ public class HomeController : Controller
         _repository = repository;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
+        var dbSize = _repository.GetDbSize();
+        ViewData["DbSize"] = dbSize.ToByteSizeHuman();
         return View();
     }
 
     [Route("/error")]
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

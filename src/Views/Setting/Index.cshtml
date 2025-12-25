@@ -1,19 +1,9 @@
 ﻿@model PikaSetting
 
-<div id="misc" class="my-2">
+<div id="misc" class="my-2 bg-body bg-gradient p-2">
     <h4>Misc</h4>
     <fieldset>
         <form class="needs-validation" novalidate id="miscForm">
-            <div class="mb-3 row">
-                <label for="itemsPerPage" class="col-md-2 col-form-label">Items per page</label>
-                <div class="col-md-10">
-                    <input type="number" class="form-control" id="itemsPerPage" min="1" max="50" step="1" value="@Model.ItemsPerPage" name="itemsPerPage" required>
-                    <div class="invalid-feedback">
-                        Required
-                    </div>
-                </div>
-            </div>
-
             <div class="mb-3 row">
                 <label for="retainSizeInMb" class="col-md-2 col-form-label">Retain DB Size in MB</label>
                 <div class="col-md-10">
@@ -61,9 +51,9 @@
     </fieldset>
 </div>
 
-<hr/>
+<hr />
 
-<div id="shrinkDb" class="my-2">
+<div id="shrinkDb" class="my-2 bg-body bg-gradient p-2">
     <h4>Shrink DB Size</h4>
     <fieldset>
         <form id="shrinkDbForm" class="needs-validation" novalidate>
@@ -75,14 +65,14 @@
     </fieldset>
 </div>
 
-<hr/>
+<hr />
 
-<div id="import" class="my-2">
+<div id="import" class="my-2 bg-body bg-gradient p-2">
     <h4>Import Tasks</h4>
     <fieldset>
         <form action="/setting/import" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
-                <label for="formFile" class="form-label">Import tasks from JSON file.</label>
+                <label for="formFile" class="form-label">Import all data from JSON file.</label>
                 <input class="form-control" type="file" id="formFile" name="file">
             </div>
             <div class="d-grid">
@@ -92,13 +82,13 @@
     </fieldset>
 </div>
 
-<hr/>
+<hr />
 
-<div id="export" class="my-2">
+<div id="export" class="my-2 bg-body bg-gradient p-2">
     <h4>Export Tasks</h4>
     <fieldset>
         <form action="/setting/export" method="POST">
-            <label class="form-label">Export all tasks to JSON file.</label>
+            <label class="form-label">Export all data to JSON file.</label>
             <div class="d-grid">
                 <button type="submit" class="btn btn-secondary"><i class="bi bi-file-earmark-arrow-down"></i> Export</button>
             </div>
@@ -106,7 +96,7 @@
     </fieldset>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         const miscForm = document.querySelector("#miscForm");
         miscForm.addEventListener('submit',
@@ -117,6 +107,7 @@
                     {
                         form: miscForm,
                         body: new URLSearchParams(new FormData(miscForm)),
+                        method: "POST",
                         contentType: "application/x-www-form-urlencoded",
                         okAction: function() {
                             showInfoMessageModal("Your Misc settings are saved successfully.");
@@ -135,6 +126,6 @@
                     });
             });
 
-        setActive("settingNav");
+        setActive("navSetting");
     </script>
 }

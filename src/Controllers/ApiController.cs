@@ -368,23 +368,7 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpPost("shrinkDB")]
-    public async Task<ApiResponse<object>> ShrinkDb()
-    {
-        ApiResponse<object> response = new();
-        try
-        {
-            await _repository.VacuumDbAsync();
-            response.RedirectTo = "/setting";
-        }
-        catch (Exception ex)
-        {
-            response.IsOk = false;
-            response.Message = ex.Message;
-        }
-
-        return response;
-    }
+    
 
     [HttpPost("run/{runId}/output")]
     public async Task<ApiResponse<PikaScriptRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
@@ -431,24 +415,14 @@ public class ApiController : ControllerBase
         return response;
     }
 
+    #region Setting
+
     [HttpPost("setting/update")]
     public async Task<ApiResponse<object>> UpdateSettingAsync([FromForm] PikaSetting setting)
     {
         ApiResponse<object> response = new();
         try
         {
-            if (setting.ItemsPerPage is > 0 and <= 50)
-            {
-                await _repository.InsertOrUpdateSetting(PikaSettingKey.ItemsPerPage, setting.ItemsPerPage.ToString());
-                _setting.ItemsPerPage = setting.ItemsPerPage;
-            }
-            else
-            {
-                response.IsOk = false;
-                response.Message = "Invalid Items Per Page set: it must be in [1, 50].";
-                return response;
-            }
-
             if (setting.RetainSizeInMb > 0)
             {
                 await _repository.InsertOrUpdateSetting(PikaSettingKey.RetainSizeInMb, setting.RetainSizeInMb.ToString());
@@ -499,4 +473,24 @@ public class ApiController : ControllerBase
 
         return response;
     }
+
+    [HttpPost("shrinkDB")]
+    public async Task<ApiResponse<object>> ShrinkDb()
+    {
+        ApiResponse<object> response = new();
+        try
+        {
+            await _repository.VacuumDbAsync();
+            response.RedirectTo = "/setting";
+        }
+        catch (Exception ex)
+        {
+            response.IsOk = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    #endregion
 }

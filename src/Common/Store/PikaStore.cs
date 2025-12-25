@@ -39,7 +39,7 @@ public class PikaStore : IPikaStore
             Cache = SqliteCacheMode.Shared,
             DataSource = _pikaDb,
             Mode = SqliteOpenMode.ReadWriteCreate,
-            DefaultTimeout = 30,
+            DefaultTimeout = 60,
             Pooling = true,
             ForeignKeys = true
         };
@@ -47,7 +47,7 @@ public class PikaStore : IPikaStore
         var baseDir = AppContext.BaseDirectory;
         if (string.IsNullOrEmpty(baseDir))
         {
-            throw new Exception("Cannot find base dir.");
+            throw new Exception($"Cannot find base dir {baseDir}.");
         }
 
         var startupFile = Path.Combine(baseDir, "Common", "Store", "startup.sql");
@@ -550,17 +550,18 @@ public class PikaStore : IPikaStore
         var retainDbSize = Convert.ToInt32(await GetSetting(PikaSettingKey.RetainSizeInMb)) * 1024 * 1024;
         await using SqliteConnection connection = new(_connectionString);
 
+        // Cleanup dead script runs
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int)PikaScriptStatus.Dead} ORDER BY created_at ASC LIMIT 1");
+                $"SELECT id FROM script_run WHERE status = {(int)PikaScriptStatus.Dead} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
             _ = await connection.ExecuteAsync(
-                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+                "DELETE FROM script_run_output WHERE run_id=@runId; DELETE FROM script_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -568,17 +569,18 @@ public class PikaStore : IPikaStore
             _ = await connection.ExecuteAsync("VACUUM");
         }
 
+        // Cleanup stopped script runs
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int)PikaScriptStatus.Stopped} ORDER BY created_at ASC LIMIT 1");
+                $"SELECT id FROM script_run WHERE status = {(int)PikaScriptStatus.Stopped} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
             _ = await connection.ExecuteAsync(
-                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+                "DELETE FROM script_run_output WHERE run_id=@runId; DELETE FROM script_run WHERE id=@runId",
                 new
                 {
                     runId
@@ -586,17 +588,18 @@ public class PikaStore : IPikaStore
             _ = await connection.ExecuteAsync("VACUUM");
         }
 
+        // Cleanup completed script runs 
         while (GetDbSize() > retainDbSize)
         {
             var runId = await connection.QueryFirstOrDefaultAsync<int>(
-                $"SELECT id FROM task_run WHERE status = {(int)PikaScriptStatus.Completed} ORDER BY created_at ASC LIMIT 1");
+                $"SELECT id FROM script_run WHERE status = {(int)PikaScriptStatus.Completed} ORDER BY created_at ASC LIMIT 1");
             if (runId == default)
             {
                 break;
             }
 
             _ = await connection.ExecuteAsync(
-                "DELETE FROM task_run_output WHERE run_id=@runId; DELETE FROM task_run WHERE id=@runId",
+                "DELETE FROM script_run_output WHERE run_id=@runId; DELETE FROM script_run WHERE id=@runId",
                 new
                 {
                     runId

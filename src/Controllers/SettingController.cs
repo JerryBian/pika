@@ -1,23 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
 using Pika.Common.Extension;
 using Pika.Common.Model;
 using Pika.Common.Store;
 using Pika.Common.Util;
-using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Pika.Controllers;
 
+[Route("setting")]
 public class SettingController : Controller
 {
     private readonly ILogger<SettingController> _logger;
     private readonly IPikaStore _repository;
     private PikaSetting _setting;
 
-    public SettingController(PikaSetting setting, IPikaStore repository, ILogger<SettingController> logger)
+    public SettingController(
+        PikaSetting setting, 
+        IPikaStore repository, 
+        ILogger<SettingController> logger)
     {
         _setting = setting;
         _logger = logger;
@@ -30,14 +30,14 @@ public class SettingController : Controller
         return View(_setting);
     }
 
-    [HttpPost("/setting/export")]
+    [HttpPost("export")]
     public async Task<IActionResult> ExportAsync()
     {
         var tasks = await _repository.GetScriptsAsync(orderByClause: "created_at ASC", whereClause: "is_temp = 0");
         PikaExport export = new()
         {
             Setting = _setting,
-            Tasks = tasks,
+            Scripts = tasks,
             Apps = await _repository.GetAppsAsync()
         };
         var content =
@@ -45,7 +45,7 @@ public class SettingController : Controller
         return File(content, "application/json", "pika-export.json");
     }
 
-    [HttpPost("/setting/import")]
+    [HttpPost("import")]
     public async Task<IActionResult> ImportAsync(IFormFile file)
     {
         try
@@ -59,21 +59,16 @@ public class SettingController : Controller
                     export.Setting.RetainSizeInMb = _setting.RetainSizeInMb;
                 }
 
-                if (export.Setting.ItemsPerPage is < 1 or > 50)
-                {
-                    export.Setting.ItemsPerPage = _setting.ItemsPerPage;
-                }
-
                 _setting = export.Setting;
             }
 
-            if (export.Tasks != null)
+            if (export.Scripts != null)
             {
-                foreach (var PikaScript in export.Tasks)
+                foreach (var PikaScript in export.Scripts)
                 {
                     PikaScript.CreatedAt = DateTime.Now.Ticks;
                     PikaScript.LastModifiedAt = DateTime.Now.Ticks;
-                    //_ = await _repository.AddScriptAsync(PikaScript);
+                    await _repository.AddScriptAsync(PikaScript);
                 }
             }
 

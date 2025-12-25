@@ -75,7 +75,6 @@ public class StartupHostedService : BackgroundService
             await _repository.InsertOrUpdateSetting(PikaSettingKey.RetainSizeInMb, "200");
         }
 
-        _setting.ItemsPerPage = Convert.ToInt32(await _repository.GetSetting(PikaSettingKey.ItemsPerPage));
         _setting.RetainSizeInMb = Convert.ToInt32(await _repository.GetSetting(PikaSettingKey.RetainSizeInMb));
         _setting.DefaultShellName = await _repository.GetSetting(PikaSettingKey.ShellName);
         _setting.DefaultShellOption = await _repository.GetSetting(PikaSettingKey.ShellOptions);
