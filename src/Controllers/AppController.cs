@@ -1,6 +1,5 @@
 ﻿using ExecDotnet;
 using Microsoft.AspNetCore.Mvc;
-using Pika.Common.Model;
 using Pika.Common.Store;
 using Pika.Models;
 
@@ -9,20 +8,17 @@ namespace Pika.Controllers;
 public class AppController : Controller
 {
     private readonly IPikaStore _repository;
-    private readonly PikaSetting _setting;
 
-    public AppController(PikaSetting setting, IPikaStore repository)
+    public AppController(IPikaStore repository)
     {
-        _setting = setting;
         _repository = repository;
     }
 
-    [HttpGet("/app")]
     public async Task<IActionResult> Index([FromQuery] int page = 1)
     {
-        var apps = await _repository.GetAppsAsync(orderByClause: "created_at DESC");
+        var apps = await _repository.GetAppsAsync();
         var model = new List<PikaAppViewModel>();
-        foreach(var app in apps)
+        foreach(var app in apps.OrderBy(x => x.Name))
         {
             var vm = new PikaAppViewModel
             {
@@ -41,7 +37,8 @@ public class AppController : Controller
             if(!string.IsNullOrWhiteSpace(stateScript))
             {
                 var execResult = await Exec.RunAsync(stateScript);
-                if(execResult.ExitCode == 0 && execResult.Output.Trim().Contains(app.RunningState, StringComparison.OrdinalIgnoreCase))
+                if(execResult.ExitCode == 0 && 
+                    execResult.Output.Trim().Contains(app.RunningState, StringComparison.OrdinalIgnoreCase))
                 {
                     vm.State = "Running";
                     vm.StateClassName = "text-success";
@@ -54,7 +51,7 @@ public class AppController : Controller
         return View(model);
     }
 
-    [HttpGet("/app/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> Detail([FromRoute] long id)
     {
         var app = await _repository.GetAppAsync(id);
@@ -66,13 +63,13 @@ public class AppController : Controller
         return View(app);
     }
 
-    [HttpGet("/app/add")]
+    [HttpGet("add")]
     public async Task<IActionResult> Add()
     {
         return View();
     }
 
-    [HttpGet("/app/{id}/update")]
+    [HttpGet("{id}/update")]
     public async Task<IActionResult> Update([FromRoute] long id)
     {
         var task = await _repository.GetAppAsync(id);

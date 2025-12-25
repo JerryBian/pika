@@ -65,20 +65,11 @@ public class PikaStore : IPikaStore
 
     #region App
 
-    public async Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "",
-        string orderByClause = "")
+    public async Task<List<PikaApp>> GetAppsAsync()
     {
         await using SqliteConnection connection = new(_connectionString);
-        whereClause = string.IsNullOrEmpty(whereClause) ? string.Empty : $" where {whereClause}";
-        orderByClause = string.IsNullOrEmpty(orderByClause) ? string.Empty : $"ORDER BY {orderByClause}";
-        var limitClause = string.Empty;
-        if (limit > 0 && offset >= 0)
-        {
-            limitClause = $"LIMIT {limit} OFFSET {offset}";
-        }
-
-        var sql = $"SELECT * FROM app {whereClause} {orderByClause} {limitClause}";
-        return (await connection.QueryAsync<PikaApp>(sql)).AsList();
+        var result = await connection.QueryAsync<PikaApp>($"SELECT * FROM app");
+        return result.AsList();
     }
 
     public async Task<PikaApp> GetAppAsync(long appId)

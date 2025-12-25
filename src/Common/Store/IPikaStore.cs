@@ -14,7 +14,7 @@ namespace Pika.Common.Store
         Task DeleteAppAsync(long appId);
         Task DeleteScriptAsync(long scriptId);
         Task<PikaApp> GetAppAsync(long appId);
-        Task<List<PikaApp>> GetAppsAsync(int limit = 0, int offset = -1, string whereClause = "", string orderByClause = "");
+        Task<List<PikaApp>> GetAppsAsync();
         long GetDbSize();
         Task<List<PikaDriveTable>> GetPikaDrivesAsync();
         Task<List<PikaDriveSmartctlTable>> GetPikaDriveSmartctlTablesAsync(string driveId, DateTime from);

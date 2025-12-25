@@ -243,6 +243,8 @@ public class ApiController : ControllerBase
 
     #endregion
 
+    #region Script
+
     [HttpDelete("task/{id}")]
     public async Task<ApiResponse<object>> DeleteTaskAsync([FromRoute] long id)
     {
@@ -414,6 +416,8 @@ public class ApiController : ControllerBase
 
         return response;
     }
+
+    #endregion
 
     #region Setting
 
