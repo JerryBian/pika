@@ -2,18 +2,13 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Pika.Common;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Pika.Controllers
 {
-    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly PikaOptions _option;
@@ -27,6 +22,7 @@ namespace Pika.Controllers
             _option = options.Value;
         }
 
+        [AllowAnonymous]
         [HttpGet("/login")]
         public IActionResult Login([FromQuery] string returnUrl)
         {
@@ -34,6 +30,7 @@ namespace Pika.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost("/login")]
         public async Task<IActionResult> Login([FromForm] string userName, [FromForm] string password,
             [FromQuery] string returnUrl = null)

@@ -10,7 +10,7 @@ public static class AppUtil
         get
         {
             // Try multiple assemblies because single-file publish or native host can change EntryAssembly behavior
-            var assembliesToCheck = new Assembly?[]
+            var assembliesToCheck = new Assembly[]
             {
                 Assembly.GetEntryAssembly(),
                 Assembly.GetExecutingAssembly(),
@@ -29,7 +29,7 @@ public static class AppUtil
         }
     }
 
-    private static string? GetVersionFromAssembly(Assembly? asm)
+    private static string? GetVersionFromAssembly(Assembly asm)
     {
         if (asm == null) return null;
 
