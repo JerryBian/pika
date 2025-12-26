@@ -5,9 +5,9 @@
 }
 <div class="table-responsive">
     <div>
-        <a href="/task/add?isTemp=true&sourceTaskId=@Model.Script.Id" class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard"></i> Clone to Temp task</a>
+        <a href="/script/add?isTemp=true&sourceTaskId=@Model.Script.Id" class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard"></i> Clone to Temp script</a>
         <span class="vr"></span>
-        <a href="/task/add?sourceTaskId=@Model.Script.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-clipboard-plus"></i> Clone to Saved task</a>
+        <a href="/script/add?sourceTaskId=@Model.Script.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-clipboard-plus"></i> Clone to Saved script</a>
     </div>
     <table class="table align-middle table-borderless caption-top border border-light table-striped mt-2">
         <caption>Task Information</caption>
@@ -45,8 +45,8 @@
                 <tr>
                     <td class="fw-bold">Actions</td>
                     <td>
-                        <a class="btn btn-info btn-sm m-1 w-25" href="/task/@Model.Script.Id/update"><i class="bi bi-pen"></i> Edit</a>
-                        <button type="button" class="btn btn-success btn-sm m-1 w-25" onclick="runTask(@Model.Script.Id)"><i class="bi bi-signpost"></i> Run</button>
+                        <a class="btn btn-info btn-sm m-1 w-25" href="/script/@Model.Script.Id/update"><i class="bi bi-pen"></i> Edit</a>
+                        <button type="button" class="btn btn-success btn-sm m-1 w-25" onclick="runScript(@Model.Script.Id)"><i class="bi bi-signpost"></i> Run</button>
                     </td>
                 </tr>
             }
@@ -57,7 +57,7 @@
 
 <div class="table-responsive mt-2">
     <table class="table align-middle caption-top text-md-center table-bordered table-striped">
-        <caption>All Runs</caption>
+        <caption>Latest Runs</caption>
         <thead>
             <tr>
                 <th>#</th>
@@ -78,7 +78,7 @@
                     <td>@Html.Raw(item.GetElapsedHtml(true))</td>
                     <td>@item.Status</td>
                     <td>
-                        <a type="button" class="btn btn-primary btn-sm mx-1" href="/run/@item.Id"><i class="bi bi-info"></i> Detail</a>
+                        <a type="button" class="btn btn-primary btn-sm mx-1" href="/script/run/@item.Id"><i class="bi bi-info"></i> Detail</a>
                     </td>
                 </tr>
             }

@@ -4,7 +4,7 @@ namespace Pika.Models
 {
     public class PikaScriptRunViewModel
     {
-        public PikaScript Task { get; set; }
+        public PikaScript Script { get; set; }
 
         public PikaScriptRun Run { get; set; }
     }

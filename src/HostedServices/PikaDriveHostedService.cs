@@ -63,7 +63,7 @@ namespace Pika.HostedServices
                     _logger.LogError(ex, "Error occurred in PikaDriveHostedService.");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken).OkForCancel();
+                await Task.Delay(TimeSpan.FromMinutes(8), stoppingToken).OkForCancel();
             }
         }
     }

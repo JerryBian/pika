@@ -3,15 +3,15 @@
     ViewData["Title"] = $"Run #{Model.Run.Id}";
 }
 
-<div class="bg-light rounded p-2 my-4 small">
+<div class="bg-body bg-gradient rounded p-2 my-4 small">
     <div class="row mb-2">
         <div class="col-md-2 fw-bold">Id</div>
         <div class="col-md-4">
             #@Model.Run.Id
         </div>
-        <div class="col-md-2 fw-bold">Task</div>
+        <div class="col-md-2 fw-bold">Script</div>
         <div class="col-md-4">
-            @Model.Task.Name (<a href="/task/@Model.Task.Id">#@Model.Task.Id</a>)
+            @Model.Script.Name (<a href="/script/@Model.Script.Id">#@Model.Script.Id</a>)
         </div>
     </div>
     <div class="row mb-2">
@@ -44,8 +44,8 @@
 
 <div class="my-4">
     <h4>Output</h4>
-    <p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/run/@Model.Run.Id/output/raw" target="_blank">here</a>.</p>
-    <pre id="output" class="overflow-auto p-2 height-max-2 bg-light rounded mb-2">
+    <p class="small">Displaying latest <span id="outputLength">0</span> records, check full records <a href="/script/run/@Model.Run.Id?format=raw" target="_blank">here</a>.</p>
+    <pre id="output" class="overflow-auto p-2 height-max-2 bg-body bg-gradient rounded mb-2">
     </pre>
 </div>
 
@@ -86,7 +86,7 @@
                     return;
                 }
 
-                submitRequest(`/api/run/@Model.Run.Id/output?lastPoint=${lastPoint}`,
+                submitRequest(`/api/script/run/@Model.Run.Id/output?lastPoint=${lastPoint}`,
                     {
                         okAction: function(res) {
                             lastPoint = res.lastPoint;

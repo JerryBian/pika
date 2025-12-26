@@ -165,8 +165,8 @@ function makeId(length) {
     return result;
 }
 
-function runTask(id) {
-    submitRequest(`/api/run/${id}`,
+function runScript(id) {
+    submitRequest(`/api/script/${id}/run`,
         {
             method: "PUT"
         });
@@ -175,7 +175,7 @@ function runTask(id) {
 function stopRun(runId) {
     showConfirmMessageModal(`Are your sure to stop run #${runId}?`,
         function () {
-            submitRequest(`/api/run/${runId}/stop`,
+            submitRequest(`/api/script/run/${runId}/stop`,
                 {
                     method: "POST",
                     okAction: function (res) {

@@ -245,7 +245,7 @@ public class ApiController : ControllerBase
 
     #region Script
 
-    [HttpDelete("task/{id}")]
+    [HttpDelete("script/{id}")]
     public async Task<ApiResponse<object>> DeleteTaskAsync([FromRoute] long id)
     {
         ApiResponse<object> response = new();
@@ -262,8 +262,8 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpPost("run/{id}/stop")]
-    public ApiResponse<object> StopRun([FromRoute] long id)
+    [HttpPost("script/run/{id}/stop")]
+    public ApiResponse<object> StopScriptRun([FromRoute] long id)
     {
         ApiResponse<object> response = new();
         try
@@ -279,13 +279,13 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    [HttpPut("run/{id}")]
-    public async Task<ApiResponse<object>> RunTaskAsync([FromRoute] long id)
+    [HttpPut("script/{id}/run")]
+    public async Task<ApiResponse<object>> RunScriptAsync([FromRoute] long id)
     {
         ApiResponse<object> response = new();
         try
         {
-            var runId = await StartRunAsync(id);
+            var runId = await StartScriptRunAsync(id);
             response.RedirectTo = $"/script/run/{runId}";
         }
         catch (Exception ex)
@@ -297,12 +297,12 @@ public class ApiController : ControllerBase
         return response;
     }
 
-    private async Task<long> StartRunAsync(long taskId)
+    private async Task<long> StartScriptRunAsync(long scriptId)
     {
-        var task = await _repository.GetScriptAsync(taskId);
+        var task = await _repository.GetScriptAsync(scriptId);
         PikaScriptRun run = new()
         {
-            ScriptId = taskId,
+            ScriptId = scriptId,
             Script = task.Script,
             ShellName = task.ShellName,
             ShellOption = task.ShellOption,
@@ -333,8 +333,8 @@ public class ApiController : ControllerBase
             var id = await _repository.AddScriptAsync(script);
             if (isTemp)
             {
-                var runId = await StartRunAsync(id);
-                response.RedirectTo = $"/run/{runId}";
+                var runId = await StartScriptRunAsync(id);
+                response.RedirectTo = $"/script/run/{runId}";
             }
             else
             {
@@ -343,7 +343,7 @@ public class ApiController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "AddTaskAsync failed");
+            _logger.LogError(ex, "AddScriptAsync failed");
             response.IsOk = false;
             response.Message = ex.Message;
         }
@@ -372,8 +372,9 @@ public class ApiController : ControllerBase
 
     
 
-    [HttpPost("run/{runId}/output")]
-    public async Task<ApiResponse<PikaScriptRunOutputViewModel>> GetRunOutputs([FromRoute] long runId,
+    [HttpPost("script/run/{runId}/output")]
+    public async Task<ApiResponse<PikaScriptRunOutputViewModel>> GetRunOutputs(
+        [FromRoute] long runId,
         [FromQuery] long lastPoint)
     {
         ApiResponse<PikaScriptRunOutputViewModel> response = new();

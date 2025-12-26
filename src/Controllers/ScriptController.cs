@@ -76,7 +76,7 @@ namespace Pika.Controllers
             }
 
             PikaScriptDetailViewModel model = new() { Script = script };
-            var runs = await _repository.GetScriptRunsByScriptIdAsync(id, 100);
+            var runs = await _repository.GetScriptRunsByScriptIdAsync(id, 30);
             model.Runs = runs;
             return View("ScriptDetail", model);
         }
@@ -104,7 +104,7 @@ namespace Pika.Controllers
 
             PikaScriptRunViewModel viewModel = new()
             {
-                Task = task,
+                Script = task,
                 Run = taskRun
             };
             return View(viewModel);
