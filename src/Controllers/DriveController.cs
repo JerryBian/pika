@@ -26,7 +26,8 @@ namespace Pika.Controllers
                     DrivePath = drive.Path,
                     DriveType = drive.Type,
                     Size = drive.Size,
-                    DriveId = drive.Id
+                    DriveId = drive.Id,
+                    MountPoints = string.Join(" & ", drive.Partitions.Select(p => p.MountPoint)),
                 };
 
                 model.Add(m);
