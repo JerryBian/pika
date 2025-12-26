@@ -5,7 +5,6 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>pika</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +13,6 @@
     <PackageReference Include="Exec" Version="2.0.0" />
     <PackageReference Include="Humanizer.Core" Version="3.0.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
-    <!-- Add Razor runtime compilation package to satisfy hosting startup loader when present -->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.1" />
     <PackageReference Include="SSH.NET" Version="2025.1.0" />
   </ItemGroup>

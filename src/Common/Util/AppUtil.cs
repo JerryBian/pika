@@ -29,7 +29,7 @@ public static class AppUtil
         }
     }
 
-    private static string? GetVersionFromAssembly(Assembly asm)
+    private static string GetVersionFromAssembly(Assembly asm)
     {
         if (asm == null) return null;
 
