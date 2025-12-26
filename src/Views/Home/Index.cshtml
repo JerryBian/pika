@@ -44,6 +44,30 @@
         <div class="border border-light px-2">
             <div class="row py-2 my-1">
                 <div class="col-10 text-truncate">
+                    <i class="bi bi-hourglass-split text-muted"></i> Machine uptime
+                </div>
+                <div class="col-2 font-monospace small text-muted bg-info-subtle">
+                    @{
+                        var uptime = TimeSpan.FromMilliseconds(Environment.TickCount64);
+                        var str = $"Uptime: {uptime.Days} days {uptime.Hours:D2}:{uptime.Minutes:D2}:{uptime.Seconds:D2}";
+                    }
+                    @str
+                </div>
+            </div>
+            <div class="row py-2 my-1">
+                <div class="col-10 text-truncate">
+                    <i class="bi bi-hourglass-split text-muted"></i> Pika uptime
+                </div>
+                <div class="col-2 font-monospace small text-muted bg-info-subtle">
+                    @{
+                        var uptime2 = DateTime.Now - System.Diagnostics.Process.GetCurrentProcess().StartTime;
+                        var str2 = $"Uptime: {uptime2.Days} days {uptime2.Hours:D2}:{uptime2.Minutes:D2}:{uptime2.Seconds:D2}";
+                    }
+                    @str2
+                </div>
+            </div>
+            <div class="row py-2 my-1">
+                <div class="col-10 text-truncate">
                     <i class="bi bi-database text-muted"></i> Database size
                 </div>
                 <div class="col-2 font-monospace small text-muted bg-info-subtle">
