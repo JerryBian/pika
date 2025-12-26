@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="~/style.min.css" asp-append-version="true" />
 </head>
 <body class="w-100 bg-body-secondary">
-    <nav class="navbar navbar-expand-lg bg-primary">
+    <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
         <div class="container">
             <a class="navbar-brand" href="/">
                 <img src="/brand.png" alt="pika" width="24" height="24">
@@ -57,12 +57,12 @@
             </div>
         </div>
     </nav>
-    <div class="container min-vh-100 d-flex flex-column p-0" id="container">
+    <div class="min-vh-100 d-flex flex-column p-0" id="container">
         <main class="my-2 py-3 container">
             @RenderBody()
         </main>
 
-        <footer class="mt-auto fs-6 text-muted container text-center p-3">
+        <footer class="mt-auto fs-6 text-muted text-center p-3 bg-dark" data-bs-theme="dark">
             Pika &middot;
             <a href="https://github.com/JerryBian/pika" class="text-decoration-none">
                 <i class="bi bi-github"></i> Github

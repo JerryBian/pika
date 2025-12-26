@@ -27,9 +27,12 @@
                 </div>
                 <div class="card-body pt-0">
                     <h5 class="card-title font-monospace">@item.Name</h5>
-                    <div class="mb-3">
-                        @item.Description
-                    </div>
+                    @if(!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <div class="mb-3">
+                            <span class="bg-info-subtle px-1">@item.Description</span>
+                        </div>
+                    }
                     <div class="fs-5 card-text font-monospace">
                         <div class="btn-group" role="group">
                             <a class="btn btn-secondary" href="/script/@item.Id"><i class="bi bi-info-lg"></i> Detail</a>
