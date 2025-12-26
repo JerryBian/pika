@@ -22,6 +22,12 @@ namespace Pika.Controllers
         {
             var model = new PikaScriptIndexViewModel();
             var scripts = await _repository.GetScriptsAsync();
+            var runs = await _repository.GetScriptRunsByStatusAsync(PikaScriptStatus.Running);
+            foreach (var item in scripts)
+            {
+                item.RunningCount = runs.Count(x => x.ScriptId == item.Id);
+            }
+
             model.SavedScripts = [.. scripts.OrderBy(x => x.Name)];
             return View(model);
         }

@@ -24,6 +24,6 @@ namespace Pika.Common.Model
 
         [JsonPropertyName("isTemp")] public bool IsTemp { get; set; }
 
-        public int RunCount { get; set; }
+        public int RunningCount { get; set; }
     }
 }
