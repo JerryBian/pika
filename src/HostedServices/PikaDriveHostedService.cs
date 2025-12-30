@@ -23,12 +23,6 @@ namespace Pika.HostedServices
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
             await _pikaDriveOps.UpdatePikaDriveAsync();
-
-            foreach(var drive in await _pikaDriveOps.GetActivePikaDrivesAsync())
-            {
-                _lastRunAtDict[drive.Id] = DateTime.MinValue;
-            }
-
             await base.StartAsync(cancellationToken);
         }
 
@@ -46,14 +40,15 @@ namespace Pika.HostedServices
 
                         if(powerStatus == PikaDrivePowerStatus.Active)
                         {
-                            if(_lastRunAtDict.TryGetValue(drive.Id, out var lastRunAt))
+                            var lastRunAt = DateTime.MinValue;
+                            _lastRunAtDict.TryGetValue(drive.Id, out lastRunAt);
+                            var timeSinceLastRun = DateTime.Now - lastRunAt;
+                            if (timeSinceLastRun > TimeSpan.FromDays(3))
                             {
-                                var timeSinceLastRun = DateTime.Now - lastRunAt;
-                                if(timeSinceLastRun > TimeSpan.FromDays(3))
-                                {
-                                    await _pikaDriveOps.RunPikaDriveSmartctlAsync(drive.Path);
-                                    _logger.LogInformation($"Refreshed drive info for {drive.Name} (ID: {drive.Id})");
-                                }
+                                await _pikaDriveOps.RunPikaDriveSmartctlAsync(drive.Path);
+
+                                _lastRunAtDict[drive.Id] = DateTime.Now;
+                                _logger.LogInformation($"Refreshed drive info for {drive.Name} (ID: {drive.Id})");
                             }
                         }
                     }
@@ -63,7 +58,7 @@ namespace Pika.HostedServices
                     _logger.LogError(ex, "Error occurred in PikaDriveHostedService.");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(8), stoppingToken).OkForCancel();
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken).OkForCancel();
             }
         }
     }
