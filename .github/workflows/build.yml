@@ -276,7 +276,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Latest (v${{ env.FULL_VERSION }})
+          name: latest
           body_path: release_notes.md
           draft: false
           prerelease: false
