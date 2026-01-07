@@ -90,6 +90,7 @@ jobs:
         run: dotnet restore src/Pika.csproj
 
       - name: Publish ${{ matrix.runtime }}
+        shell: bash
         run: |
           dotnet publish src/Pika.csproj \
             -c Release \
