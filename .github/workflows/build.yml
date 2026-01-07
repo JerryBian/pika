@@ -1,93 +1,285 @@
-name: master
+name: Build and Publish
 
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  publish_release:
-    name: Publish release
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: write
-
+  test:
+    name: Test on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y zip unzip tar
-
-      - name: Setup environment variables
-        run: |
-          APP_VERSION=`cat VERSION`
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-          APP_VERSION_ARR=(${APP_VERSION//./ })
-          echo "APP_VERSION_LINK=${APP_VERSION_ARR[0]}${APP_VERSION_ARR[1]}" >> $GITHUB_ENV
-
-      - uses: actions/setup-dotnet@v3
+        uses: actions/checkout@v5
         with:
-          dotnet-version: '10'
+          fetch-depth: 0
 
-      - name: Publish Binaries
-        run: |
-          mkdir -p __ga
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-x64 -c Release -o __ga/linux-x64
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-musl-x64 -c Release -o __ga/linux-musl-x64
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-arm -c Release -o __ga/linux-arm
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r linux-arm64 -c Release -o __ga/linux-arm64
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x64 -c Release -o __ga/win-x64
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-x86 -c Release -o __ga/win-x86
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r win-arm64 -c Release -o __ga/win-arm64
-          dotnet publish ./src/Pika.csproj /p:Version=${{ env.APP_VERSION }} /p:FileVersion=${{ env.APP_VERSION }} /p:InformationalVersion=${{ env.APP_VERSION }} /p:AssemblyVersion=${{ env.APP_VERSION }} /p:DebugType=None --self-contained true -v normal -p:PublishTrimmed=false -p:PublishSingleFile=true -r osx-x64 -c Release -o __ga/osx-x64
-      - name: Package Binaries
-        run: |
-          cd __ga
-          sudo tar -cvzf pika-linux-x64.tar.gz --directory=linux-x64 .
-          sudo tar -cvzf pika-linux-musl-x64.tar.gz --directory=linux-musl-x64 .
-          sudo tar -cvzf pika-linux-arm.tar.gz --directory=linux-arm .
-          sudo tar -cvzf pika-linux-arm64.tar.gz --directory=linux-arm64 .
-          cd win-x64 && sudo zip -r ../pika-win-x64.zip * && cd ..
-          cd win-x86 && sudo zip -r ../pika-win-x86.zip * && cd ..
-          cd win-arm64 && sudo zip -r ../pika-win-arm64.zip * && cd ..
-          cd osx-x64 && sudo zip -r ../pika-osx-x64.zip * && cd ..
-      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        name: Remove existing release for current version
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
         with:
-          delete_release: true
-          tag_name: ${{ env.APP_VERSION }}
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/Pika.csproj
+
+      - name: Build
+        run: dotnet build src/Pika.csproj --no-restore --configuration Release
+
+  build_binaries:
+    name: Build ${{ matrix.runtime }} Binary
+    runs-on: ${{ matrix.os }}
+    needs: [test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            runtime: linux-x64
+          - os: ubuntu-latest
+            runtime: linux-musl-x64
+          - os: ubuntu-latest
+            runtime: linux-arm
+          - os: ubuntu-latest
+            runtime: linux-arm64
+          - os: windows-latest
+            runtime: win-x64
+          - os: windows-latest
+            runtime: win-x86
+          - os: windows-latest
+            runtime: win-arm64
+          - os: macos-latest
+            runtime: osx-x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: read_version
+        shell: bash
+        run: |
+          MAJOR_VERSION=$(cat VERSION | tr -d '[:space:]')
+          FULL_VERSION="${MAJOR_VERSION}.${{ github.run_number }}.0"
+          echo "MAJOR_VERSION=$MAJOR_VERSION" >> $GITHUB_ENV
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+          echo "Major version: $MAJOR_VERSION"
+          echo "Full version: $FULL_VERSION"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/Pika.csproj
+
+      - name: Publish ${{ matrix.runtime }}
+        run: |
+          dotnet publish src/Pika.csproj \
+            -c Release \
+            -r ${{ matrix.runtime }} \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishTrimmed=false \
+            -p:DebugType=None \
+            -p:Version=${{ env.FULL_VERSION }} \
+            -p:AssemblyVersion=${{ env.FULL_VERSION }} \
+            -p:FileVersion=${{ env.FULL_VERSION }} \
+            -p:InformationalVersion=${{ env.FULL_VERSION }} \
+            -o ./publish/${{ matrix.runtime }}
+
+      - name: Create archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd ./publish/${{ matrix.runtime }}
+          tar -czf ../pika-${{ matrix.runtime }}.tar.gz *
+          cd ../..
+
+      - name: Create archive (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          cd ./publish/${{ matrix.runtime }}
+          Compress-Archive -Path * -DestinationPath ../pika-${{ matrix.runtime }}.zip
+          cd ../..
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pika-${{ matrix.runtime }}-${{ env.FULL_VERSION }}
+          path: ./publish/pika-${{ matrix.runtime }}.*
+          retention-days: 90
+
+  create_releases:
+    name: Create GitHub Releases
+    runs-on: ubuntu-latest
+    needs: [build_binaries]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: read_version
+        run: |
+          MAJOR_VERSION=$(cat VERSION | tr -d '[:space:]')
+          FULL_VERSION="${MAJOR_VERSION}.${{ github.run_number }}.0"
+          echo "MAJOR_VERSION=$MAJOR_VERSION" >> $GITHUB_ENV
+          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+          VERSION_LINK="${MAJOR_VERSION//.}"
+          echo "VERSION_LINK=$VERSION_LINK" >> $GITHUB_ENV
+          echo "Major version: $MAJOR_VERSION"
+          echo "Full version: $FULL_VERSION"
+          echo "Version link: $VERSION_LINK"
+
+      - name: Prepare release notes
+        id: prepare_body
+        run: |
+          set -e
+          VERSION="v${{ env.FULL_VERSION }}"
+          prev_tag=$(git describe --tags --abbrev=0 2>/dev/null | grep -v "^latest$" || echo "")
+          
+          if [ -n "$prev_tag" ]; then
+            COMMITS=$(git log ${prev_tag}..HEAD --pretty=format:'- %h %s (%an) [%ad]' --date=format:'%Y-%m-%d %H:%M:%S' || echo "No previous commits")
+          else
+            COMMITS=$(git log -n 50 --pretty=format:'- %h %s (%an) [%ad]' --date=format:'%Y-%m-%d %H:%M:%S')
+          fi
+          
+          cat << EOF > release_notes.md
+          # Pika Release $VERSION
+          
+          A web application for running scripts, managing applications, and monitoring drive health.
+          
+          ## Changes
+          
+          $COMMITS
+          
+          For detailed changes, see [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md#${{ env.VERSION_LINK }}).
+          
+          ---
+          
+          ## Installation
+          
+          Download the binary for your platform and run:
+          
+          ### Linux
+          \`\`\`bash
+          # Extract the archive
+          tar -xzf pika-linux-x64.tar.gz
+          
+          # Set environment variables and run
+          export DbLocation=/path/to/data
+          export ASPNETCORE_URLS=http://0.0.0.0:8080
+          ./pika
+          \`\`\`
+          
+          ### Windows
+          \`\`\`powershell
+          # Extract the archive
+          Expand-Archive pika-win-x64.zip
+          
+          # Set environment variables and run
+          \$env:DbLocation="C:\\path\\to\\data"
+          \$env:ASPNETCORE_URLS="http://localhost:8080"
+          .\\pika.exe
+          \`\`\`
+          
+          ### macOS
+          \`\`\`bash
+          # Extract the archive
+          unzip pika-osx-x64.zip
+          
+          # Set environment variables and run
+          export DbLocation=/path/to/data
+          export ASPNETCORE_URLS=http://0.0.0.0:8080
+          ./pika
+          \`\`\`
+          
+          ---
+          
+          **Required Configuration:**
+          - \`DbLocation\`: Directory for SQLite database storage
+          
+          **Optional Configuration:**
+          - \`ASPNETCORE_URLS\`: Bind URL (default: http://localhost:5000)
+          - \`AdminUserName\`: Admin username (default: test)
+          - \`AdminPassword\`: Admin password (default: testtest)
+          
+          ---
+          
+          **Links:**
+          - [GitHub Repository](https://github.com/${{ github.repository }})
+          - [Documentation](https://github.com/${{ github.repository }}/blob/master/README.md)
+          EOF
+          
+          echo "Release notes prepared"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -exec ls -lh {} \;
+
+      - name: Delete existing versioned release and tag
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ncipollo/release-action@v1
-        name: publish release for current version
+        run: |
+          gh release delete v${{ env.FULL_VERSION }} --yes || true
+          git push --delete origin v${{ env.FULL_VERSION }} || true
+
+      - name: Create v${{ env.FULL_VERSION }} Release
+        uses: softprops/action-gh-release@v2
         with:
-          artifacts: "__ga/*.gz,__ga/*zip"
+          tag_name: v${{ env.FULL_VERSION }}
+          name: v${{ env.FULL_VERSION }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          removeArtifacts: true
-          tag: ${{ env.APP_VERSION }}
-          allowUpdates: true
-          name: ${{ env.APP_VERSION }}
-          commit: master
-          artifactErrorsFailBuild: true
-          body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
-      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        name: Remove existing release for latest version
+
+      - name: Delete existing 'latest' release and tag
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --yes || true
+          git push --delete origin latest || true
+
+      - name: Create 'latest' Release
+        uses: softprops/action-gh-release@v2
         with:
-          delete_release: true
           tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ncipollo/release-action@v1
-        name: publish release for latest version
-        with:
-          artifacts: "__ga/*.gz,__ga/*zip"
+          name: Latest (v${{ env.FULL_VERSION }})
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          removeArtifacts: true
-          tag: latest
-          allowUpdates: true
-          name: latest
-          commit: master
-          artifactErrorsFailBuild: true
-          body: "Changes could be found at [CHANGELOG](https://github.com/JerryBian/pika/blob/master/CHANGELOG.md#${{ env.APP_VERSION_LINK }})."
